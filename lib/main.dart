@@ -1,20 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:linkmeup_app/presentation/screens/splash/splash_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+
+import 'core/themes/app_theme.dart';
+import 'presentation/routes/app_router.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    const ProviderScope(
+      child: LinkMeUpApp(),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class LinkMeUpApp extends ConsumerWidget {
+  const LinkMeUpApp({super.key});
 
-  // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-      home: const SplashScreen(),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+
+    return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
+      routerConfig: router,
     );
   }
 }

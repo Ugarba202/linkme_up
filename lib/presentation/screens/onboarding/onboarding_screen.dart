@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/themes/app_colors.dart';
+
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -9,59 +11,117 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  final PageController controller = PageController();
-  int index = 0;
+  final PageController _controller = PageController();
+  int currentIndex = 0;
+
+  final List<Map<String, String>> pages = [
+    {
+      "title": "Connect Instantly",
+      "subtitle": "Share all your socials with one scan",
+    },
+    {
+      "title": "One QR For Everything",
+      "subtitle": "No more typing usernames",
+    },
+    {
+      "title": "Start Connecting",
+      "subtitle": "Join and build your digital identity",
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView(
-        controller: controller,
-        onPageChanged: (i) {
-          setState(() => index = i);
-        },
-        children: [
-          buildPage("Connect instantly"),
-          buildPage("One QR for all socials"),
-          buildLastPage(),
-        ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Skip Button
+            Align(
+              alignment: Alignment.topRight,
+              child: TextButton(
+                onPressed: () {
+                  context.go('/auth/name');
+                },
+                child: const Text("Skip"),
+              ),
+            ),
+
+            // Page Content
+            Expanded(
+              child: PageView.builder(
+                controller: _controller,
+                itemCount: pages.length,
+                onPageChanged: (index) {
+                  setState(() {
+                    currentIndex = index;
+                  });
+                },
+                itemBuilder: (context, index) {
+                  return buildPage(
+                    pages[index]["title"]!,
+                    pages[index]["subtitle"]!,
+                  );
+                },
+              ),
+            ),
+
+            // Bottom Button
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: ElevatedButton(
+                onPressed: () {
+                  if (currentIndex == pages.length - 1) {
+                    context.go('/auth/name');
+                  } else {
+                    _controller.nextPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  }
+                },
+                child: Text(
+                  currentIndex == pages.length - 1
+                      ? "Get Started"
+                      : "Next",
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget buildPage(String title) {
-    return Center(
+  Widget buildPage(String title, String subtitle) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(title, style: const TextStyle(fontSize: 24)),
-          const SizedBox(height: 40),
-          ElevatedButton(
-            onPressed: () {
-              controller.nextPage(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-              );
-            },
-            child: const Text("Next"),
+          // Placeholder for illustration
+          Container(
+            height: 180,
+            width: 180,
+            decoration: BoxDecoration(
+              color: AppColors.primarySoft,
+              borderRadius: BorderRadius.circular(24),
+            ),
           ),
-        ],
-      ),
-    );
-  }
 
-  Widget buildLastPage() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text("Ready to start?", style: TextStyle(fontSize: 24)),
           const SizedBox(height: 40),
-          ElevatedButton(
-            onPressed: () {
-              context.go('/auth');
-            },
-            child: const Text("Get Started"),
+
+          Text(
+            title,
+            style: Theme.of(context).textTheme.headlineLarge,
+            textAlign: TextAlign.center,
+          ),
+
+          const SizedBox(height: 12),
+
+          Text(
+            subtitle,
+            style: Theme.of(context).textTheme.bodyMedium,
+            textAlign: TextAlign.center,
           ),
         ],
       ),

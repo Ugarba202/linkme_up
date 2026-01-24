@@ -1,32 +1,63 @@
-// import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-// import '../screens/splash/splash_screen.dart';
-// import '../screens/onboarding/onboarding_screen.dart';
-// import '../screens/auth/phone_screen.dart';
-// import '../../application/providers/auth_provider.dart';
+// Screens
+import '../screens/splash/splash_screen.dart';
+import '../screens/onboarding/onboarding_screen.dart';
 
-// final routerProvider = Provider<GoRouter>((ref) {
-//   final authState = ref.watch(authStateProvider);
+// Auth Provider
 
-//   return GoRouter(
-//     initialLocation: '/splash',
-//     routes: [
-//       GoRoute(path: '/splash', builder: (_, __) => const SplashScreen()),
-//       GoRoute(
-//         path: '/onboarding',
-//         builder: (_, __) => const OnboardingScreen(),
-//       ),
-//       GoRoute(path: '/auth', builder: (_, __) => PhoneScreen()),
-//     ],
-//     redirect: (_, __) {
-//       final loggedIn = authState.value ?? false;
+final routerProvider = Provider<GoRouter>((ref) {
+  // final authState = ref.watch(authStateProvider);
 
-//       if (loggedIn) {
-//         return '/home';
-//       }
+  return GoRouter(
+    initialLocation: '/splash',
 
-//       return null;
-//     },
-//   );
-// });
+    routes: [
+      // Splash
+      GoRoute(path: '/splash', builder: (_, __) => const SplashScreen()),
+
+      // Onboarding
+      GoRoute(
+        path: '/onboarding',
+        builder: (_, __) => const OnboardingScreen(),
+      ),
+
+      // Auth Flow
+      // GoRoute(
+      //   path: '/auth/name',
+      //   builder: (_, __) => const NameScreen(),
+      // ),
+
+      // GoRoute(
+      //   path: '/auth/phone',
+      //   builder: (_, __) => const PhoneScreen(),
+      // ),
+
+      // GoRoute(
+      //   path: '/auth/otp',
+      //   builder: (_, __) => const OtpScreen(),
+      // ),
+
+      // TODO (Next Sprints)
+      // /setup
+      // /home
+      // /qr
+      // /profile
+    ],
+
+    // redirect: (context, state) {
+    //   final isLoggedIn = authState.value ?? false;
+    //
+    //   final isAuthRoute =
+    //       state.fullPath!.startsWith('/auth');
+    //
+    //   // If logged in, block auth pages
+    //   if (isLoggedIn && isAuthRoute) {
+    //     return '/home';
+    //   }
+    //
+    //   return null;
+    // },
+  );
+});
