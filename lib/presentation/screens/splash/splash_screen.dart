@@ -23,11 +23,12 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              AppColors.primarySoft,
+              Color(0xFFF3F4FF), // Soft blue/purple shading
               Colors.white,
             ],
             begin: Alignment.topLeft,
@@ -35,11 +36,11 @@ class _SplashScreenState extends State<SplashScreen> {
           ),
         ),
         child: const Center(
-          child: Text(
-            'LinkMeUp',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
+          child: Hero(
+            tag: 'app_logo',
+            child: Icon(
+              Icons.link_rounded,
+              size: 80,
               color: AppColors.primary,
             ),
           ),

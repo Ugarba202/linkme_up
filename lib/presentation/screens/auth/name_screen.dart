@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/themes/app_colors.dart';
+
 class NameScreen extends StatefulWidget {
   const NameScreen({super.key});
 
@@ -9,51 +11,123 @@ class NameScreen extends StatefulWidget {
 }
 
 class _NameScreenState extends State<NameScreen> {
-  final TextEditingController nameController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  bool _isDirty = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController.addListener(() {
+      setState(() {
+        _isDirty = _nameController.text.trim().isNotEmpty;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              // Emoji / Icon
+              const Text(
+                "👋",
+                style: TextStyle(fontSize: 48),
+              ),
+              const SizedBox(height: 16),
+
+              // Heading
+              const Text(
                 "What should we call you?",
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
-
-              const SizedBox(height: 8),
-
-              Text(
-                "This will appear on your profile",
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-
-              const SizedBox(height: 32),
-
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  hintText: "Enter your name",
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                  letterSpacing: -0.5,
                 ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+
+              // Subtext
+              Text(
+                "Your name will be visible to people you connect with.",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: AppColors.textSecondary,
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 48),
+
+              // Name Input
+              TextField(
+                controller: _nameController,
+                autofocus: true,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primary,
+                ),
+                decoration: InputDecoration(
+                  hintText: "Your Full Name",
+                  hintStyle: TextStyle(
+                    color: AppColors.textMuted.withOpacity(0.5),
+                    fontSize: 22,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  filled: false,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                ),
+                textCapitalization: TextCapitalization.words,
               ),
 
-              const SizedBox(height: 32),
+              // Underline for input
+              Container(
+                height: 2,
+                width: 200,
+                color: _isDirty ? AppColors.primary : AppColors.border,
+              ),
 
-              ElevatedButton(
-                onPressed: () {
-                  final name = nameController.text.trim();
+              const SizedBox(height: 64),
 
-                  if (name.isEmpty) return;
-
-                  // TEMP: Pass name forward (later store in state)
-                  context.go('/auth/phone', extra: name);
-                },
-                child: const Text("Continue"),
+              // Continue Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _isDirty
+                      ? () => context.push('/auth/phone', extra: _nameController.text.trim())
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    backgroundColor: _isDirty ? AppColors.primary : AppColors.border,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: AppColors.border,
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    "Continue →",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),

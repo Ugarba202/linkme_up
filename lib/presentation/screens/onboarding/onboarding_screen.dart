@@ -12,78 +12,117 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _controller = PageController();
-  int currentIndex = 0;
+  int _currentIndex = 0;
 
-  final List<Map<String, String>> pages = [
-    {
-      "title": "Connect Instantly",
-      "subtitle": "Share all your socials with one scan",
-    },
-    {
-      "title": "One QR For Everything",
-      "subtitle": "No more typing usernames",
-    },
-    {
-      "title": "Start Connecting",
-      "subtitle": "Join and build your digital identity",
-    },
+  final List<OnboardingContent> _pages = [
+    OnboardingContent(
+      title: "Scan once, connect everywhere.",
+      subtitle: "Share your entire social presence in seconds with a single QR code.",
+      icon: Icons.qr_code_scanner_rounded,
+    ),
+    OnboardingContent(
+      title: "No more awkward spelling.",
+      subtitle: "Stop repeating usernames. Just show your code and stay in the flow.",
+      icon: Icons.forum_rounded,
+    ),
+    OnboardingContent(
+      title: "Your identity, simplified.",
+      subtitle: "One link for all your platforms. Instantly intuitive for everyone.",
+      icon: Icons.person_add_rounded,
+    ),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            // Skip Button
-            Align(
-              alignment: Alignment.topRight,
-              child: TextButton(
-                onPressed: () {
-                  context.go('/auth/name');
-                },
-                child: const Text("Skip"),
+            // TOP BAR - Skip Button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Align(
+                alignment: Alignment.topRight,
+                child: _currentIndex < _pages.length - 1
+                    ? TextButton(
+                        onPressed: () => _navigateToAuth(),
+                        child: Text(
+                          "Skip",
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      )
+                    : const SizedBox(height: 48), // Spacer to maintain layout
               ),
             ),
 
-            // Page Content
+            // CENTER CONTENT - PageView
             Expanded(
               child: PageView.builder(
                 controller: _controller,
-                itemCount: pages.length,
+                itemCount: _pages.length,
                 onPageChanged: (index) {
-                  setState(() {
-                    currentIndex = index;
-                  });
+                  setState(() => _currentIndex = index);
                 },
                 itemBuilder: (context, index) {
-                  return buildPage(
-                    pages[index]["title"]!,
-                    pages[index]["subtitle"]!,
-                  );
+                  return _OnboardingPageView(content: _pages[index]);
                 },
               ),
             ),
 
-            // Bottom Button
+            // BOTTOM BAR - Indicators & Action Button
             Padding(
               padding: const EdgeInsets.all(24),
-              child: ElevatedButton(
-                onPressed: () {
-                  if (currentIndex == pages.length - 1) {
-                    context.go('/auth/name');
-                  } else {
-                    _controller.nextPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  }
-                },
-                child: Text(
-                  currentIndex == pages.length - 1
-                      ? "Get Started"
-                      : "Next",
-                ),
+              child: Column(
+                children: [
+                  // Progress Dots
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      _pages.length,
+                      (index) => _buildIndicator(index == _currentIndex),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Action Button
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_currentIndex == _pages.length - 1) {
+                        _navigateToAuth();
+                      } else {
+                        _controller.nextPage(
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeOutQuart,
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      elevation: 0,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          _currentIndex == _pages.length - 1
+                              ? "Get Started"
+                              : "Next",
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.arrow_forward_rounded, size: 20),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -92,35 +131,85 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget buildPage(String title, String subtitle) {
+  Widget _buildIndicator(bool isActive) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      height: 8,
+      width: isActive ? 24 : 8,
+      decoration: BoxDecoration(
+        color: isActive ? AppColors.primary : AppColors.primarySoft,
+        borderRadius: BorderRadius.circular(4),
+      ),
+    );
+  }
+
+  void _navigateToAuth() {
+    context.push('/auth/name');
+  }
+}
+
+class OnboardingContent {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+
+  OnboardingContent({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+  });
+}
+
+class _OnboardingPageView extends StatelessWidget {
+  final OnboardingContent content;
+
+  const _OnboardingPageView({required this.content});
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Placeholder for illustration
+          // Illustration / Icon Placeholder
           Container(
-            height: 180,
-            width: 180,
+            height: 200,
+            width: 200,
             decoration: BoxDecoration(
-              color: AppColors.primarySoft,
-              borderRadius: BorderRadius.circular(24),
+              color: AppColors.primarySoft.withOpacity(0.5),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              content.icon,
+              size: 100,
+              color: AppColors.primary,
             ),
           ),
+          const SizedBox(height: 60),
 
-          const SizedBox(height: 40),
-
+          // Title
           Text(
-            title,
-            style: Theme.of(context).textTheme.headlineLarge,
+            content.title,
+            style: const TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textPrimary,
+              height: 1.2,
+            ),
             textAlign: TextAlign.center,
           ),
+          const SizedBox(height: 16),
 
-          const SizedBox(height: 12),
-
+          // Subtitle
           Text(
-            subtitle,
-            style: Theme.of(context).textTheme.bodyMedium,
+            content.subtitle,
+            style: const TextStyle(
+              fontSize: 16,
+              color: AppColors.textSecondary,
+              height: 1.5,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
