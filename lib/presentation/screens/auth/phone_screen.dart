@@ -1,3 +1,4 @@
+import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -16,6 +17,18 @@ class PhoneScreen extends ConsumerStatefulWidget {
 class _PhoneScreenState extends ConsumerState<PhoneScreen> {
   final TextEditingController _phoneController = TextEditingController();
   bool _isLoading = false;
+  Country _selectedCountry = Country(
+    phoneCode: "234",
+    countryCode: "NG",
+    e164Sc: 0,
+    geographic: true,
+    level: 1,
+    name: "Nigeria",
+    example: "8123456789",
+    displayName: "Nigeria",
+    displayNameNoCountryCode: "Nigeria",
+    e164Key: "",
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +59,7 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
                     borderRadius: BorderRadius.circular(32),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withOpacity(0.08),
+                        color: AppColors.primary.withValues(alpha: 0.08),
                         blurRadius: 40,
                         offset: const Offset(0, 20),
                       ),
@@ -87,28 +100,63 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
                       ),
                       const SizedBox(height: 32),
 
-                      // Country Selector (Simulated)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.border),
-                        ),
-                        child: Row(
-                          children: [
-                            const Text("🇳🇬", style: TextStyle(fontSize: 20)),
-                            const SizedBox(width: 12),
-                            const Text(
-                              "Nigeria (+234)",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
+                      // Country Selector
+                      GestureDetector(
+                        onTap: () {
+                          showCountryPicker(
+                            context: context,
+                            showPhoneCode: true,
+                            onSelect: (Country country) {
+                              setState(() {
+                                _selectedCountry = country;
+                              });
+                            },
+                            countryListTheme: CountryListThemeData(
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(20.0),
+                                topRight: Radius.circular(20.0),
+                              ),
+                              inputDecoration: InputDecoration(
+                                labelText: 'Search',
+                                hintText: 'Start typing to search',
+                                prefixIcon: const Icon(Icons.search),
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: AppColors.primary.withValues(alpha: 0.2),
+                                  ),
+                                ),
                               ),
                             ),
-                            const Spacer(),
-                            const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textMuted),
-                          ],
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: AppColors.border),
+                          ),
+                          child: Row(
+                            children: [
+                              Text(
+                                _selectedCountry.flagEmoji,
+                                style: const TextStyle(fontSize: 28),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  "${_selectedCountry.name} (+${_selectedCountry.phoneCode})",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textPrimary,
+                                    fontSize: 16,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textMuted),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -123,7 +171,7 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
                           letterSpacing: 1.2,
                         ),
                         decoration: InputDecoration(
-                          hintText: "812 345 6789",
+                          hintText: _selectedCountry.example,
                           prefixIcon: const Icon(Icons.phone_iphone_rounded, color: AppColors.primary),
                           filled: true,
                           fillColor: AppColors.surface,
@@ -153,6 +201,8 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
                           ),
                           child: _isLoading
                               ? const SizedBox(
@@ -200,9 +250,11 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
     if (phone.isEmpty) return;
 
     setState(() => _isLoading = true);
-    
+
     try {
-      await ref.read(authRepositoryProvider).sendOtp("+234$phone");
+      // Format: +[CountryCode][Phone]
+      final formattedPhone = "+${_selectedCountry.phoneCode}$phone";
+      await ref.read(authRepositoryProvider).sendOtp(formattedPhone);
       if (mounted) {
         context.push('/auth/otp');
       }

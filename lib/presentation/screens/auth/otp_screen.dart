@@ -128,8 +128,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
   Widget _buildOtpBox(int index) {
     return SizedBox(
-      width: 45,
-      height: 56,
+      width: 50,
+      height: 60,
       child: TextField(
         controller: _controllers[index],
         focusNode: _focusNodes[index],
@@ -145,15 +145,17 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
           }
         },
         textAlign: TextAlign.center,
+        textAlignVertical: TextAlignVertical.center,
         keyboardType: TextInputType.number,
         maxLength: 1,
         style: const TextStyle(
-          fontSize: 24,
+          fontSize: 22,
           fontWeight: FontWeight.bold,
           color: AppColors.primary,
         ),
         decoration: InputDecoration(
           counterText: "",
+          contentPadding: EdgeInsets.zero,
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: AppColors.border, width: 2),
