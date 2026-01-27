@@ -5,11 +5,29 @@ import 'package:go_router/go_router.dart';
 import '../../../application/providers/user_provider.dart';
 import '../../../core/themes/app_colors.dart';
 
-class WelcomeScreen extends ConsumerWidget {
+class WelcomeScreen extends ConsumerStatefulWidget {
   const WelcomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
+  bool _isLoading = false;
+
+  Future<void> _handleFinishSetup() async {
+    setState(() => _isLoading = true);
+    
+    // Simulate setting up account
+    await Future.delayed(const Duration(seconds: 5));
+    
+    if (mounted) {
+      context.go('/profile/add-socials');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(userProvider);
     final username = user?.username ?? "User";
     
@@ -42,10 +60,10 @@ class WelcomeScreen extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: AppColors.primarySoft,
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.primary, width: 4),
+                  border: Border.all(color: AppColors.primaryPurple, width: 4),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.2),
+                      color: AppColors.primaryPurple.withValues(alpha: 0.2),
                       blurRadius: 30,
                       spreadRadius: 5,
                     ),
@@ -64,7 +82,7 @@ class WelcomeScreen extends ConsumerWidget {
                                     ? loadingProgress.cumulativeBytesLoaded /
                                         loadingProgress.expectedTotalBytes!
                                     : null,
-                                color: AppColors.primary,
+                                color: AppColors.primaryPurple,
                               ),
                             );
                           },
@@ -75,7 +93,7 @@ class WelcomeScreen extends ConsumerWidget {
                                 style: const TextStyle(
                                   fontSize: 60,
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
+                                  color: AppColors.primaryPurple,
                                 ),
                               ),
                             );
@@ -87,7 +105,7 @@ class WelcomeScreen extends ConsumerWidget {
                             style: const TextStyle(
                               fontSize: 60,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
+                              color: AppColors.primaryPurple,
                             ),
                           ),
                         ),
@@ -122,23 +140,20 @@ class WelcomeScreen extends ConsumerWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () => context.go('/profile/add-socials'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    elevation: 0,
-                    backgroundColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: const Text(
-                    "Finish Setup",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
+                  onPressed: _isLoading ? null : _handleFinishSetup,
+                  // Rely on Theme for size/radius, override only if necessary
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          "Finish Setup",
+                        ),
                 ),
               ),
               const SizedBox(height: 24),
