@@ -5,15 +5,15 @@ class AppTheme {
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
 
-    scaffoldBackgroundColor: AppColors.background,
+    scaffoldBackgroundColor: AppColors.background, // Aliased to gray50
 
-    primaryColor: AppColors.primary,
+    primaryColor: AppColors.primaryPurple,
 
     fontFamily: 'Inter',
 
-    colorScheme: ColorScheme.light(
-      primary: AppColors.primary,
-      background: AppColors.background,
+    colorScheme: const ColorScheme.light(
+      primary: AppColors.primaryPurple,
+      secondary: AppColors.primaryBlue,
       surface: AppColors.surface,
       error: AppColors.error,
     ),
@@ -23,7 +23,7 @@ class AppTheme {
       headlineLarge: TextStyle(
         fontSize: 28,
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+        color: AppColors.textPrimary, // Aliased to gray900
       ),
       headlineMedium: TextStyle(
         fontSize: 22,
@@ -32,18 +32,18 @@ class AppTheme {
       ),
       bodyMedium: TextStyle(
         fontSize: 16,
-        color: AppColors.textSecondary,
+        color: AppColors.textSecondary, // Aliased to gray600
       ),
       bodySmall: TextStyle(
         fontSize: 14,
-        color: AppColors.textMuted,
+        color: AppColors.textMuted, // Aliased to gray400
       ),
     ),
 
     // BUTTON THEME
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.primaryPurple,
         foregroundColor: Colors.white,
         minimumSize: const Size(double.infinity, 56),
         shape: RoundedRectangleBorder(
@@ -59,14 +59,26 @@ class AppTheme {
     // INPUT THEME
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: AppColors.surface,
+      fillColor: AppColors.surface, // Aliased to white
       contentPadding: const EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 16,
       ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide.none,
+        borderSide: const BorderSide(color: AppColors.gray200),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: AppColors.gray200),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: AppColors.primaryPurple, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: AppColors.error),
       ),
     ),
   );
