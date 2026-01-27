@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../application/providers/auth_providers.dart';
 import '../../../application/providers/user_provider.dart';
 import '../../../domain/entities/user_entity.dart';
 import '../../../core/themes/app_colors.dart';
@@ -40,59 +39,66 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                "📩",
-                style: TextStyle(fontSize: 48),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                "Verify your number",
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                "Enter the 6-digit code we sent to your phone.",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: AppColors.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 48),
-
-              // OTP Input Boxes
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: List.generate(6, (index) => _buildOtpBox(index)),
-              ),
-
-              const SizedBox(height: 48),
-
-              // Resend Text
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "Didn't receive code? ",
-                    style: TextStyle(color: AppColors.textSecondary),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      // Handle Resend
-                    },
-                    child: const Text(
-                      "Resend",
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      "📩",
+                      style: TextStyle(fontSize: 48),
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      "Verify your email",
                       style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    const Text(
+                      "Enter the 6-digit code we sent to your email address.",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: AppColors.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 48),
+
+                    // OTP Input Boxes
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: List.generate(6, (index) => _buildOtpBox(index)),
+                    ),
+                    
+                    const SizedBox(height: 48),
+
+                    // Resend Text
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          "Didn't receive code? ",
+                          style: TextStyle(color: AppColors.textSecondary),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            // Handle Resend
+                          },
+                          child: const Text(
+                            "Resend",
+                            style: TextStyle(
+                              color: AppColors.primaryPurple,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
 
               const SizedBox(height: 32),
@@ -104,7 +110,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                   onPressed: _isLoading ? null : _handleVerify,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 18),
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: AppColors.primaryPurple,
                     elevation: 0,
                   ),
                   child: _isLoading
@@ -119,6 +125,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                         ),
                 ),
               ),
+              const SizedBox(height: 24),
             ],
           ),
         ),
@@ -151,7 +158,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
         style: const TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.bold,
-          color: AppColors.primary,
+          color: AppColors.primaryPurple,
         ),
         decoration: InputDecoration(
           counterText: "",
@@ -162,7 +169,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.primary, width: 2),
+            borderSide: const BorderSide(color: AppColors.primaryPurple, width: 2),
           ),
         ),
       ),
@@ -176,14 +183,16 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     setState(() => _isLoading = true);
     
     try {
-      await ref.read(authRepositoryProvider).verifyOtp(otp);
+      // Mock Verification
+      await Future.delayed(const Duration(seconds: 1));
       
-      // Initialize User state with a mock user for now
+      // Initialize User state with a mock user
       ref.read(userProvider.notifier).setUser(
         UserEntity(
           uid: 'mock_uid_123',
           name: 'New User', // Ideally pass the name from previous screen
-          phoneNumber: '+2348123456789',
+          phoneNumber: '', // No phone number
+          username: '',
           createdAt: DateTime.now(),
         ),
       );

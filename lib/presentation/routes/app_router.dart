@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../screens/splash/splash_screen.dart';
 import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/auth/name_screen.dart';
-import '../screens/auth/phone_screen.dart';
+import '../screens/auth/email_screen.dart';
 import '../screens/auth/otp_screen.dart';
 import '../screens/auth/username_screen.dart';
 
@@ -35,10 +35,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Auth Flow
       GoRoute(path: '/auth/name', builder: (context, state) => const NameScreen()),
       GoRoute(
-        path: '/auth/phone',
+        path: '/auth/email',
         builder: (context, state) {
           final name = state.extra as String? ?? "User";
-          return PhoneScreen(userName: name);
+          return EmailScreen(userName: name);
         },
       ),
       GoRoute(path: '/auth/otp', builder: (context, state) => const OtpScreen()),

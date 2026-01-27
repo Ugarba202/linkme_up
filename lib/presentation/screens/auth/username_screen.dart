@@ -87,90 +87,97 @@ class _UsernameScreenState extends ConsumerState<UsernameScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                "👤",
-                style: TextStyle(fontSize: 48),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                "Choose a Username",
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                "This will be your unique identity on LinkMeUp.",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: AppColors.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 48),
-
-              // Username Input inside Container
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: _errorText != null ? Colors.red : AppColors.border,
-                  ),
-                ),
-                child: TextField(
-                  controller: _usernameController,
-                  onChanged: _validateUsername,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                  decoration: InputDecoration(
-                    prefixText: "@ ",
-                    prefixStyle: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textMuted,
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      "👤",
+                      style: TextStyle(fontSize: 48),
                     ),
-                    hintText: "username",
-                    hintStyle: TextStyle(
-                      color: AppColors.textMuted.withValues(alpha: 0.5),
+                    const SizedBox(height: 24),
+                    const Text(
+                      "Choose a Username",
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    border: InputBorder.none,
-                    errorText: null, // Handled manually below
-                  ),
-                  textCapitalization: TextCapitalization.none,
-                  autocorrect: false, 
+                    const SizedBox(height: 12),
+                    const Text(
+                      "This will be your unique identity on LinkMeUp.",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: AppColors.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 48),
+
+                    // Username Input inside Container
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: _errorText != null ? Colors.red : AppColors.border,
+                        ),
+                      ),
+                      child: TextField(
+                        controller: _usernameController,
+                        onChanged: _validateUsername,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                        decoration: InputDecoration(
+                          prefixText: "@ ",
+                          prefixStyle: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textMuted,
+                          ),
+                          hintText: "username",
+                          hintStyle: TextStyle(
+                            color: AppColors.textMuted.withValues(alpha: 0.5),
+                          ),
+                          border: InputBorder.none,
+                          errorText: null, // Handled manually below
+                        ),
+                        textCapitalization: TextCapitalization.none,
+                        autocorrect: false, 
+                      ),
+                    ),
+                    if (_errorText != null) ...[
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          _errorText!,
+                          style: const TextStyle(color: Colors.red, fontSize: 12),
+                        ),
+                      ),
+                    ],
+                    
+                    const SizedBox(height: 12),
+                    // Preview Link
+                    if (_usernameController.text.isNotEmpty && _errorText == null)
+                      Text(
+                        "linkmeup.ugarba/${_usernameController.text.trim()}",
+                        style: const TextStyle(
+                          color: AppColors.primaryPurple,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                  ],
                 ),
               ),
-              if (_errorText != null) ...[
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    _errorText!,
-                    style: const TextStyle(color: Colors.red, fontSize: 12),
-                  ),
-                ),
-              ],
-              
-              const SizedBox(height: 12),
-              // Preview Link
-              if (_usernameController.text.isNotEmpty && _errorText == null)
-                Text(
-                  "linkmeup.ugarba/${_usernameController.text.trim()}",
-                  style: const TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
 
-              const SizedBox(height: 48),
+              const SizedBox(height: 32),
 
               // Continue Button
               SizedBox(
