@@ -3,6 +3,7 @@ import 'social_link_entity.dart';
 class UserEntity {
   final String uid;
   final String name;
+  final String username;
   final String phoneNumber;
   final String? photoUrl;
   final List<SocialLinkEntity> socialLinks;
@@ -11,6 +12,7 @@ class UserEntity {
   UserEntity({
     required this.uid,
     required this.name,
+    this.username = '',
     required this.phoneNumber,
     this.photoUrl,
     this.socialLinks = const [],
@@ -20,6 +22,7 @@ class UserEntity {
   UserEntity copyWith({
     String? uid,
     String? name,
+    String? username,
     String? phoneNumber,
     String? photoUrl,
     List<SocialLinkEntity>? socialLinks,
@@ -28,6 +31,7 @@ class UserEntity {
     return UserEntity(
       uid: uid ?? this.uid,
       name: name ?? this.name,
+      username: username ?? this.username,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       photoUrl: photoUrl ?? this.photoUrl,
       socialLinks: socialLinks ?? this.socialLinks,

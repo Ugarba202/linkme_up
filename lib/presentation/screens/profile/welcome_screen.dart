@@ -1,12 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../application/providers/user_provider.dart';
 import '../../../core/themes/app_colors.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends ConsumerWidget {
   const WelcomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(userProvider);
+    final username = user?.username ?? "User";
+    
+    // Get Initials
+    String initials = "";
+    if (user?.name != null && user!.name.isNotEmpty) {
+      List<String> names = user.name.split(" ");
+      if (names.length >= 2) {
+        initials = "${names[0][0]}${names[1][0]}".toUpperCase();
+      } else {
+        initials = names[0][0].toUpperCase();
+      }
+    } else {
+      initials = username.isNotEmpty ? username[0].toUpperCase() : "U";
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -18,34 +37,68 @@ class WelcomeScreen extends StatelessWidget {
               // Animated Avatar / Celebration
               const Spacer(),
               Container(
-                height: 160,
-                width: 160,
+                height: 180,
+                width: 180,
                 decoration: BoxDecoration(
                   color: AppColors.primarySoft,
                   shape: BoxShape.circle,
                   border: Border.all(color: AppColors.primary, width: 4),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withOpacity(0.2),
+                      color: AppColors.primary.withValues(alpha: 0.2),
                       blurRadius: 30,
                       spreadRadius: 5,
                     ),
                   ],
                 ),
-                child: const Center(
-                  child: Icon(
-                    Icons.person_rounded,
-                    size: 80,
-                    color: AppColors.primary,
-                  ),
+                child: ClipOval(
+                  child: user?.photoUrl != null
+                      ? Image.network(
+                          user!.photoUrl!,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                    : null,
+                                color: AppColors.primary,
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return Center(
+                              child: Text(
+                                initials,
+                                style: const TextStyle(
+                                  fontSize: 60,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            );
+                          },
+                        )
+                      : Center(
+                          child: Text(
+                            initials,
+                            style: const TextStyle(
+                              fontSize: 60,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(height: 48),
 
               // Welcome Text
-              const Text(
-                "Welcome to LinkUp! 🎉",
-                style: TextStyle(
+              Text(
+                "Welcome, @$username! 🎉",
+                style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
@@ -73,12 +126,17 @@ class WelcomeScreen extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 20),
                     elevation: 0,
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                   child: const Text(
                     "Finish Setup",
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
                 ),

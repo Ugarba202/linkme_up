@@ -189,7 +189,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
       );
 
       if (mounted) {
-        context.go('/profile/welcome');
+        context.go('/auth/username');
       }
     } catch (e) {
       if (mounted) {
