@@ -8,7 +8,6 @@ import '../screens/auth/name_screen.dart';
 import '../screens/auth/email_screen.dart';
 import '../screens/auth/otp_screen.dart';
 import '../screens/auth/username_screen.dart';
-
 // Profile Screens
 import '../screens/profile/welcome_screen.dart';
 import '../screens/profile/add_socials_screen.dart';
@@ -51,7 +50,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Dashboard (Section 4)
       GoRoute(
         path: '/dashboard',
-        builder: (context, state) => const DashboardScreen(),
+        builder: (context, state) {
+          final rawLinks = state.extra as String?;
+          return DashboardScreen(rawLinks: rawLinks);
+        },
       ),
 
       // QR (Section 5)
