@@ -17,12 +17,10 @@ class QrScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        title: const Text("Share & Scan", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+        centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close_rounded, color: AppColors.textPrimary),
-          onPressed: () => context.go('/dashboard'),
-        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.share_rounded, color: AppColors.textPrimary),
@@ -74,7 +72,7 @@ class QrScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(40),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color: AppColors.primary.withValues(alpha: 0.1),
                       blurRadius: 50,
                       spreadRadius: 10,
                     ),
@@ -83,7 +81,7 @@ class QrScreen extends ConsumerWidget {
                 child: QrImageView(
                   data: shareUrl,
                   version: QrVersions.auto,
-                  size: 260.0,
+                  size: 200.0,
                   eyeStyle: const QrEyeStyle(
                     eyeShape: QrEyeShape.circle,
                     color: AppColors.primary,
@@ -95,44 +93,58 @@ class QrScreen extends ConsumerWidget {
                 ),
               ),
             ),
+            
+            const SizedBox(height: 16),
+            const Text(
+              "Tap to expand",
+              style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+            ),
 
             const Spacer(),
 
             // Actions
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                   // Share logic
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  backgroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.ios_share_rounded),
-                    SizedBox(width: 12),
-                    Text(
-                      "Share my QR",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => context.go('/qr/scan'), // Go to scanner
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      side: const BorderSide(color: AppColors.primary),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
-                  ],
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.qr_code_scanner_rounded, color: AppColors.primary),
+                        SizedBox(width: 8),
+                        Text("Scan Code", style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextButton(
-              onPressed: () => context.push('/profile/manage-socials'),
-              child: const Text(
-                "Manage Socials",
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w600,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                       // Share logic
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.ios_share_rounded),
+                        SizedBox(width: 8),
+                        Text("Share", style: TextStyle(fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
             const SizedBox(height: 40),
           ],

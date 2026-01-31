@@ -16,7 +16,7 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  int _currentIndex = 0;
+  final int _currentIndex = 0;
   List<SocialLinkEntity> _detectLinks = [];
   final Set<SocialPlatform> _selectedPlatforms = {};
 
@@ -81,33 +81,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return Scaffold(
       backgroundColor: AppColors.gray50,
       body: _currentIndex == 0 ? _buildDashboardHome() : const Center(child: Text("Coming Soon")),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: AppColors.border)),
-        ),
-        child: NavigationBar(
-          selectedIndex: _currentIndex,
-          onDestinationSelected: (index) => setState(() => _currentIndex = index),
-          backgroundColor: Colors.white,
-          elevation: 0,
-          indicatorColor: AppColors.primaryPurple.withValues(alpha: 0.1),
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.grid_view_rounded),
-              label: 'Dashboard',
-            ),
-            NavigationDestination(
-               icon: Icon(Icons.qr_code_rounded),
-               label: 'Share',
-             ),
-             NavigationDestination(
-               icon: Icon(Icons.person_rounded),
-               label: 'Profile',
-             ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -188,14 +161,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       padding: EdgeInsets.fromLTRB(24, 24, 24, 0),
                       child: Align(
                         alignment: Alignment.centerLeft,
-                        child: Text("Detected Links", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                        child: Text("Customize Screen", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                       ),
                     ),
                     Expanded(
                       child: GridView.builder(
                         padding: const EdgeInsets.all(24),
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
+                          crossAxisCount: 4,
                           crossAxisSpacing: 16,
                           mainAxisSpacing: 16,
                           childAspectRatio: 0.85,
@@ -218,7 +191,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 children: [
                                   Icon(link.platform.icon, color: isSelected ? link.platform.color : AppColors.gray300, size: 32),
                                   const SizedBox(height: 8),
-                                  Text(link.platform.displayName, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: isSelected ? Colors.black : AppColors.gray400)),
+                                  Text(link.platform.displayName, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: isSelected ? Colors.black : AppColors.gray400), overflow: TextOverflow.ellipsis),
                                 ],
                               ),
                             ),
