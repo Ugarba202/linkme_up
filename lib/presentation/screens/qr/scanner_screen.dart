@@ -34,13 +34,16 @@ class _ScannerScreenState extends State<ScannerScreen> {
               for (final barcode in barcodes) {
                 if (barcode.rawValue != null) {
                   controller.stop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Found: ${barcode.rawValue}"),
-                      backgroundColor: AppColors.primaryPurple,
-                    ),
-                  );
-                  context.pop();
+                  final String code = barcode.rawValue!;
+                  
+                  // Simple logic: extract username from linkmeup urls
+                  String username = 'user';
+                  if (code.contains('linkmeup.ugarba/')) {
+                    username = code.split('/').last;
+                  }
+
+                  // Navigate to external profile
+                  context.pushReplacement('/profile/$username');
                   break;
                 }
               }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/themes/app_colors.dart';
+import '../../widgets/gradient_button.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -89,7 +90,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   const SizedBox(height: 32),
 
                   // Action Button
-                  ElevatedButton(
+                  GradientButton(
+                    text: _currentIndex == _pages.length - 1
+                        ? "Get Started"
+                        : "Next",
+                    icon: Icons.arrow_forward_rounded,
                     onPressed: () {
                       if (_currentIndex == _pages.length - 1) {
                         _navigateToAuth();
@@ -100,27 +105,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         );
                       }
                     },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      elevation: 0,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          _currentIndex == _pages.length - 1
-                              ? "Get Started"
-                              : "Next",
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Icon(Icons.arrow_forward_rounded, size: 20),
-                      ],
-                    ),
                   ),
                 ],
               ),

@@ -196,7 +196,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ],
                   ),
                   child: IconButton(
-                    onPressed: () {},
+                    onPressed: () => context.push('/notifications'),
                     icon: Stack(
                       children: [
                         const Icon(Icons.notifications_none_rounded),

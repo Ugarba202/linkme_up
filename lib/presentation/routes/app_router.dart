@@ -27,6 +27,15 @@ import '../screens/qr/qr_screen.dart';
 import '../screens/qr/full_qr_screen.dart';
 import '../screens/qr/scanner_screen.dart';
 
+// New Screens
+import '../screens/notifications/notifications_screen.dart';
+import '../screens/profile/external_profile_screen.dart';
+import '../screens/profile/profile_landing_screen.dart';
+
+// Domain
+import '../../domain/entities/user_entity.dart';
+import '../../domain/entities/social_link_entity.dart';
+
 final routerProvider = Provider<GoRouter>((ref) {
   final rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -136,6 +145,75 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
         ],
+      ),
+
+      // Notifications
+      GoRoute(
+        path: '/notifications',
+        builder: (context, state) => const NotificationsScreen(),
+      ),
+
+      // External Profile (View scanned user)
+      GoRoute(
+        path: '/profile/:username',
+        builder: (context, state) {
+          final username = state.pathParameters['username'] ?? 'user';
+          // Mock data for demonstration if no extra passed
+          final user =
+              state.extra as UserEntity? ??
+              UserEntity(
+                uid: 'external',
+                name: 'Scanned User',
+                username: username,
+                phoneNumber: '',
+                email: '',
+                country: 'Nigeria',
+                createdAt: DateTime.now(),
+                socialLinks: [
+                  SocialLinkEntity(
+                    platform: SocialPlatform.instagram,
+                    url: 'https://instagram.com',
+                    id: '',
+                    username: '',
+                  ),
+                  SocialLinkEntity(
+                    platform: SocialPlatform.twitter,
+                    url: 'https://x.com',
+                    id: '',
+                    username: '',
+                  ),
+                ],
+              );
+          return ExternalProfileScreen(user: user);
+        },
+      ),
+
+      // Landing Page (Web simulation)
+      GoRoute(
+        path: '/landing/:username',
+        builder: (context, state) {
+          final username = state.pathParameters['username'] ?? 'user';
+          final user =
+              state.extra as UserEntity? ??
+              UserEntity(
+                uid: 'landing',
+                name: 'Web User',
+                username: username,
+                phoneNumber: '',
+                email: '',
+                country: 'Nigeria',
+                createdAt: DateTime.now(),
+                socialLinks: [
+                  SocialLinkEntity(
+                    platform: SocialPlatform.linkedin,
+                    url: 'https://linkedin.com',
+                    id: '',
+                    username: '',
+                  ),
+                ],
+              );
+          return ProfileLandingScreen(user: user);
+        },
       ),
 
       // Compatibility Redirects or Global Routes if needed

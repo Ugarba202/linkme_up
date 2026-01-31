@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../application/providers/auth_providers.dart';
 import '../../../core/themes/app_colors.dart';
+import '../../widgets/gradient_button.dart';
 
 class PhoneScreen extends ConsumerStatefulWidget {
   final String userName;
@@ -192,35 +193,11 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
                       const SizedBox(height: 32),
 
                       // Continue Button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _handleSendOtp,
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 18),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                          ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Text(
-                                  "Continue →",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                        ),
+                      GradientButton(
+                        text: "Continue",
+                        icon: Icons.arrow_forward_rounded,
+                        isLoading: _isLoading,
+                        onPressed: _isLoading ? null : _handleSendOtp,
                       ),
                     ],
                   ),
