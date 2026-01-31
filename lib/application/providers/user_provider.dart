@@ -25,6 +25,26 @@ class UserStateNotifier extends StateNotifier<UserEntity?> {
     currentLinks.removeWhere((l) => l.id == id);
     state = state!.copyWith(socialLinks: currentLinks);
   }
+
+  void updateName(String newName) {
+    if (state == null) return;
+    state = state!.copyWith(name: newName);
+  }
+
+  void updateEmail(String newEmail) {
+    if (state == null) return;
+    state = state!.copyWith(email: newEmail);
+  }
+
+  void updateCountry(String newCountry) {
+    if (state == null) return;
+    state = state!.copyWith(country: newCountry);
+  }
+
+  void updatePhotoUrl(String newPhotoUrl) {
+    if (state == null) return;
+    state = state!.copyWith(photoUrl: newPhotoUrl);
+  }
 }
 
 final userProvider = StateNotifierProvider<UserStateNotifier, UserEntity?>((ref) {

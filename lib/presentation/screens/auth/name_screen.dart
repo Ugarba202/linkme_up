@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
 import '../../../core/themes/app_colors.dart';
+import '../../widgets/custom_input.dart';
+import '../../widgets/gradient_button.dart';
 
 class NameScreen extends StatefulWidget {
   const NameScreen({super.key});
@@ -33,105 +34,74 @@ class _NameScreenState extends State<NameScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Emoji / Icon
-                    const Text(
-                      "👋",
-                      style: TextStyle(fontSize: 48),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Heading
-                    const Text(
-                      "What should we call you?",
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Subtext
-                    const Text(
-                      "Your name will be visible to people you connect with.",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: AppColors.textSecondary,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 48),
-
-                    // Name Input
-                    TextField(
-                      controller: _nameController,
-                      autofocus: true,
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primaryPurple,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: "Your Full Name",
-                        hintStyle: TextStyle(
-                          color: AppColors.textMuted.withValues(alpha: 0.5),
-                          fontSize: 22,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        filled: false,
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                      textCapitalization: TextCapitalization.words,
-                    ),
-
-                    // Underline for input
-                    Container(
-                      height: 2,
-                      width: double.infinity,
-                      color: _isDirty ? AppColors.primaryPurple : AppColors.border,
-                    ),
-                  ],
+              const SizedBox(height: 40),
+              // Progress/Header
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.gray200,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-
-              // Continue Button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isDirty
-                      ? () => context.push('/auth/email', extra: _nameController.text.trim())
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    backgroundColor: _isDirty ? AppColors.primaryPurple : AppColors.border,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: AppColors.border,
-                    elevation: 0,
+              const Spacer(),
+              
+              // Emoji / Icon
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryPurple.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
                   ),
                   child: const Text(
-                    "Continue →",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    "👋",
+                    style: TextStyle(fontSize: 48),
                   ),
                 ),
+              ),
+              const SizedBox(height: 32),
+
+              // Headings
+              Text(
+                "What should we call you?",
+                style: Theme.of(context).textTheme.headlineLarge,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                "Your name will be visible to people you connect with.",
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 48),
+
+              // Input
+              CustomInput(
+                controller: _nameController,
+                hintText: "Your Full Name",
+                label: "Full Name",
+                prefixIcon: Icons.person_outline_rounded,
+                keyboardType: TextInputType.name, maxLines: 1,
+              ),
+              
+              const Spacer(),
+
+              // Continue Button
+              GradientButton(
+                text: "Continue",
+                onPressed: _isDirty
+                    ? () => context.push('/auth/email', extra: _nameController.text.trim())
+                    : null,
               ),
               const SizedBox(height: 24),
             ],

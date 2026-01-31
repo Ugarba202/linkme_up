@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../application/providers/user_provider.dart';
 import '../../../core/themes/app_colors.dart';
+import '../../widgets/custom_input.dart';
+import '../../widgets/gradient_button.dart';
 
 class UsernameScreen extends ConsumerStatefulWidget {
   const UsernameScreen({super.key});
@@ -80,10 +82,18 @@ class _UsernameScreenState extends ConsumerState<UsernameScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: Theme.of(context).textTheme.bodyLarge?.color),
+          onPressed: () => context.pop(),
+        ),
+      ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -91,86 +101,57 @@ class _UsernameScreenState extends ConsumerState<UsernameScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
-                      "👤",
-                      style: TextStyle(fontSize: 48),
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryPurple.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Text(
+                        "👤",
+                        style: TextStyle(fontSize: 48),
+                      ),
                     ),
                     const SizedBox(height: 24),
-                    const Text(
+                    Text(
                       "Choose a Username",
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
-                      ),
+                      style: Theme.of(context).textTheme.headlineLarge,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
-                    const Text(
+                    Text(
                       "This will be your unique identity on LinkMeUp.",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: AppColors.textSecondary,
-                      ),
+                      style: Theme.of(context).textTheme.bodyMedium,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 48),
 
                     // Username Input inside Container
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: _errorText != null ? Colors.red : AppColors.border,
-                        ),
-                      ),
-                      child: TextField(
-                        controller: _usernameController,
-                        onChanged: _validateUsername,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                        decoration: InputDecoration(
-                          prefixText: "@ ",
-                          prefixStyle: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textMuted,
-                          ),
-                          hintText: "username",
-                          hintStyle: TextStyle(
-                            color: AppColors.textMuted.withValues(alpha: 0.5),
-                          ),
-                          border: InputBorder.none,
-                          errorText: null, // Handled manually below
-                        ),
-                        textCapitalization: TextCapitalization.none,
-                        autocorrect: false, 
-                      ),
+                    CustomInput(
+                      controller: _usernameController,
+                      hintText: "username",
+                      label: "Username",
+                      onChanged: _validateUsername,
+                      prefixIcon: Icons.alternate_email_rounded,
+                      errorText: _errorText, maxLines:1,
                     ),
-                    if (_errorText != null) ...[
-                      const SizedBox(height: 8),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          _errorText!,
-                          style: const TextStyle(color: Colors.red, fontSize: 12),
-                        ),
-                      ),
-                    ],
                     
                     const SizedBox(height: 12),
                     // Preview Link
                     if (_usernameController.text.isNotEmpty && _errorText == null)
-                      Text(
-                        "linkmeup.ugarba/${_usernameController.text.trim()}",
-                        style: const TextStyle(
-                          color: AppColors.primaryPurple,
-                          fontWeight: FontWeight.w500,
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryPurple.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: AppColors.primaryPurple.withValues(alpha: 0.2)),
+                        ),
+                        child: Text(
+                          "linkmeup.ugarba/${_usernameController.text.trim()}",
+                          style: TextStyle(
+                            color: AppColors.primaryPurple,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                   ],
@@ -180,40 +161,14 @@ class _UsernameScreenState extends ConsumerState<UsernameScreen> {
               const SizedBox(height: 32),
 
               // Continue Button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isLoading || _usernameController.text.isEmpty || _errorText != null
-                      ? null
-                      : _handleContinue,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    backgroundColor: AppColors.primary,
-                    disabledBackgroundColor: AppColors.border,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text(
-                          "Create Username",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                ),
+              GradientButton(
+                text: "Create Username",
+                isLoading: _isLoading,
+                onPressed: _isLoading || _usernameController.text.isEmpty || _errorText != null
+                    ? null
+                    : _handleContinue,
               ),
+              const SizedBox(height: 24),
             ],
           ),
         ),

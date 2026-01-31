@@ -28,22 +28,29 @@ class AppColors {
   
   // Light Mode
   static const Color white = Color(0xFFFFFFFF);
-  static const Color gray50 = Color(0xFFF9FAFB);  // Backgrounds
-  static const Color gray100 = Color(0xFFF3F4F6); // Secondary backgrounds
-  static const Color gray200 = Color(0xFFE5E7EB); // Borders, dividers
-  static const Color gray300 = Color(0xFFD1D5DB); // Disabled states
-  static const Color gray400 = Color(0xFF9CA3AF); // Placeholder text
-  static const Color gray500 = Color(0xFF6B7280); // Secondary text
-  static const Color gray600 = Color(0xFF4B5563); // Body text
-  static const Color gray700 = Color(0xFF374151); // Headings
-  static const Color gray800 = Color(0xFF1F2937); // Dark headings
-  static const Color gray900 = Color(0xFF111827); // Maximum contrast
+  static const Color gray50 = Color(0xFFF8FAFC);  // Backgrounds (Slate 50)
+  static const Color gray100 = Color(0xFFF1F5F9); // Secondary (Slate 100)
+  static const Color gray200 = Color(0xFFE2E8F0); // Borders/Dividers (Slate 200)
+  static const Color gray300 = Color(0xFFCBD5E1); // Disabled (Slate 300)
+  static const Color gray400 = Color(0xFF94A3B8); // Placeholder (Slate 400)
+  static const Color gray500 = Color(0xFF64748B); // Secondary text (Slate 500)
+  static const Color gray600 = Color(0xFF475569); // Body text (Slate 600)
+  static const Color gray700 = Color(0xFF334155); // Headings (Slate 700)
+  static const Color gray800 = Color(0xFF1E293B); // Dark headings (Slate 800)
+  static const Color gray900 = Color(0xFF0F172A); // Max contrast (Slate 900)
 
   // Dark Mode
-  static const Color darkBg = Color(0xFF0F172A);
-  static const Color darkSurface = Color(0xFF1E293B);
+  static const Color darkBg = Color(0xFF0F172A);      // Main Background
+  static const Color darkSurface = Color(0xFF1E293B); // Surface/Card
   static const Color darkBorder = Color(0xFF334155);
-  static const Color darkText = Color(0xFFF1F5F9);
+  static const Color darkText = Color(0xFFF8FAFC);
+
+  // Glass Utilities
+  static const Color glassWhite = Color(0x1AFFFFFF); // 10% White
+  static const Color glassBlack = Color(0x1A000000); // 10% Black
+  static const Color glassBorder = Color(0x1AFFFFFF); // 10% White for borders
+
+  // ... (Keep Semantic Colors ...)
 
   // ===========================================================================
   // SEMANTIC COLORS (Feedback)
@@ -69,9 +76,7 @@ class AppColors {
   static const Color info = Color(0xFF3B82F6);
   static const Color infoDark = Color(0xFF2563EB);
 
-  // ===========================================================================
-  // SOCIAL MEDIA COLORS
-  // ===========================================================================
+  // ... (Keep Social Media Colors ...)
   
   static const Color tiktok = Color(0xFF000000);
   static const Color tiktokAccent = Color(0xFFFE2C55);
@@ -103,10 +108,8 @@ class AppColors {
   // ===========================================================================
 
   static const Color primary = primaryPurple;
-  
-  // Mapping variants to new palette
-  static const Color primaryLight = Color(0xFFA78BFA); // Slightly lighter purple
-  static const Color primarySoft = Color(0xFFF5F3FF);  // Very light purple
+  static const Color primaryLight = Color(0xFFA78BFA); 
+  static const Color primarySoft = Color(0xFFF5F3FF);
 
   static const Color background = gray50;
   static const Color surface = white;

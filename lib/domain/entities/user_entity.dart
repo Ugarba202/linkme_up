@@ -5,6 +5,8 @@ class UserEntity {
   final String name;
   final String username;
   final String phoneNumber;
+  final String email;
+  final String country;
   final String? photoUrl;
   final List<SocialLinkEntity> socialLinks;
   final DateTime createdAt;
@@ -14,6 +16,8 @@ class UserEntity {
     required this.name,
     this.username = '',
     required this.phoneNumber,
+    required this.email,
+    this.country = 'Nigeria',
     this.photoUrl,
     this.socialLinks = const [],
     required this.createdAt,
@@ -24,6 +28,8 @@ class UserEntity {
     String? name,
     String? username,
     String? phoneNumber,
+    String? email,
+    String? country,
     String? photoUrl,
     List<SocialLinkEntity>? socialLinks,
     DateTime? createdAt,
@@ -33,6 +39,8 @@ class UserEntity {
       name: name ?? this.name,
       username: username ?? this.username,
       phoneNumber: phoneNumber ?? this.phoneNumber,
+      email: email ?? this.email,
+      country: country ?? this.country,
       photoUrl: photoUrl ?? this.photoUrl,
       socialLinks: socialLinks ?? this.socialLinks,
       createdAt: createdAt ?? this.createdAt,

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../application/providers/user_provider.dart';
 import '../../../domain/entities/user_entity.dart';
 import '../../../core/themes/app_colors.dart';
+import '../../widgets/gradient_button.dart';
 
 class OtpScreen extends ConsumerStatefulWidget {
   const OtpScreen({super.key});
@@ -32,10 +33,18 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: Theme.of(context).textTheme.bodyLarge?.color),
+          onPressed: () => context.pop(),
+        ),
+      ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -43,45 +52,46 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
-                      "📩",
-                      style: TextStyle(fontSize: 48),
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryPurple.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Text(
+                        "📩",
+                        style: TextStyle(fontSize: 48),
+                      ),
                     ),
                     const SizedBox(height: 24),
-                    const Text(
+                    Text(
                       "Verify your email",
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
-                      ),
+                      style: Theme.of(context).textTheme.headlineLarge,
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
-                    const Text(
+                    Text(
                       "Enter the 6-digit code we sent to your email address.",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: AppColors.textSecondary,
-                      ),
+                      style: Theme.of(context).textTheme.bodyMedium,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 48),
 
                     // OTP Input Boxes
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: List.generate(6, (index) => _buildOtpBox(index)),
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: List.generate(6, (index) => _buildOtpBox(index, context)),
                     ),
                     
-                    const SizedBox(height: 48),
+                    const SizedBox(height: 40),
 
                     // Resend Text
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
+                        Text(
                           "Didn't receive code? ",
-                          style: TextStyle(color: AppColors.textSecondary),
+                          style: Theme.of(context).textTheme.bodyMedium,
                         ),
                         TextButton(
                           onPressed: () {
@@ -104,26 +114,10 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
               const SizedBox(height: 32),
 
               // Verify Button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _handleVerify,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    backgroundColor: AppColors.primaryPurple,
-                    elevation: 0,
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                        )
-                      : const Text(
-                          "Verify Account",
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                ),
+              GradientButton(
+                text: "Verify Account",
+                isLoading: _isLoading,
+                onPressed: _isLoading ? null : _handleVerify,
               ),
               const SizedBox(height: 24),
             ],
@@ -133,10 +127,10 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     );
   }
 
-  Widget _buildOtpBox(int index) {
+  Widget _buildOtpBox(int index, BuildContext context) {
     return SizedBox(
-      width: 50,
-      height: 60,
+      width: 48,
+      height: 64,
       child: TextField(
         controller: _controllers[index],
         focusNode: _focusNodes[index],
@@ -155,17 +149,22 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
         textAlignVertical: TextAlignVertical.center,
         keyboardType: TextInputType.number,
         maxLength: 1,
-        style: const TextStyle(
-          fontSize: 22,
+        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
           fontWeight: FontWeight.bold,
           color: AppColors.primaryPurple,
         ),
         decoration: InputDecoration(
           counterText: "",
           contentPadding: EdgeInsets.zero,
+          filled: true,
+          fillColor: Theme.of(context).inputDecorationTheme.fillColor,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.gray200),
+          ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.border, width: 2),
+            borderSide: BorderSide(color: AppColors.gray200),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -186,12 +185,19 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
       // Mock Verification
       await Future.delayed(const Duration(seconds: 1));
       
-      // Initialize User state with a mock user
+      final extra = GoRouterState.of(context).extra as Map<String, dynamic>?;
+      final name = extra?['name'] as String? ?? 'User';
+      final email = extra?['email'] as String? ?? 'user@example.com';
+      final country = extra?['country'] as String? ?? 'Nigeria';
+
+      // Initialize User state with data passed from previous screens
       ref.read(userProvider.notifier).setUser(
         UserEntity(
           uid: 'mock_uid_123',
-          name: 'New User', // Ideally pass the name from previous screen
-          phoneNumber: '', // No phone number
+          name: name,
+          email: email,
+          country: country,
+          phoneNumber: '', // No phone number collection flow currently
           username: '',
           createdAt: DateTime.now(),
         ),

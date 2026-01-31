@@ -1,129 +1,117 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-import '../../../application/providers/user_provider.dart';
 import '../../../core/themes/app_colors.dart';
+import '../../widgets/custom_input.dart';
+import '../../widgets/gradient_button.dart';
 
-class AddSocialsScreen extends ConsumerStatefulWidget {
+class AddSocialsScreen extends StatefulWidget {
   const AddSocialsScreen({super.key});
 
   @override
-  ConsumerState<AddSocialsScreen> createState() => _AddSocialsScreenState();
+  State<AddSocialsScreen> createState() => _AddSocialsScreenState();
 }
 
-class _AddSocialsScreenState extends ConsumerState<AddSocialsScreen> {
-  final TextEditingController _bulkController = TextEditingController();
+class _AddSocialsScreenState extends State<AddSocialsScreen> {
+  final TextEditingController _linkController = TextEditingController();
+  bool _isProcessing = false;
 
   @override
-  void initState() {
-    super.initState();
-    // Pre-populate if we have links already
-    final user = ref.read(userProvider);
-    if (user != null && user.socialLinks.isNotEmpty) {
-      final linksText = user.socialLinks.map((l) => l.url).join('\n');
-      _bulkController.text = linksText;
-    }
+  void dispose() {
+    _linkController.dispose();
+    super.dispose();
   }
 
-  void _handleContinue() {
-    final text = _bulkController.text.trim();
-    if (text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please paste at least one link.")),
-      );
-      return;
-    }
+  void _handleAnalyze() {
+    final text = _linkController.text.trim();
+    if (text.isEmpty) return;
 
-    // We navigate to Dashboard and let IT handle the detection logic for display
-    // We could save it to provider as a raw string or just pass it as extra
-    // Let's use a temporary field in UserEntity or just pass via extra for verification.
-    // Actually, user said: "whatever link is pasted is going to appear in the user dashboard"
-    // So we'll pass the raw text to the Dashboard.
-    
-    context.go('/dashboard', extra: text);
+    setState(() {
+      _isProcessing = true;
+    });
+
+    // Simulate processing delay for effect
+    Future.delayed(const Duration(seconds: 1), () {
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+        });
+        // Navigate to Dashboard with the raw text to be detected there
+        context.go('/dashboard', extra: text);
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
-          "Connect Your Socials",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.black),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          color: Colors.black,
-          onPressed: () => context.pop(), 
+          onPressed: () => context.pop(),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: Theme.of(context).textTheme.bodyLarge?.color),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Paste all your social links below:",
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 18,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              "Separate them with spaces or new lines. We'll find them for you!",
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.gray50,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.gray200),
-                ),
-                child: TextField(
-                  controller: _bulkController,
-                  maxLines: null,
-                  expands: true,
-                  textAlignVertical: TextAlignVertical.top,
-                  style: const TextStyle(fontSize: 16),
-                  decoration: const InputDecoration(
-                    hintText: "Enter links here...\ne.g. instagram.com/user\ntwitter.com/handle\nwa.me/numbers",
-                    hintStyle: TextStyle(color: AppColors.gray300),
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    contentPadding: EdgeInsets.all(20),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryPurple.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.add_link_rounded,
+                    size: 48,
+                    color: AppColors.primaryPurple,
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _handleContinue,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  backgroundColor: AppColors.primaryPurple,
-                ),
-                child: const Text(
-                  "Continue to Dashboard",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+              const SizedBox(height: 32),
+              
+              Text(
+                "Add your links",
+                style: Theme.of(context).textTheme.headlineLarge,
+                textAlign: TextAlign.center,
               ),
-            ),
-          ],
+              const SizedBox(height: 12),
+              Text(
+                "Paste your social profile links below. We'll automatically detect the platforms.",
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+              
+              const SizedBox(height: 48),
+
+              // Paste Input
+              CustomInput(
+                controller: _linkController,
+                hintText: "https://instagram.com/username\nhttps://twitter.com/user...",
+                label: "Paste Links Here",
+                prefixIcon: Icons.link_rounded,
+                maxLines: 6,
+                keyboardType: TextInputType.multiline,
+              ),
+
+              const Spacer(),
+
+              // Analyze Button
+              GradientButton(
+                text: "Analyze Links",
+                icon: Icons.auto_awesome_rounded,
+                isLoading: _isProcessing,
+                onPressed: _isProcessing ? null : _handleAnalyze,
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );

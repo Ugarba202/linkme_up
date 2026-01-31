@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/themes/app_colors.dart';
+import '../../widgets/custom_input.dart';
+import '../../widgets/gradient_button.dart';
 
 class EmailScreen extends ConsumerStatefulWidget {
   final String userName;
@@ -55,14 +57,13 @@ class _EmailScreenState extends ConsumerState<EmailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
           onPressed: () => context.pop(),
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          color: AppColors.textPrimary,
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: Theme.of(context).textTheme.bodyLarge?.color),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
       ),
       body: SafeArea(
@@ -78,36 +79,39 @@ class _EmailScreenState extends ConsumerState<EmailScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const SizedBox(height: 16),
-                      const Text(
-                        "📩",
-                        style: TextStyle(fontSize: 40),
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryPurple.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Text(
+                            "📩",
+                            style: TextStyle(fontSize: 40),
+                          ),
+                        ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 32),
+                      
                       Text(
                         "Welcome, ${widget.userName}!",
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           color: AppColors.primaryPurple,
                         ),
+                        textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
-                      const Text(
+                      Text(
                         "What's your email?",
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
-                          height: 1.2,
-                        ),
+                        style: Theme.of(context).textTheme.headlineLarge,
+                        textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 12),
-                      const Text(
+                      Text(
                         "We'll use this to verify your account.",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: AppColors.textSecondary,
-                        ),
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
                       ),
                       
                       const SizedBox(height: 48),
@@ -117,7 +121,7 @@ class _EmailScreenState extends ConsumerState<EmailScreen> {
                         onTap: () {
                           showCountryPicker(
                             context: context,
-                            showPhoneCode: false, // Hide phone code as requested
+                            showPhoneCode: false,
                             onSelect: (Country country) {
                               setState(() {
                                 _selectedCountry = country;
@@ -125,14 +129,15 @@ class _EmailScreenState extends ConsumerState<EmailScreen> {
                             },
                             countryListTheme: CountryListThemeData(
                               borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(20.0),
-                                topRight: Radius.circular(20.0),
+                                topLeft: Radius.circular(24.0),
+                                topRight: Radius.circular(24.0),
                               ),
                               inputDecoration: InputDecoration(
                                 labelText: 'Search Country',
                                 hintText: 'Start typing to search',
                                 prefixIcon: const Icon(Icons.search),
                                 border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
                                   borderSide: BorderSide(
                                     color: AppColors.primaryPurple.withValues(alpha: 0.2),
                                   ),
@@ -142,11 +147,11 @@ class _EmailScreenState extends ConsumerState<EmailScreen> {
                           );
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                           decoration: BoxDecoration(
-                            color: AppColors.surface,
+                            color: Theme.of(context).inputDecorationTheme.fillColor,
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: AppColors.border),
+                            border: Border.all(color: AppColors.gray200),
                           ),
                           child: Row(
                             children: [
@@ -158,15 +163,11 @@ class _EmailScreenState extends ConsumerState<EmailScreen> {
                               Expanded(
                                 child: Text(
                                   _selectedCountry.name,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimary,
-                                    fontSize: 16,
-                                  ),
+                                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textMuted),
+                              Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.gray400),
                             ],
                           ),
                         ),
@@ -174,29 +175,12 @@ class _EmailScreenState extends ConsumerState<EmailScreen> {
                       const SizedBox(height: 16),
 
                       // Email Input
-                      Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.border),
-                        ),
-                        child: TextField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                          decoration: const InputDecoration(
-                            hintText: "yourname@example.com",
-                            prefixIcon: Icon(Icons.email_outlined, color: AppColors.textSecondary),
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                          ),
-                        ),
+                      CustomInput(
+                        controller: _emailController,
+                        hintText: "yourname@example.com",
+                        label: "Email Address",
+                        prefixIcon: Icons.email_outlined,
+                        keyboardType: TextInputType.emailAddress, maxLines: 1,
                       ),
                     ],
                   ),
@@ -204,37 +188,10 @@ class _EmailScreenState extends ConsumerState<EmailScreen> {
               ),
 
               // Continue Button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isLoading || !_isValidEmail ? null : _handleSendOtp,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    backgroundColor: _isValidEmail ? AppColors.primaryPurple : AppColors.border,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: AppColors.border,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text(
-                          "Continue →",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                ),
+              GradientButton(
+                text: "Continue",
+                isLoading: _isLoading,
+                onPressed: !_isValidEmail ? null : _handleSendOtp,
               ),
               const SizedBox(height: 24),
             ],
@@ -255,7 +212,11 @@ class _EmailScreenState extends ConsumerState<EmailScreen> {
       await Future.delayed(const Duration(seconds: 1)); // Simulate network request
       
       if (mounted) {
-        context.push('/auth/otp', extra: email);
+        context.push('/auth/otp', extra: {
+          'name': widget.userName,
+          'email': email,
+          'country': _selectedCountry.name,
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -268,3 +229,4 @@ class _EmailScreenState extends ConsumerState<EmailScreen> {
     }
   }
 }
+

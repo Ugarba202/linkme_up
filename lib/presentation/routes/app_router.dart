@@ -29,20 +29,28 @@ import '../screens/qr/scanner_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final rootNavigatorKey = GlobalKey<NavigatorState>();
-  final shellNavigatorKey = GlobalKey<NavigatorState>();
 
   return GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: '/splash',
     routes: [
       // Splash
-      GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
+      GoRoute(
+        path: '/splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
 
       // Onboarding
-      GoRoute(path: '/onboarding', builder: (context, state) => const OnboardingScreen()),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingScreen(),
+      ),
 
       // Auth Flow
-      GoRoute(path: '/auth/name', builder: (context, state) => const NameScreen()),
+      GoRoute(
+        path: '/auth/name',
+        builder: (context, state) => const NameScreen(),
+      ),
       GoRoute(
         path: '/auth/email',
         builder: (context, state) {
@@ -50,12 +58,24 @@ final routerProvider = Provider<GoRouter>((ref) {
           return EmailScreen(userName: name);
         },
       ),
-      GoRoute(path: '/auth/otp', builder: (context, state) => const OtpScreen()),
-      GoRoute(path: '/auth/username', builder: (context, state) => const UsernameScreen()),
+      GoRoute(
+        path: '/auth/otp',
+        builder: (context, state) => const OtpScreen(),
+      ),
+      GoRoute(
+        path: '/auth/username',
+        builder: (context, state) => const UsernameScreen(),
+      ),
 
       // Profile Setup
-      GoRoute(path: '/profile/welcome', builder: (context, state) => const WelcomeScreen()),
-      GoRoute(path: '/profile/add-socials', builder: (context, state) => const AddSocialsScreen()),
+      GoRoute(
+        path: '/profile/welcome',
+        builder: (context, state) => const WelcomeScreen(),
+      ),
+      GoRoute(
+        path: '/profile/add-socials',
+        builder: (context, state) => const AddSocialsScreen(),
+      ),
 
       // Main Navigation with Bottom Bar
       StatefulShellRoute.indexedStack(
@@ -75,7 +95,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          
+
           // Branch 2: QR
           StatefulShellBranch(
             routes: [
@@ -83,21 +103,23 @@ final routerProvider = Provider<GoRouter>((ref) {
                 path: '/qr',
                 builder: (context, state) => const QrScreen(),
                 routes: [
-                   GoRoute(
+                  GoRoute(
                     path: 'full',
-                    parentNavigatorKey: rootNavigatorKey, // Open full screen on top
+                    parentNavigatorKey:
+                        rootNavigatorKey, // Open full screen on top
                     builder: (context, state) => const FullQrScreen(),
                   ),
                   GoRoute(
                     path: 'scan',
-                    parentNavigatorKey: rootNavigatorKey, // Open scanner on top (hide nav bar)
+                    parentNavigatorKey:
+                        rootNavigatorKey, // Open scanner on top (hide nav bar)
                     builder: (context, state) => const ScannerScreen(),
                   ),
                 ],
               ),
             ],
           ),
-          
+
           // Branch 3: Profile/Settings
           StatefulShellBranch(
             routes: [
@@ -115,9 +137,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-      
+
       // Compatibility Redirects or Global Routes if needed
-      GoRoute(path: '/profile/manage-socials', redirect: (_, __) => '/profile/settings/manage-socials'), // Redirect old path
+      GoRoute(
+        path: '/profile/manage-socials',
+        redirect: (_, __) => '/profile/settings/manage-socials',
+      ), // Redirect old path
     ],
   );
 });
