@@ -10,6 +10,7 @@ class CustomInput extends StatefulWidget {
   final TextInputType keyboardType;
   final Function(String)? onChanged;
   final String? errorText;
+  final int maxLines;
 
   const CustomInput({
     super.key,
@@ -20,7 +21,8 @@ class CustomInput extends StatefulWidget {
     this.isPassword = false,
     this.keyboardType = TextInputType.text,
     this.onChanged,
-    this.errorText, required int maxLines,
+    this.errorText,
+    this.maxLines = 1,
   });
 
   @override
@@ -79,6 +81,7 @@ class _CustomInputState extends State<CustomInput> {
               obscureText: widget.isPassword && _obscureText,
               keyboardType: widget.keyboardType,
               onChanged: widget.onChanged,
+              maxLines: widget.maxLines,
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,

@@ -140,30 +140,33 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             padding: const EdgeInsets.all(24.0),
             child: Row(
               children: [
-                Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppColors.primaryPurple.withValues(alpha: 0.3),
-                      width: 2,
+                GestureDetector(
+                  onTap: () => context.push('/profile/settings'),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.primaryPurple.withValues(alpha: 0.3),
+                        width: 2,
+                      ),
                     ),
-                  ),
-                  child: CircleAvatar(
-                    radius: 28,
-                    backgroundColor: AppColors.primaryPurple.withValues(
-                      alpha: 0.1,
+                    child: CircleAvatar(
+                      radius: 28,
+                      backgroundColor: AppColors.primaryPurple.withValues(
+                        alpha: 0.1,
+                      ),
+                      backgroundImage: backgroundImage,
+                      child: backgroundImage == null
+                          ? Text(
+                              initials.toUpperCase(),
+                              style: const TextStyle(
+                                color: AppColors.primaryPurple,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
+                            )
+                          : null,
                     ),
-                    backgroundImage: backgroundImage,
-                    child: backgroundImage == null
-                        ? Text(
-                            initials.toUpperCase(),
-                            style: const TextStyle(
-                              color: AppColors.primaryPurple,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                            ),
-                          )
-                        : null,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -395,7 +398,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       // Action Bar (only if editing/selecting)
                       if (_detectLinks.isNotEmpty) ...[
                         Container(
-                          padding: const EdgeInsets.all(24),
+                          padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
                           decoration: BoxDecoration(
                             color: Theme.of(context).scaffoldBackgroundColor,
                             border: Border(

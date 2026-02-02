@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "913815620809",
+    "project_id": "linkmeup-6855b",
+    "storage_bucket": "linkmeup-6855b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:913815620809:android:6aff413e3c46b411a91118",
+        "android_client_info": {
+          "package_name": "com.example.linkmeup_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAL32-86ZYLNuKBEwApxlXdbtVXc4vm9f8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

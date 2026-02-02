@@ -258,7 +258,7 @@ class QrScreen extends ConsumerWidget {
               // "remove remvoe first a camera" -> I think they mean I REMOVED it and they want it back.
               // I will leave the bottom button as it's the primary action for scanning usually.
               Padding(
-                padding: const EdgeInsets.only(left: 32, right: 32, bottom: 40),
+                padding: const EdgeInsets.fromLTRB(32, 0, 32, 130),
                 child: GradientButton(
                   text: "Scan a Code",
                   icon: Icons.qr_code_scanner_rounded,

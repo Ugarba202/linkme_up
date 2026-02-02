@@ -4,10 +4,12 @@ class UserEntity {
   final String uid;
   final String name;
   final String username;
-  final String phoneNumber;
+  final String? phoneNumber;
   final String email;
   final String country;
   final String? photoUrl;
+  final String? bannerUrl;
+  final String bio;
   final List<SocialLinkEntity> socialLinks;
   final DateTime createdAt;
 
@@ -15,10 +17,12 @@ class UserEntity {
     required this.uid,
     required this.name,
     this.username = '',
-    required this.phoneNumber,
+    this.phoneNumber,
     required this.email,
     this.country = 'Nigeria',
     this.photoUrl,
+    this.bannerUrl,
+    this.bio = '',
     this.socialLinks = const [],
     required this.createdAt,
   });
@@ -31,6 +35,8 @@ class UserEntity {
     String? email,
     String? country,
     String? photoUrl,
+    String? bannerUrl,
+    String? bio,
     List<SocialLinkEntity>? socialLinks,
     DateTime? createdAt,
   }) {
@@ -42,6 +48,8 @@ class UserEntity {
       email: email ?? this.email,
       country: country ?? this.country,
       photoUrl: photoUrl ?? this.photoUrl,
+      bannerUrl: bannerUrl ?? this.bannerUrl,
+      bio: bio ?? this.bio,
       socialLinks: socialLinks ?? this.socialLinks,
       createdAt: createdAt ?? this.createdAt,
     );

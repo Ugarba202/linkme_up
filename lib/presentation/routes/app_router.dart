@@ -10,7 +10,7 @@ import '../screens/main_wrapper.dart';
 // Auth Flow
 import '../screens/auth/name_screen.dart';
 import '../screens/auth/email_screen.dart';
-import '../screens/auth/otp_screen.dart';
+import '../screens/auth/verification_screen.dart';
 import '../screens/auth/username_screen.dart';
 
 // Profile Setup
@@ -68,8 +68,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
-        path: '/auth/otp',
-        builder: (context, state) => const OtpScreen(),
+        path: '/auth/verify',
+        builder: (context, state) => const VerificationScreen(),
       ),
       GoRoute(
         path: '/auth/username',
@@ -162,27 +162,30 @@ final routerProvider = Provider<GoRouter>((ref) {
           final user =
               state.extra as UserEntity? ??
               UserEntity(
-                uid: 'external',
+                uid: 'scanned_user_123',
                 name: 'Scanned User',
                 username: username,
-                phoneNumber: '',
-                email: '',
+                email: 'scanned@example.com',
+                phoneNumber: '+2348000000001',
                 country: 'Nigeria',
-                createdAt: DateTime.now(),
+                photoUrl: 'https://api.dicebear.com/9.x/avataaars/png?seed=$username',
+                bannerUrl: 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000', // Premium gradient-like banner
+                bio: 'Tech enthusiast, digital nomad, and coffee lover. Let\'s connect and build something amazing together! 🚀☕️',
                 socialLinks: [
                   SocialLinkEntity(
+                    id: 's1',
                     platform: SocialPlatform.instagram,
-                    url: 'https://instagram.com',
-                    id: '',
-                    username: '',
+                    username: 'uceeee',
+                    url: 'https://instagram.com/uceeee',
                   ),
                   SocialLinkEntity(
+                    id: 's2',
                     platform: SocialPlatform.twitter,
-                    url: 'https://x.com',
-                    id: '',
-                    username: '',
+                    username: 'uceeee',
+                    url: 'https://twitter.com/uceeee',
                   ),
                 ],
+                createdAt: DateTime.now(),
               );
           return ExternalProfileScreen(user: user);
         },
@@ -196,21 +199,24 @@ final routerProvider = Provider<GoRouter>((ref) {
           final user =
               state.extra as UserEntity? ??
               UserEntity(
-                uid: 'landing',
+                uid: 'landing_123',
                 name: 'Web User',
                 username: username,
+                email: 'web@example.com',
                 phoneNumber: '',
-                email: '',
                 country: 'Nigeria',
-                createdAt: DateTime.now(),
+                photoUrl: 'https://api.dicebear.com/9.x/avataaars/png?seed=$username',
+                bannerUrl: 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000',
+                bio: 'Welcome to my official LinkMeUp profile! Check out my socials below and let\'s stay in touch.',
                 socialLinks: [
                   SocialLinkEntity(
+                    id: 'w1',
                     platform: SocialPlatform.linkedin,
+                    username: 'webuser',
                     url: 'https://linkedin.com',
-                    id: '',
-                    username: '',
                   ),
                 ],
+                createdAt: DateTime.now(),
               );
           return ProfileLandingScreen(user: user);
         },

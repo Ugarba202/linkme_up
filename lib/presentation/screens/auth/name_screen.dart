@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../widgets/custom_input.dart';
 import '../../widgets/gradient_button.dart';
+import '../../widgets/auth_background.dart';
 
 class NameScreen extends StatefulWidget {
   const NameScreen({super.key});
@@ -33,79 +35,86 @@ class _NameScreenState extends State<NameScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 40),
-              // Progress/Header
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.gray200,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+    return AuthBackground(
+      showBackButton: false,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+            // Progress Indicator
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.gray200,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const Spacer(),
-              
-              // Emoji / Icon
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryPurple.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Text(
-                    "👋",
-                    style: TextStyle(fontSize: 48),
-                  ),
+            ),
+            const SizedBox(height: 60),
+            
+            // Emoji / Icon
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryPurple.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
                 ),
-              ),
-              const SizedBox(height: 32),
+                child: const Text(
+                  "👋",
+                  style: TextStyle(fontSize: 56),
+                ),
+              ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
+            ),
+            const SizedBox(height: 40),
 
-              // Headings
-              Text(
-                "What should we call you?",
-                style: Theme.of(context).textTheme.headlineLarge,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                "Your name will be visible to people you connect with.",
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 48),
+            // Headings
+            Column(
+              children: [
+                Text(
+                  "What should we call you?",
+                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  "Your name will be visible to people you connect with.",
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.gray500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0, duration: 400.ms),
+            
+            const SizedBox(height: 56),
 
-              // Input
-              CustomInput(
-                controller: _nameController,
-                hintText: "Your Full Name",
-                label: "Full Name",
-                prefixIcon: Icons.person_outline_rounded,
-                keyboardType: TextInputType.name, maxLines: 1,
-              ),
-              
-              const Spacer(),
+            // Input
+            CustomInput(
+              controller: _nameController,
+              hintText: "Your Full Name",
+              label: "Full Name",
+              prefixIcon: Icons.person_outline_rounded,
+              keyboardType: TextInputType.name,
+              maxLines: 1,
+            ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1, end: 0),
+            
+            const SizedBox(height: 100), // Large gap instead of Spacer to prevent overlap
 
-              // Continue Button
-              GradientButton(
-                text: "Continue",
-                onPressed: _isDirty
-                    ? () => context.push('/auth/email', extra: _nameController.text.trim())
-                    : null,
-              ),
-              const SizedBox(height: 24),
-            ],
-          ),
+            // Continue Button
+            GradientButton(
+              text: "Continue",
+              onPressed: _isDirty
+                  ? () => context.push('/auth/email', extra: _nameController.text.trim())
+                  : null,
+            ).animate().fadeIn(delay: 600.ms).scale(duration: 400.ms),
+            const SizedBox(height: 40),
+          ],
         ),
       ),
     );

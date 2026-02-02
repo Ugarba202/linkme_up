@@ -92,6 +92,35 @@ enum SocialPlatform {
         return AppColors.primaryPurple;
     }
   }
+
+  String get ctaLabel {
+    switch (this) {
+      case SocialPlatform.facebook:
+        return 'Become a fan';
+      case SocialPlatform.instagram:
+      case SocialPlatform.twitter:
+      case SocialPlatform.tiktok:
+      case SocialPlatform.snapchat:
+        return 'Follow us';
+      case SocialPlatform.linkedin:
+        return 'Connect';
+      case SocialPlatform.youtube:
+        return 'Subscribe';
+      case SocialPlatform.whatsapp:
+      case SocialPlatform.telegram:
+        return 'Message';
+      case SocialPlatform.discord:
+        return 'Join Server';
+      case SocialPlatform.github:
+        return 'View Projects';
+      case SocialPlatform.pinterest:
+        return 'See Pins';
+      case SocialPlatform.reddit:
+        return 'Join Subreddit';
+      case SocialPlatform.other:
+        return 'Visit Link';
+    }
+  }
 }
 
 class SocialLinkEntity {

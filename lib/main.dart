@@ -5,13 +5,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/themes/app_theme.dart';
 import 'presentation/routes/app_router.dart';
 
-void main() {
+import 'package:firebase_core/firebase_core.dart';
+// import 'firebase_options.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    // options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(
     const ProviderScope(
       child: LinkMeUpApp(),
     ),
   );
-}
+}  
 
 class LinkMeUpApp extends ConsumerWidget {
   const LinkMeUpApp({super.key});

@@ -2,20 +2,17 @@ import '../../domain/repositories/auth_repository.dart';
 
 class MockAuthRepository implements IAuthRepository {
   @override
-  Future<void> sendOtp(String phoneNumber) async {
+  Future<void> sendEmailVerificationLink(String email) async {
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 1));
-    print("MOCK: OTP sent to $phoneNumber");
+    print("MOCK: Verification link sent to $email");
   }
 
   @override
-  Future<void> verifyOtp(String code) async {
-    await Future.delayed(const Duration(seconds: 1));
-    if (code == "123456") {
-      print("MOCK: OTP Verified");
-    } else {
-      throw Exception("Invalid OTP");
-    }
+  Future<bool> isEmailVerified() async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    // For mock testing, we'll return true to allow the flow to continue
+    return true;
   }
 
   @override
