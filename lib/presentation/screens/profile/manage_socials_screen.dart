@@ -102,7 +102,7 @@ class ManageSocialsScreen extends ConsumerWidget {
                             Switch.adaptive(
                               value: link.isVisible,
                               activeTrackColor: AppColors.primaryPurple.withValues(alpha: 0.5),
-                              activeColor: AppColors.primaryPurple,
+                              activeThumbColor: AppColors.primaryPurple,
                               onChanged: (value) {
                                 HapticFeedback.selectionClick();
                                 ref.read(userProvider.notifier).toggleSocialVisibility(link.id);

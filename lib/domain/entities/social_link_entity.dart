@@ -129,6 +129,8 @@ class SocialLinkEntity {
   final String username;
   final String url;
   final bool isVisible;
+  final int order;
+  final DateTime createdAt;
 
   SocialLinkEntity({
     required this.id,
@@ -136,6 +138,8 @@ class SocialLinkEntity {
     required this.username,
     required this.url,
     this.isVisible = true,
+    this.order = 0,
+    required this.createdAt,
   });
 
   SocialLinkEntity copyWith({
@@ -144,6 +148,8 @@ class SocialLinkEntity {
     String? username,
     String? url,
     bool? isVisible,
+    int? order,
+    DateTime? createdAt,
   }) {
     return SocialLinkEntity(
       id: id ?? this.id,
@@ -151,6 +157,8 @@ class SocialLinkEntity {
       username: username ?? this.username,
       url: url ?? this.url,
       isVisible: isVisible ?? this.isVisible,
+      order: order ?? this.order,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 }

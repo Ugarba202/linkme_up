@@ -12,16 +12,14 @@ class AppTheme {
         ? const ColorScheme.dark(
             primary: AppColors.primaryPurple,
             secondary: AppColors.primaryBlue,
-            surface: AppColors.darkSurface,
+            surface: AppColors.darkBg,
             error: AppColors.error,
-            background: AppColors.darkBg,
           )
         : const ColorScheme.light(
             primary: AppColors.primaryPurple,
             secondary: AppColors.primaryBlue,
-            surface: AppColors.white,
+            surface: AppColors.gray50,
             error: AppColors.error,
-            background: AppColors.gray50,
           );
 
     return ThemeData(

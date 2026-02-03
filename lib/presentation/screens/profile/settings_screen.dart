@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../application/providers/user_provider.dart';
 import '../../../core/themes/app_colors.dart';
+import '../../../infrastructure/media/cloudinary_service.dart';
 import '../../widgets/custom_input.dart';
 import '../../widgets/glass_container.dart';
 import '../../widgets/gradient_button.dart';
@@ -20,11 +21,30 @@ class SettingsScreen extends ConsumerWidget {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      ref.read(userProvider.notifier).updatePhotoUrl(pickedFile.path);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Profile picture updated")),
-        );
+      if (!context.mounted) return;
+
+      // Show loading indicator or handle loading state
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Uploading image...")),
+      );
+
+      try {
+        final cloudinary = CloudinaryService();
+        final imageUrl = await cloudinary.uploadImage(File(pickedFile.path));
+        
+        await ref.read(userProvider.notifier).updatePhotoUrl(imageUrl);
+        
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Profile picture updated")),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to upload image: $e")),
+          );
+        }
       }
     }
   }

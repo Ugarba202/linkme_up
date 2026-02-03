@@ -90,6 +90,7 @@ class SocialLinkDetector {
           username: extractUsername(part, platform),
           url: part.trim(),
           isVisible: true,
+          createdAt: DateTime.now(),
         ));
       } else if (part.startsWith('http') && platform == SocialPlatform.other) {
         results.add(SocialLinkEntity(
@@ -98,6 +99,7 @@ class SocialLinkDetector {
           username: 'Link',
           url: part.trim(),
           isVisible: true,
+          createdAt: DateTime.now(),
         ));
       }
     }

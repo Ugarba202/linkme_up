@@ -48,15 +48,26 @@ class _UsernameScreenState extends ConsumerState<UsernameScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await Future.delayed(const Duration(seconds: 1));
-      
+      // Check for availability first
+      final isAvailable = await ref.read(userRepositoryProvider).isUsernameAvailable(username);
+      if (!isAvailable) {
+        setState(() {
+          _errorText = "Username is already taken";
+          _isLoading = false;
+        });
+        return;
+      }
+
       final avatarUrl = "https://api.dicebear.com/9.x/avataaars/png?seed=$username&backgroundColor=b6e3f4,c0aede,d1d4f9";
 
       final currentUser = ref.read(userProvider);
       if (currentUser != null) {
+        final publicUrl = "linkmeup.ugarba/${username}";
         final updatedUser = currentUser.copyWith(
           username: username,
-          photoUrl: avatarUrl, 
+          photoUrl: avatarUrl,
+          publicUrl: publicUrl,
+          profileCompleted: true,
         );
         
         // Persist to Firestore

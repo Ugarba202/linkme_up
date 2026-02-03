@@ -69,14 +69,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     }
 
     // Save selected links to provider
+    // Save selected links to provider and persist
     final finalLinks = _detectLinks
         .where((l) => _selectedPlatforms.contains(l.platform))
         .toList();
+    
     final user = ref.read(userProvider);
     if (user != null) {
-      ref
-          .read(userProvider.notifier)
-          .setUser(user.copyWith(socialLinks: finalLinks));
+      ref.read(userProvider.notifier).updateSocialLinks(finalLinks);
     }
 
     // Proceed to next screen (QR)

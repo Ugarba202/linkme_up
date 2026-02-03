@@ -73,30 +73,56 @@ class UserNotifier extends Notifier<UserEntity?> {
     state = updated;
   }
 
-  void addSocialLink(SocialLinkEntity link) {
+  Future<void> addSocialLink(SocialLinkEntity link) async {
     if (state == null) return;
+    
+    // Add to local state first for responsiveness
     final currentLinks = List<SocialLinkEntity>.from(state!.socialLinks);
     currentLinks.add(link);
     state = state!.copyWith(socialLinks: currentLinks);
-    // Note: Social links would ideally be persisted to their sub-collection here
+
+    // Persist to Firestore
+    await ref.read(userRepositoryProvider).addSocialLink(state!.uid, link);
   }
 
-  void removeSocialLink(String id) {
+  Future<void> removeSocialLink(String id) async {
     if (state == null) return;
+    
     final currentLinks = List<SocialLinkEntity>.from(state!.socialLinks);
     currentLinks.removeWhere((l) => l.id == id);
     state = state!.copyWith(socialLinks: currentLinks);
+    
+    await ref.read(userRepositoryProvider).deleteSocialLink(state!.uid, id);
   }
 
-  void toggleSocialVisibility(String id) {
+  Future<void> toggleSocialVisibility(String id) async {
     if (state == null) return;
+    
+    SocialLinkEntity? targetLink;
     final currentLinks = state!.socialLinks.map((link) {
       if (link.id == id) {
-        return link.copyWith(isVisible: !link.isVisible);
+        targetLink = link.copyWith(isVisible: !link.isVisible);
+        return targetLink!;
       }
       return link;
     }).toList();
+    
     state = state!.copyWith(socialLinks: currentLinks);
+    
+    if (targetLink != null) {
+      await ref.read(userRepositoryProvider).updateSocialLink(state!.uid, targetLink!);
+    }
+  }
+
+  Future<void> updateSocialLinks(List<SocialLinkEntity> links) async {
+    if (state == null) return;
+    
+    state = state!.copyWith(socialLinks: links);
+    
+    // Persist each link (addSocialLink uses 'set' which acts as put)
+    for (final link in links) {
+      await ref.read(userRepositoryProvider).addSocialLink(state!.uid, link);
+    }
   }
 }
 

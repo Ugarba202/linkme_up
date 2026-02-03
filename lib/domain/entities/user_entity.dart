@@ -10,6 +10,8 @@ class UserEntity {
   final String? photoUrl;
   final String? bannerUrl;
   final String bio;
+  final String? publicUrl;
+  final bool profileCompleted;
   final List<SocialLinkEntity> socialLinks;
   final DateTime createdAt;
 
@@ -24,6 +26,8 @@ class UserEntity {
     this.bannerUrl,
     this.bio = '',
     this.socialLinks = const [],
+    this.publicUrl,
+    this.profileCompleted = false,
     required this.createdAt,
   });
 
@@ -33,11 +37,13 @@ class UserEntity {
     String? username,
     String? phoneNumber,
     String? email,
-    String? country,
+    String? country, 
     String? photoUrl,
     String? bannerUrl,
     String? bio,
     List<SocialLinkEntity>? socialLinks,
+    String? publicUrl,
+    bool? profileCompleted,
     DateTime? createdAt,
   }) {
     return UserEntity(
@@ -51,6 +57,8 @@ class UserEntity {
       bannerUrl: bannerUrl ?? this.bannerUrl,
       bio: bio ?? this.bio,
       socialLinks: socialLinks ?? this.socialLinks,
+      publicUrl: publicUrl ?? this.publicUrl,
+      profileCompleted: profileCompleted ?? this.profileCompleted,
       createdAt: createdAt ?? this.createdAt,
     );
   }
