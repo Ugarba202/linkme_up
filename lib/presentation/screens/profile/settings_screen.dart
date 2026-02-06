@@ -145,10 +145,23 @@ class SettingsScreen extends ConsumerWidget {
                                 backgroundColor: Colors.white24,
                                 backgroundImage: backgroundImage,
                                 child: backgroundImage == null
-                                    ? const Icon(
-                                        Icons.person_rounded,
-                                        size: 60,
-                                        color: Colors.white,
+                                    ? Text(
+                                        (user?.name ?? "U")
+                                                    .trim()
+                                                    .split(" ")
+                                                    .length >=
+                                                2
+                                            ? "${(user?.name ?? "U").trim().split(" ")[0][0]}${(user?.name ?? "U").trim().split(" ")[1][0]}"
+                                                .toUpperCase()
+                                            : (user?.name ?? "U").isNotEmpty
+                                                ? (user?.name ?? "U")[0]
+                                                    .toUpperCase()
+                                                : "U",
+                                        style: const TextStyle(
+                                          fontSize: 48,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
                                       )
                                     : null,
                               ),
@@ -321,6 +334,8 @@ class SettingsScreen extends ConsumerWidget {
 
                   // Logout
                   _buildLogoutButton(context),
+                  const SizedBox(height: 16),
+                  _buildDeleteAccountButton(context),
                   const SizedBox(height: 40),
                 ],
               ),
@@ -506,6 +521,47 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     ).animate().fadeIn(delay: 500.ms);
+  }
+
+  Widget _buildDeleteAccountButton(BuildContext context) {
+    return TextButton(
+      onPressed: () {
+        HapticFeedback.lightImpact();
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("Delete Account"),
+            content: const Text(
+                "Are you sure you want to delete your account? This action cannot be undone."),
+            actions: [
+              TextButton(
+                onPressed: () => context.pop(),
+                child: const Text("Cancel"),
+              ),
+              TextButton(
+                onPressed: () {
+                  context.pop(); // Close dialog
+                  context.go('/onboarding'); // Mock deletion
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Account deleted")),
+                  );
+                },
+                style: TextButton.styleFrom(foregroundColor: AppColors.error),
+                child: const Text("Delete"),
+              ),
+            ],
+          ),
+        );
+      },
+      child: Text(
+        "Delete Account",
+        style: TextStyle(
+          color: AppColors.error.withValues(alpha: 0.6),
+          fontWeight: FontWeight.w600,
+          fontSize: 14,
+        ),
+      ),
+    ).animate().fadeIn(delay: 600.ms);
   }
 
   void _showEditField(

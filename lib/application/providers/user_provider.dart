@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/social_link_entity.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/user_repository.dart';
-import '../../infrastructure/firebase/firestore_user_repository.dart';
+import '../../infrastructure/mock_user_repository.dart';
 
 final userRepositoryProvider = Provider<IUserRepository>((ref) {
-  return FirestoreUserRepository();
+  return MockUserRepository();
 });
 
 class UserNotifier extends Notifier<UserEntity?> {

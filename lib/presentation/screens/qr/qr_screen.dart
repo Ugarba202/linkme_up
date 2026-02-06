@@ -143,10 +143,17 @@ class QrScreen extends ConsumerWidget {
                                                 AppColors.primaryPurple,
                                             backgroundImage: backgroundImage,
                                             child: backgroundImage == null
-                                                ? const Text(
-                                                    "👋",
-                                                    style: TextStyle(
+                                                ? Text(
+                                                    (fullName.trim().split(" ").length >= 2
+                                                            ? "${fullName.trim().split(" ")[0][0]}${fullName.trim().split(" ")[1][0]}"
+                                                            : fullName.isNotEmpty
+                                                                ? fullName[0]
+                                                                : "U")
+                                                        .toUpperCase(),
+                                                    style: const TextStyle(
                                                       fontSize: 40,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: Colors.white,
                                                     ),
                                                   )
                                                 : null,

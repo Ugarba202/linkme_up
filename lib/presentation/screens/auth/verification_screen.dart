@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -139,7 +139,7 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
       final email = extra?['email'] as String? ?? 'user@example.com';
       final country = extra?['country'] as String? ?? 'Nigeria';
 
-      final userId = FirebaseAuth.instance.currentUser?.uid ?? 'unknown';
+      final userId = 'mock-user-123'; // Mock ID since auth is mocked
 
       ref.read(userProvider.notifier).setUser(
         UserEntity(

@@ -76,6 +76,47 @@ class ExternalProfileScreen extends StatelessWidget {
                 ),
               ),
             ),
+            actions: [
+              IconButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text("Report User"),
+                      content: const Text(
+                          "Do you want to report this user for inappropriate content?"),
+                      actions: [
+                        TextButton(
+                          onPressed: () => context.pop(),
+                          child: const Text("Cancel"),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            context.pop();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text("User reported. Thank you.")),
+                            );
+                          },
+                          style: TextButton.styleFrom(
+                              foregroundColor: AppColors.error),
+                          child: const Text("Report"),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                icon: CircleAvatar(
+                  backgroundColor: Colors.black.withValues(alpha: 0.3),
+                  child: const Icon(
+                    Icons.flag_rounded,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               background: bannerImage != null
                   ? Image(image: bannerImage, fit: BoxFit.cover)
@@ -126,9 +167,12 @@ class ExternalProfileScreen extends StatelessWidget {
                         backgroundImage: profileImage,
                         child: profileImage == null
                             ? Text(
-                                user.name.isNotEmpty
-                                    ? user.name[0].toUpperCase()
-                                    : "U",
+                                (user.name.trim().split(" ").length >= 2
+                                        ? "${user.name.trim().split(" ")[0][0]}${user.name.trim().split(" ")[1][0]}"
+                                        : user.name.isNotEmpty
+                                            ? user.name[0]
+                                            : "U")
+                                    .toUpperCase(),
                                 style: const TextStyle(
                                   fontSize: 48,
                                   fontWeight: FontWeight.bold,

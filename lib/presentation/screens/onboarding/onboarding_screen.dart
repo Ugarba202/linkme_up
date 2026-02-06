@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/themes/app_colors.dart';
 import '../../widgets/gradient_button.dart';
@@ -105,6 +106,35 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         );
                       }
                     },
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () => launchUrl(Uri.parse('https://linkmeup.com/terms')),
+                        child: Text(
+                          "Terms of Service",
+                          style: TextStyle(
+                            color: AppColors.gray500,
+                            fontSize: 12,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                      Text("  •  ", style: TextStyle(color: AppColors.gray300)),
+                      GestureDetector(
+                        onTap: () => launchUrl(Uri.parse('https://linkmeup.com/privacy')),
+                        child: Text(
+                          "Privacy Policy",
+                          style: TextStyle(
+                            color: AppColors.gray500,
+                            fontSize: 12,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
