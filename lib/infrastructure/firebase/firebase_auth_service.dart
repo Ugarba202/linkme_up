@@ -7,13 +7,10 @@ class FirebaseAuthService implements IAuthRepository {
   @override
   Future<void> sendEmailVerificationLink(String email) async {
     try {
-      // For this flow, we'll try to create the user first if they don't exist
-      // Since we don't have passwords in this flow, we use a temporary one
-      // or we use sendSignInLinkToEmail. 
-      // Let's try the sign-in link approach which is cleaner for passwordless.
+   
       
       var acs = ActionCodeSettings(
-        url: 'https://linkmeup-app.firebaseapp.com', // Replace with your actual project URL
+        url: 'https://linkmeup-6855b.firebaseapp.com', // Replace with your actual project URL
         handleCodeInApp: true,
         androidPackageName: 'com.example.linkmeup_app', // Replace with your package name
         androidInstallApp: true,

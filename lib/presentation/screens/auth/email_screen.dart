@@ -1,4 +1,5 @@
 import 'package:country_picker/country_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -209,6 +210,24 @@ class _EmailScreenState extends ConsumerState<EmailScreen> {
           'email': email,
           'country': _selectedCountry.name,
         });
+      }
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = "An error occurred. Please try again.";
+      if (e.code == 'too-many-requests') {
+        errorMessage = "Too many attempts. Please try again later.";
+      } else if (e.code == 'invalid-email') {
+        errorMessage = "The email address is invalid.";
+      } else if (e.message != null) {
+        errorMessage = e.message!;
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {

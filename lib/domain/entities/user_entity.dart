@@ -33,6 +33,7 @@ class UserEntity {
 
   UserEntity copyWith({
     String? uid,
+    
     String? name,
     String? username,
     String? phoneNumber,
