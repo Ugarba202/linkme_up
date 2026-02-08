@@ -253,6 +253,19 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                       _buildSettingsTile(
                         context,
+                        label: "Bio",
+                        value: user?.bio.isEmpty ?? true ? "No bio set" : user?.bio,
+                        icon: Icons.description_outlined,
+                        onTap: () => _showEditField(
+                          context,
+                          ref,
+                          "Bio",
+                          user?.bio ?? "",
+                          (v) => ref.read(userProvider.notifier).updateBio(v),
+                        ),
+                      ),
+                      _buildSettingsTile(
+                        context,
                         label: "Country / Region",
                         value: user?.country ?? "Nigeria",
                         icon: Icons.public_rounded,
@@ -623,11 +636,15 @@ class SettingsScreen extends ConsumerWidget {
                     hintText: "Enter your $title",
                     prefixIcon: title == "Email"
                         ? Icons.email_outlined
-                        : Icons.person_outline_rounded,
+                        : (title == "Bio"
+                            ? Icons.description_outlined
+                            : Icons.person_outline_rounded),
                     keyboardType: title == "Email"
                         ? TextInputType.emailAddress
-                        : TextInputType.text,
-                    maxLines: 1,
+                        : (title == "Bio"
+                            ? TextInputType.multiline
+                            : TextInputType.text),
+                    maxLines: title == "Bio" ? 4 : 1,
                   ),
                   const SizedBox(height: 40),
                   GradientButton(

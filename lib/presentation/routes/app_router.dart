@@ -31,6 +31,8 @@ import '../screens/qr/scanner_screen.dart';
 import '../screens/notifications/notifications_screen.dart';
 import '../screens/profile/external_profile_screen.dart';
 import '../screens/profile/profile_landing_screen.dart';
+import '../screens/legal/legal_screen.dart';
+import '../screens/legal/legal_content.dart';
 
 // Domain
 import '../../domain/entities/user_entity.dart';
@@ -53,6 +55,22 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
+      ),
+
+      // Legal
+      GoRoute(
+        path: '/legal/terms',
+        builder: (context, state) => const LegalScreen(
+          title: 'Terms of Service',
+          content: LegalContent.termsOfService,
+        ),
+      ),
+      GoRoute(
+        path: '/legal/privacy',
+        builder: (context, state) => const LegalScreen(
+          title: 'Privacy Policy',
+          content: LegalContent.privacyPolicy,
+        ),
       ),
 
       // Auth Flow

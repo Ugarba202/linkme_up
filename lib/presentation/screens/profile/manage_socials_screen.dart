@@ -20,7 +20,10 @@ class ManageSocialsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBg : AppColors.gray50,
       appBar: AppBar(
-        title: const Text("Manage Socials", style: TextStyle(fontWeight: FontWeight.w800)),
+        title: const Text(
+          "Manage Socials",
+          style: TextStyle(fontWeight: FontWeight.w800),
+        ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -34,21 +37,51 @@ class ManageSocialsScreen extends ConsumerWidget {
       ),
       body: links.isEmpty
           ? _buildEmptyState(context)
-          : ListView.builder(
+          : ReorderableListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
               itemCount: links.length,
               physics: const BouncingScrollPhysics(),
+              onReorder: (oldIndex, newIndex) {
+                if (newIndex > oldIndex) newIndex -= 1;
+                final List<SocialLinkEntity> newLinks = List.from(links);
+                final link = newLinks.removeAt(oldIndex);
+                newLinks.insert(newIndex, link);
+
+                // Update order index for each link
+                final orderedLinks = newLinks.asMap().entries.map((entry) {
+                  return entry.value.copyWith(order: entry.key);
+                }).toList();
+
+                HapticFeedback.mediumImpact();
+                ref.read(userProvider.notifier).updateSocialLinks(orderedLinks);
+              },
               itemBuilder: (context, index) {
                 final link = links[index];
                 return Padding(
+                  key: ValueKey(link.id),
                   padding: const EdgeInsets.only(bottom: 16),
                   child: GlassContainer(
                     padding: const EdgeInsets.all(16),
-                    color: isDark ? AppColors.darkSurface.withValues(alpha: 0.6) : Colors.white,
+                    color: isDark
+                        ? AppColors.darkSurface.withValues(alpha: 0.6)
+                        : Colors.white,
                     borderRadius: 24,
-                    borderColor: isDark ? Colors.white.withValues(alpha: 0.05) : AppColors.gray200.withValues(alpha: 0.5),
+                    borderColor: isDark
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : AppColors.gray200.withValues(alpha: 0.5),
                     child: Row(
                       children: [
+                        // Drag Handle
+                        ReorderableDragStartListener(
+                          index: index,
+                          child: const Icon(
+                            Icons.drag_indicator_rounded,
+                            color: AppColors.gray300,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+
                         // Platform Icon
                         Container(
                           padding: const EdgeInsets.all(12),
@@ -63,7 +96,7 @@ class ManageSocialsScreen extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(width: 16),
-                        
+
                         // Username & Platform
                         Expanded(
                           child: Column(
@@ -90,32 +123,43 @@ class ManageSocialsScreen extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        
+
                         // Visibility Toggle
                         Column(
                           children: [
                             const Text(
                               "VISIBLE",
-                              style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: AppColors.gray400),
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.gray400,
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Switch.adaptive(
                               value: link.isVisible,
-                              activeTrackColor: AppColors.primaryPurple.withValues(alpha: 0.5),
+                              activeTrackColor: AppColors.primaryPurple
+                                  .withValues(alpha: 0.5),
                               activeThumbColor: AppColors.primaryPurple,
                               onChanged: (value) {
                                 HapticFeedback.selectionClick();
-                                ref.read(userProvider.notifier).toggleSocialVisibility(link.id);
+                                ref
+                                    .read(userProvider.notifier)
+                                    .toggleSocialVisibility(link.id);
                               },
                             ),
                           ],
                         ),
-                        
+
                         const SizedBox(width: 8),
-                        
+
                         // Delete Button
                         IconButton(
-                          icon: const Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 20),
+                          icon: const Icon(
+                            Icons.delete_outline_rounded,
+                            color: AppColors.error,
+                            size: 20,
+                          ),
                           onPressed: () {
                             HapticFeedback.mediumImpact();
                             _confirmDelete(context, ref, link);
@@ -123,19 +167,25 @@ class ManageSocialsScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-                  ).animate().fadeIn(delay: (index * 50).ms).slideX(begin: 0.1, end: 0),
+                  ),
                 );
               },
             ),
     );
   }
 
-  void _confirmDelete(BuildContext context, WidgetRef ref, SocialLinkEntity link) {
+  void _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    SocialLinkEntity link,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Remove Link?"),
-        content: Text("Are you sure you want to remove your ${link.platform.displayName} account?"),
+        content: Text(
+          "Are you sure you want to remove your ${link.platform.displayName} account?",
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -149,7 +199,10 @@ class ManageSocialsScreen extends ConsumerWidget {
                 SnackBar(content: Text("${link.platform.displayName} removed")),
               );
             },
-            child: const Text("Remove", style: TextStyle(color: AppColors.error)),
+            child: const Text(
+              "Remove",
+              style: TextStyle(color: AppColors.error),
+            ),
           ),
         ],
       ),
@@ -167,7 +220,11 @@ class ManageSocialsScreen extends ConsumerWidget {
               color: AppColors.primaryPurple.withValues(alpha: 0.05),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.link_off_rounded, size: 80, color: AppColors.gray300),
+            child: const Icon(
+              Icons.link_off_rounded,
+              size: 80,
+              color: AppColors.gray300,
+            ),
           ),
           const SizedBox(height: 24),
           const Text(
@@ -183,7 +240,10 @@ class ManageSocialsScreen extends ConsumerWidget {
           TextButton.icon(
             onPressed: () => context.pop(),
             icon: const Icon(Icons.arrow_back_rounded),
-            label: const Text("Go back", style: TextStyle(fontWeight: FontWeight.bold)),
+            label: const Text(
+              "Go back",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ).animate().fadeIn().scale(begin: const Offset(0.9, 0.9)),

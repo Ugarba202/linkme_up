@@ -3,7 +3,7 @@ import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
+
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../application/providers/auth_providers.dart';
@@ -194,7 +194,7 @@ class _EmailScreenState extends ConsumerState<EmailScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 GestureDetector(
-                  onTap: () => launchUrl(Uri.parse('https://linkmeup.com/terms')),
+                  onTap: () => context.push('/legal/terms'),
                   child: Text(
                     "Terms",
                     style: TextStyle(
@@ -206,7 +206,7 @@ class _EmailScreenState extends ConsumerState<EmailScreen> {
                 ),
                 Text(" • ", style: TextStyle(color: AppColors.gray400)),
                 GestureDetector(
-                  onTap: () => launchUrl(Uri.parse('https://linkmeup.com/privacy')),
+                  onTap: () => context.push('/legal/privacy'),
                   child: Text(
                     "Privacy",
                     style: TextStyle(

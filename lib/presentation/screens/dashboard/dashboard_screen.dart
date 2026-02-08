@@ -223,6 +223,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
           ),
 
+          // Stats Section
+          _buildStatSection(isDark),
+
           // Main Content
           Expanded(
             child: _detectLinks.isEmpty
@@ -416,6 +419,95 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       ],
                     ],
                   ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatSection(bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildStatCard(
+              context,
+              isDark: isDark,
+              title: "Profile Views",
+              value: "1,248",
+              icon: Icons.remove_red_eye_rounded,
+              color: AppColors.primaryPurple,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: _buildStatCard(
+              context,
+              isDark: isDark,
+              title: "Link Clicks",
+              value: "856",
+              icon: Icons.ads_click_rounded,
+              color: AppColors.primaryBlue,
+            ),
+          ),
+        ],
+      ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
+    );
+  }
+
+  Widget _buildStatCard(
+    BuildContext context, {
+    required bool isDark,
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurface.withValues(alpha: 0.6) : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isDark ? Colors.white.withValues(alpha: 0.05) : AppColors.gray100,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: const TextStyle(
+              color: AppColors.gray400,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
