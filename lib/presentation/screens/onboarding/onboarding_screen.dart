@@ -159,7 +159,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _navigateToAuth() {
-    context.push('/auth/name');
+    context.push('/auth/country');
   }
 }
 

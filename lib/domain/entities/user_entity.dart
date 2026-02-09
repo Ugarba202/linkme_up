@@ -4,8 +4,6 @@ class UserEntity {
   final String uid;
   final String name;
   final String username;
-  final String? phoneNumber;
-  final String email;
   final String country;
   final String? photoUrl;
   final String? bannerUrl;
@@ -13,14 +11,16 @@ class UserEntity {
   final String? publicUrl;
   final bool profileCompleted;
   final List<SocialLinkEntity> socialLinks;
+  final int views;
+  final int clicks;
+  final String email;
+  final String phoneNumber;
   final DateTime createdAt;
 
   UserEntity({
     required this.uid,
     required this.name,
     this.username = '',
-    this.phoneNumber,
-    required this.email,
     this.country = 'Nigeria',
     this.photoUrl,
     this.bannerUrl,
@@ -28,16 +28,17 @@ class UserEntity {
     this.socialLinks = const [],
     this.publicUrl,
     this.profileCompleted = false,
+    this.views = 0,
+    this.clicks = 0,
     required this.createdAt,
+    this.email = '',
+    this.phoneNumber = '',
   });
 
   UserEntity copyWith({
     String? uid,
-    
     String? name,
     String? username,
-    String? phoneNumber,
-    String? email,
     String? country, 
     String? photoUrl,
     String? bannerUrl,
@@ -46,13 +47,15 @@ class UserEntity {
     String? publicUrl,
     bool? profileCompleted,
     DateTime? createdAt,
+    String? email,
+    String? phoneNumber,
+    int? views,
+    int? clicks,
   }) {
     return UserEntity(
       uid: uid ?? this.uid,
       name: name ?? this.name,
       username: username ?? this.username,
-      phoneNumber: phoneNumber ?? this.phoneNumber,
-      email: email ?? this.email,
       country: country ?? this.country,
       photoUrl: photoUrl ?? this.photoUrl,
       bannerUrl: bannerUrl ?? this.bannerUrl,
@@ -61,6 +64,10 @@ class UserEntity {
       publicUrl: publicUrl ?? this.publicUrl,
       profileCompleted: profileCompleted ?? this.profileCompleted,
       createdAt: createdAt ?? this.createdAt,
+      email: email ?? this.email,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      views: views ?? this.views,
+      clicks: clicks ?? this.clicks,
     );
   }
 }

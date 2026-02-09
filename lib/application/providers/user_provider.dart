@@ -1,17 +1,62 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+
 
 import '../../domain/entities/social_link_entity.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/user_repository.dart';
-import '../../infrastructure/mock_user_repository.dart';
+import '../../infrastructure/firebase/firestore_user_repository.dart';
 
 final userRepositoryProvider = Provider<IUserRepository>((ref) {
-  return MockUserRepository();
+  return FirestoreUserRepository();
 });
 
 class UserNotifier extends Notifier<UserEntity?> {
   @override
-  UserEntity? build() => null;
+  UserEntity? build() {
+    // Initial load from local storage (SharedPreferences)
+    _restoreLocalSession();
+    return null;
+  }
+
+  Future<void> _restoreLocalSession() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final localUid = prefs.getString('local_uid');
+      
+      if (localUid != null) {
+        debugPrint("DEBUG: Restoring session from local UID: $localUid");
+        await _loadUserProfile(localUid);
+      } else {
+        // Fallback for real firebase auth if present
+        final authUid = await _getFirebaseUid();
+        if (authUid != null) {
+          await _loadUserProfile(authUid);
+        }
+      }
+    } catch (e) {
+      debugPrint("DEBUG: Error session restoration: $e");
+    }
+  }
+
+  Future<String?> _getFirebaseUid() async {
+    // This is a partial fallback for когда Firebase Auth finally logs them in
+    return null; // For No-Auth flow, we primarily rely on local_uid
+  }
+
+  Future<void> _loadUserProfile(String uid) async {
+    try {
+      final user = await ref.read(userRepositoryProvider).getUser(uid);
+      if (user != null) {
+        state = user;
+        debugPrint("DEBUG: Restored user profile for ${user.name}");
+      }
+    } catch (e) {
+      debugPrint("DEBUG: Error loading profile for $uid: $e");
+    }
+  }
 
   void setUser(UserEntity user) {
     state = user;
@@ -24,16 +69,15 @@ class UserNotifier extends Notifier<UserEntity?> {
     state = updated;
   }
 
-  Future<void> updateEmail(String newEmail) async {
-    if (state == null) return;
-    // Note: In a real app, email update might require re-auth or special handling in Firebase Auth
-    final updated = state!.copyWith(email: newEmail);
-    state = updated;
-  }
 
   Future<void> updateUsername(String newUsername) async {
     if (state == null) return;
-    final updated = state!.copyWith(username: newUsername);
+    // Generate public URL when username is set
+    final publicUrl = 'https://linkmeup.app/${newUsername.toLowerCase()}';
+    final updated = state!.copyWith(
+      username: newUsername.toLowerCase(),
+      publicUrl: publicUrl,
+    );
     await ref.read(userRepositoryProvider).updateUser(updated);
     state = updated;
   }
@@ -66,12 +110,6 @@ class UserNotifier extends Notifier<UserEntity?> {
     state = updated;
   }
 
-  Future<void> updatePhoneNumber(String? newPhone) async {
-    if (state == null) return;
-    final updated = state!.copyWith(phoneNumber: newPhone);
-    await ref.read(userRepositoryProvider).updateUser(updated);
-    state = updated;
-  }
 
   Future<void> addSocialLink(SocialLinkEntity link) async {
     if (state == null) return;
@@ -119,9 +157,18 @@ class UserNotifier extends Notifier<UserEntity?> {
     
     state = state!.copyWith(socialLinks: links);
     
-    // Persist each link (addSocialLink uses 'set' which acts as put)
-    for (final link in links) {
-      await ref.read(userRepositoryProvider).addSocialLink(state!.uid, link);
+    // Persist the entire list to maintain order in Firestore
+    await ref.read(userRepositoryProvider).updateSocialLinks(state!.uid, links);
+  }
+
+  Future<void> signOut() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('local_uid');
+      state = null;
+      debugPrint("DEBUG: Local session cleared on sign out.");
+    } catch (e) {
+      debugPrint("DEBUG: Error during sign out: $e");
     }
   }
 }

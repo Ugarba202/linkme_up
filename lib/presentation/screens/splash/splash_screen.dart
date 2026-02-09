@@ -4,26 +4,49 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../core/themes/app_colors.dart';
 
-class SplashScreen extends StatefulWidget {
+import 'dart:async';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../application/providers/user_provider.dart';
+
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
+  Timer? _timer;
+
   @override
   void initState() {
     super.initState();
-    _navigateToNext();
+    _startTimer();
   }
 
-  void _navigateToNext() {
-    Future.delayed(const Duration(seconds: 10), () {
-      if (mounted) {
-        context.go('/onboarding');
-      }
-    });
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    // Show splash for at least 2 seconds for branding
+    _timer = Timer(const Duration(seconds: 3), _checkAuthAndNavigate);
+  }
+
+  Future<void> _checkAuthAndNavigate() async {
+    if (!mounted) return;
+
+    final user = ref.read(userProvider);
+    
+    // If user is already loaded and profile is completed, go to dashboard
+    if (user != null && user.profileCompleted) {
+      context.go('/dashboard');
+    } else {
+      // Otherwise, go to onboarding
+      context.go('/onboarding');
+    }
   }
 
   @override

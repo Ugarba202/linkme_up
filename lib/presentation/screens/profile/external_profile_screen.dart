@@ -2,21 +2,88 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../domain/entities/social_link_entity.dart' as social_link_entity;
 import '../../../domain/entities/user_entity.dart';
 import '../../../core/themes/app_colors.dart';
+import '../../../application/providers/user_provider.dart';
 import '../../widgets/gradient_button.dart';
 
-class ExternalProfileScreen extends StatelessWidget {
-  final UserEntity user;
+class ExternalProfileScreen extends ConsumerStatefulWidget {
+  final UserEntity? user;
+  final String? initialUsername;
 
-  const ExternalProfileScreen({super.key, required this.user});
+  const ExternalProfileScreen({super.key, this.user, this.initialUsername});
+
+  @override
+  ConsumerState<ExternalProfileScreen> createState() => _ExternalProfileScreenState();
+}
+
+class _ExternalProfileScreenState extends ConsumerState<ExternalProfileScreen> {
+  UserEntity? _loadedUser;
+  bool _isLoading = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadedUser = widget.user;
+    if (_loadedUser == null && widget.initialUsername != null) {
+      _fetchUser();
+    } else if (_loadedUser != null) {
+      _incrementView(_loadedUser!.uid);
+    }
+  }
+
+  Future<void> _fetchUser() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final user = await ref
+          .read(userRepositoryProvider)
+          .getUserByUsername(widget.initialUsername!);
+      if (mounted) {
+        if (user != null) {
+          setState(() {
+            _loadedUser = user;
+            _isLoading = false;
+          });
+          _incrementView(user.uid);
+        } else {
+          setState(() {
+            _error = "User not found";
+            _isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = "Error loading profile";
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _incrementView(String uid) {
+    Future.microtask(() {
+      ref.read(userRepositoryProvider).incrementViews(uid);
+    });
+  }
 
   Future<void> _launchSocial(BuildContext context, String url) async {
+    if (_loadedUser == null) return;
     final Uri uri = Uri.parse(url);
     try {
+      // Increment click count
+      await ref.read(userRepositoryProvider).incrementClicks(_loadedUser!.uid);
+      
       if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -35,6 +102,30 @@ class ExternalProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator(color: AppColors.primaryPurple)),
+      );
+    }
+
+    if (_error != null || _loadedUser == null) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 48),
+              const SizedBox(height: 16),
+              Text(_error ?? "Profile not found", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              TextButton(onPressed: () => context.pop(), child: const Text("Go Back")),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final user = _loadedUser!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     ImageProvider? profileImage;

@@ -38,7 +38,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   
                   // Simple logic: extract username from linkmeup urls
                   String username = 'user';
-                  if (code.contains('linkmeup.ugarba/')) {
+                  if (code.contains('linkmeup.app/')) {
                     username = code.split('/').last;
                   }
 

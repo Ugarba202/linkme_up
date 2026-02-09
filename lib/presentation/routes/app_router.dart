@@ -8,10 +8,8 @@ import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/main_wrapper.dart';
 
 // Auth Flow
+import '../screens/auth/country_screen.dart';
 import '../screens/auth/name_screen.dart';
-import '../screens/auth/email_screen.dart';
-import '../screens/auth/verification_screen.dart';
-import '../screens/auth/username_screen.dart';
 
 // Profile Setup
 import '../screens/profile/welcome_screen.dart';
@@ -75,23 +73,15 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       // Auth Flow
       GoRoute(
+        path: '/auth/country',
+        builder: (context, state) => const CountryScreen(),
+      ),
+      GoRoute(
         path: '/auth/name',
-        builder: (context, state) => const NameScreen(),
-      ),
-      GoRoute(
-        path: '/auth/email',
         builder: (context, state) {
-          final name = state.extra as String? ?? "User";
-          return EmailScreen(userName: name);
+          final country = state.extra as String? ?? 'Nigeria';
+          return NameScreen(countryName: country);
         },
-      ),
-      GoRoute(
-        path: '/auth/verify',
-        builder: (context, state) => const VerificationScreen(),
-      ),
-      GoRoute(
-        path: '/auth/username',
-        builder: (context, state) => const UsernameScreen(),
       ),
 
       // Profile Setup
@@ -175,39 +165,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/profile/:username',
         builder: (context, state) {
-          final username = state.pathParameters['username'] ?? 'user';
-          // Mock data for demonstration if no extra passed
-          final user =
-              state.extra as UserEntity? ??
-              UserEntity(
-                uid: 'scanned_user_123',
-                name: 'Scanned User',
-                username: username,
-                email: 'scanned@example.com',
-                phoneNumber: '+2348000000001',
-                country: 'Nigeria',
-                photoUrl: 'https://api.dicebear.com/9.x/avataaars/png?seed=$username',
-                bannerUrl: 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000', // Premium gradient-like banner
-                bio: 'Tech enthusiast, digital nomad, and coffee lover. Let\'s connect and build something amazing together! 🚀☕️',
-                socialLinks: [
-                  SocialLinkEntity(
-                    id: 's1',
-                    platform: SocialPlatform.instagram,
-                    username: 'uceeee',
-                    url: 'https://instagram.com/uceeee',
-                    createdAt: DateTime.now(),
-                  ),
-                  SocialLinkEntity(
-                    id: 's2',
-                    platform: SocialPlatform.twitter,
-                    username: 'uceeee',
-                    url: 'https://twitter.com/uceeee',
-                    createdAt: DateTime.now(),
-                  ),
-                ],
-                createdAt: DateTime.now(),
-              );
-          return ExternalProfileScreen(user: user);
+          final username = state.pathParameters['username'];
+          final user = state.extra as UserEntity?;
+          
+          return ExternalProfileScreen(
+            user: user,
+            initialUsername: username,
+          );
         },
       ),
 

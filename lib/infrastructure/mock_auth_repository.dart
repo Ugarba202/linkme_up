@@ -16,6 +16,12 @@ class MockAuthRepository implements IAuthRepository {
   }
 
   @override
+  Future<String?> signInAnonymously() async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    return "mock-uid-${DateTime.now().millisecondsSinceEpoch}";
+  }
+
+  @override
   Future<void> signOut() async {
     print("MOCK: Signed out");
   }

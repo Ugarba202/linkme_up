@@ -6,11 +6,11 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import '../../../application/providers/user_provider.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../widgets/glass_container.dart';
 import '../../widgets/gradient_button.dart';
+ // Assuming UserEntity is in this path
 
 class QrScreen extends ConsumerWidget {
   const QrScreen({super.key});
@@ -18,6 +18,7 @@ class QrScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final fullName = user?.name ?? "User";
     final username = user?.username ?? "user";
     final photoUrl = user?.photoUrl;
@@ -32,7 +33,7 @@ class QrScreen extends ConsumerWidget {
     }
 
     final displayHandle = username.isNotEmpty ? username : "user";
-    final shareUrl = "https://linkmeup.ugarba/$displayHandle";
+    final shareUrl = user?.publicUrl ?? "https://linkmeup.app/$displayHandle";
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -107,106 +108,131 @@ class QrScreen extends ConsumerWidget {
               const SizedBox(height: 20),
 
               // Digital Pass Card
+              // Digital Pass Card
               Expanded(
-                child:
-                    Center(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 32),
-                            child: GlassContainer(
-                              borderRadius: 32,
-                              blur: 0,
-                              borderOpacity: 0,
-                              color: Colors.transparent,
-                              borderColor: Colors.transparent,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  // Top Section: Profile
-                                  Container(
-                                    padding: const EdgeInsets.all(32),
-                                    decoration: const BoxDecoration(
-                                      color: Colors.transparent,
-                                      borderRadius: BorderRadius.vertical(
-                                        top: Radius.circular(32),
-                                      ),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        Container(
-                                          decoration: const BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            // boxShadow removed or made transparent
-                                          ),
-                                          child: CircleAvatar(
-                                            radius: 50,
-                                            backgroundColor:
-                                                AppColors.primaryPurple,
-                                            backgroundImage: backgroundImage,
-                                            child: backgroundImage == null
-                                                ? Text(
-                                                    (fullName.trim().split(" ").length >= 2
-                                                            ? "${fullName.trim().split(" ")[0][0]}${fullName.trim().split(" ")[1][0]}"
-                                                            : fullName.isNotEmpty
-                                                                ? fullName[0]
-                                                                : "U")
-                                                        .toUpperCase(),
-                                                    style: const TextStyle(
-                                                      fontSize: 40,
-                                                      fontWeight: FontWeight.bold,
-                                                      color: Colors.white,
-                                                    ),
-                                                  )
-                                                : null,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 16),
-                                        Text(
-                                          fullName,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .headlineMedium
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                        Text(
-                                          "@$displayHandle",
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium
-                                              ?.copyWith(
-                                                color: AppColors.primaryPurple,
-                                              ),
-                                        ),
-                                      ],
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    child: GlassContainer(
+                      borderRadius: 32,
+                      blur: 15,
+                      borderOpacity: 0.1,
+                      color: isDark 
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : Colors.white.withValues(alpha: 0.7),
+                      borderColor: Colors.white.withValues(alpha: 0.2),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Top Section: Profile
+                          Container(
+                            padding: const EdgeInsets.all(32),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppColors.primaryPurple.withValues(alpha: 0.1),
+                                  Colors.transparent,
+                                ],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                              ),
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(32),
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(3),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: AppColors.primaryPurple.withValues(alpha: 0.3),
+                                      width: 2,
                                     ),
                                   ),
+                                  child: CircleAvatar(
+                                    radius: 50,
+                                    backgroundColor: AppColors.primaryPurple,
+                                    backgroundImage: backgroundImage,
+                                    child: backgroundImage == null
+                                        ? Text(
+                                            (fullName.trim().split(" ").length >= 2
+                                                    ? "${fullName.trim().split(" ")[0][0]}${fullName.trim().split(" ")[1][0]}"
+                                                    : fullName.isNotEmpty
+                                                        ? fullName[0]
+                                                        : "U")
+                                                .toUpperCase(),
+                                            style: const TextStyle(
+                                              fontSize: 40,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : null,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  fullName,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: -0.5,
+                                      ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 4),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryPurple.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    "@$displayHandle",
+                                    style: const TextStyle(
+                                      color: AppColors.primaryPurple,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
 
-                                  // Bottom Section: QR
-                                  Padding(
-                                    padding: const EdgeInsets.all(40),
-                                    child: QrImageView(
-                                      data: shareUrl,
-                                      version: QrVersions.auto,
-                                      size: 200.0,
-                                      // Use darker/contrast color for QR to ensure readability on glass
-                                      eyeStyle: QrEyeStyle(
-                                        eyeShape: QrEyeShape
-                                            .square, // Keep user's preference
-                                        color: Theme.of(
-                                          context,
-                                        ).textTheme.bodyLarge?.color,
-                                      ),
-                                      dataModuleStyle: QrDataModuleStyle(
-                                        dataModuleShape:
-                                            QrDataModuleShape.circle,
-                                        color: Theme.of(
-                                          context,
-                                        ).textTheme.bodyLarge?.color,
-                                      ),
-                                    ),
-                                  ),
+                          // Bottom Section: QR
+                          Container(
+                            margin: const EdgeInsets.fromLTRB(32, 0, 32, 24),
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(24),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.05),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                            child: QrImageView(
+                              data: shareUrl,
+                              version: QrVersions.auto,
+                              size: 180.0,
+                              eyeStyle: const QrEyeStyle(
+                                eyeShape: QrEyeShape.circle,
+                                color: Colors.black,
+                              ),
+                              dataModuleStyle: const QrDataModuleStyle(
+                                dataModuleShape: QrDataModuleShape.circle,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
 
                                   // Clickable Link
                                   Padding(

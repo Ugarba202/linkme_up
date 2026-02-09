@@ -10,5 +10,9 @@ abstract class IUserRepository {
   // Social Links Operations
   Future<void> addSocialLink(String uid, SocialLinkEntity link);
   Future<void> updateSocialLink(String uid, SocialLinkEntity link);
+  Future<void> updateSocialLinks(String uid, List<SocialLinkEntity> links);
+  Future<void> incrementViews(String uid);
+  Future<void> incrementClicks(String uid);
   Future<void> deleteSocialLink(String uid, String linkId);
+  Future<UserEntity?> getUserByUsername(String username);
 }

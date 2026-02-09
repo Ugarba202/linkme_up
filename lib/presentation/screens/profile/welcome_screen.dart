@@ -13,14 +13,9 @@ class WelcomeScreen extends ConsumerStatefulWidget {
 }
 
 class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   Future<void> _handleFinishSetup() async {
-    setState(() => _isLoading = true);
-    
-    // Simulate setting up account
-    await Future.delayed(const Duration(seconds: 5));
-    
     if (mounted) {
       context.go('/profile/add-socials');
     }
@@ -30,7 +25,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   Widget build(BuildContext context) {
     final user = ref.watch(userProvider);
     final username = user?.username ?? "User";
-    
+
     // Get Initials
     String initials = "";
     if (user?.name != null && user!.name.isNotEmpty) {
@@ -78,9 +73,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             if (loadingProgress == null) return child;
                             return Center(
                               child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes != null
+                                value:
+                                    loadingProgress.expectedTotalBytes != null
                                     ? loadingProgress.cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes!
+                                          loadingProgress.expectedTotalBytes!
                                     : null,
                                 color: AppColors.primaryPurple,
                               ),
@@ -151,9 +147,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                             color: Colors.white,
                           ),
                         )
-                      : const Text(
-                          "Finish Setup",
-                        ),
+                      : const Text("Finish Setup"),
                 ),
               ),
               const SizedBox(height: 24),

@@ -240,19 +240,6 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                       _buildSettingsTile(
                         context,
-                        label: "Email Address",
-                        value: user?.email ?? "N/A",
-                        icon: Icons.email_outlined,
-                        onTap: () => _showEditField(
-                          context,
-                          ref,
-                          "Email",
-                          user?.email ?? "",
-                          (v) => ref.read(userProvider.notifier).updateEmail(v),
-                        ),
-                      ),
-                      _buildSettingsTile(
-                        context,
                         label: "Bio",
                         value: user?.bio.isEmpty ?? true ? "No bio set" : user?.bio,
                         icon: Icons.description_outlined,
@@ -346,7 +333,7 @@ class SettingsScreen extends ConsumerWidget {
                   const SizedBox(height: 48),
 
                   // Logout
-                  _buildLogoutButton(context),
+                  _buildLogoutButton(context, ref),
                   const SizedBox(height: 16),
                   _buildDeleteAccountButton(context),
                   const SizedBox(height: 40),
@@ -510,11 +497,14 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildLogoutButton(BuildContext context) {
+  Widget _buildLogoutButton(BuildContext context, WidgetRef ref) {
     return TextButton(
-      onPressed: () {
+      onPressed: () async {
         HapticFeedback.heavyImpact();
-        context.go('/onboarding');
+        await ref.read(userProvider.notifier).signOut();
+        if (context.mounted) {
+          context.go('/onboarding');
+        }
       },
       style: TextButton.styleFrom(
         foregroundColor: AppColors.error,
@@ -634,16 +624,12 @@ class SettingsScreen extends ConsumerWidget {
                     controller: controller,
                     label: title,
                     hintText: "Enter your $title",
-                    prefixIcon: title == "Email"
-                        ? Icons.email_outlined
-                        : (title == "Bio"
-                            ? Icons.description_outlined
-                            : Icons.person_outline_rounded),
-                    keyboardType: title == "Email"
-                        ? TextInputType.emailAddress
-                        : (title == "Bio"
-                            ? TextInputType.multiline
-                            : TextInputType.text),
+                    prefixIcon: title == "Bio"
+                        ? Icons.description_outlined
+                        : Icons.person_outline_rounded,
+                    keyboardType: title == "Bio"
+                        ? TextInputType.multiline
+                        : TextInputType.text,
                     maxLines: title == "Bio" ? 4 : 1,
                   ),
                   const SizedBox(height: 40),

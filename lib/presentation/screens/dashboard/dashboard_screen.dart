@@ -8,6 +8,7 @@ import '../../../application/providers/user_provider.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/utils/social_link_detector.dart';
 import '../../../domain/entities/social_link_entity.dart';
+import '../../../domain/entities/user_entity.dart';
 import '../../widgets/gradient_button.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -175,7 +176,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Hello, $username!",
+                        "Welcome, ${user?.name.split(' ').first ?? 'User'}!",
                         style: Theme.of(context).textTheme.headlineMedium
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
@@ -224,7 +225,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           ),
 
           // Stats Section
-          _buildStatSection(isDark),
+          _buildStatSection(isDark, user),
 
           // Main Content
           Expanded(
@@ -425,7 +426,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  Widget _buildStatSection(bool isDark) {
+  Widget _buildStatSection(bool isDark, UserEntity? user) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       child: Row(
@@ -435,7 +436,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               context,
               isDark: isDark,
               title: "Profile Views",
-              value: "1,248",
+              value: (user?.views ?? 0).toString(),
               icon: Icons.remove_red_eye_rounded,
               color: AppColors.primaryPurple,
             ),
@@ -446,7 +447,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               context,
               isDark: isDark,
               title: "Link Clicks",
-              value: "856",
+              value: (user?.clicks ?? 0).toString(),
               icon: Icons.ads_click_rounded,
               color: AppColors.primaryBlue,
             ),
