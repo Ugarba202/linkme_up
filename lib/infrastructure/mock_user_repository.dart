@@ -106,4 +106,17 @@ class MockUserRepository implements IUserRepository {
     // TODO: implement incrementViews
     throw UnimplementedError();
   }
+
+  @override
+  Future<void> markQrAsGenerated(String uid) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    if (_users.containsKey(uid)) {
+      final user = _users[uid]!;
+      _users[uid] = user.copyWith(
+        isQrGenerated: true,
+        qrGeneratedAt: DateTime.now(),
+      );
+      print("MOCK: Marked QR as generated for $uid");
+    }
+  }
 }

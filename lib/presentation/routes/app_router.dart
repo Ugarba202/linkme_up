@@ -12,15 +12,15 @@ import '../screens/auth/country_screen.dart';
 import '../screens/auth/name_screen.dart';
 
 // Profile Setup
-import '../screens/profile/welcome_screen.dart';
-import '../screens/profile/add_socials_screen.dart';
+import '../screens/profile/welcome_screen.dart'; 
+import '../screens/profile/add_socials_screen.dart'; 
 import '../screens/profile/settings_screen.dart';
 import '../screens/profile/manage_socials_screen.dart';
-
+ 
 // Dashboard
 import '../screens/dashboard/dashboard_screen.dart';
 
-// QR
+// QR 
 import '../screens/qr/qr_screen.dart';
 import '../screens/qr/full_qr_screen.dart';
 import '../screens/qr/scanner_screen.dart';

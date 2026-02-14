@@ -36,15 +36,29 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   controller.stop();
                   final String code = barcode.rawValue!;
                   
-                  // Simple logic: extract username from linkmeup urls
-                  String username = 'user';
-                  if (code.contains('linkmeup.app/')) {
-                    username = code.split('/').last;
+                  // Robust logic: extract username from various LinkMeUp URL formats
+                  String? username;
+                  try {
+                    final uri = Uri.parse(code);
+                    if (uri.host.contains('linkmeup.app')) {
+                      // Handle https://linkmeup.app/username
+                      final segments = uri.pathSegments;
+                      if (segments.isNotEmpty) {
+                        username = segments.first;
+                      }
+                    } else if (code.contains('linkmeup.app/')) {
+                      // Fallback for simple string containing the domain
+                      username = code.split('linkmeup.app/').last.split('?').first.split('/').first;
+                    }
+                  } catch (e) {
+                    debugPrint('Error parsing QR code: $e');
                   }
 
-                  // Navigate to external profile
-                  context.pushReplacement('/profile/$username');
-                  break;
+                  if (username != null && username.isNotEmpty) {
+                    // Navigate to external profile
+                    context.pushReplacement('/profile/$username');
+                    break;
+                  }
                 }
               }
             },

@@ -38,13 +38,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   Future<void> _checkAuthAndNavigate() async {
     if (!mounted) return;
 
+    // We wait a bit more if state is null to allow restoration to complete
     final user = ref.read(userProvider);
     
     // If user is already loaded and profile is completed, go to dashboard
-    if (user != null && user.profileCompleted) {
-      context.go('/dashboard');
+    if (user != null) {
+      if (user.profileCompleted) {
+        context.go('/dashboard');
+      } else {
+        // User exists but profile not complete, take them to welcome or where they left off
+        context.go('/profile/welcome');
+      }
     } else {
-      // Otherwise, go to onboarding
+      // No user found after restoration period, go to onboarding
       context.go('/onboarding');
     }
   }

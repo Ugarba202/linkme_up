@@ -104,6 +104,14 @@ class FirestoreUserRepository implements IUserRepository {
     });
   }
 
+  @override
+  Future<void> markQrAsGenerated(String uid) async {
+    await _usersCollection.doc(uid).update({
+      'isQrGenerated': true,
+      'qrGeneratedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
   // Mappers
   Map<String, dynamic> _userToMap(UserEntity user) {
     return {
@@ -122,6 +130,10 @@ class FirestoreUserRepository implements IUserRepository {
       'phoneNumber': user.phoneNumber,
       'views': user.views,
       'clicks': user.clicks,
+      'isQrGenerated': user.isQrGenerated,
+      'qrGeneratedAt': user.qrGeneratedAt != null
+          ? Timestamp.fromDate(user.qrGeneratedAt!)
+          : null,
     };
   }
 
@@ -144,6 +156,8 @@ class FirestoreUserRepository implements IUserRepository {
       phoneNumber: map['phoneNumber'] ?? '',
       views: map['views'] ?? 0,
       clicks: map['clicks'] ?? 0,
+      isQrGenerated: map['isQrGenerated'] ?? false,
+      qrGeneratedAt: (map['qrGeneratedAt'] as Timestamp?)?.toDate(),
     );
   }
 

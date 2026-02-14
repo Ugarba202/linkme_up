@@ -161,6 +161,12 @@ class UserNotifier extends Notifier<UserEntity?> {
     await ref.read(userRepositoryProvider).updateSocialLinks(state!.uid, links);
   }
 
+  Future<void> markQrAsGenerated() async {
+    if (state == null) return;
+    state = state!.copyWith(isQrGenerated: true, qrGeneratedAt: DateTime.now());
+    await ref.read(userRepositoryProvider).markQrAsGenerated(state!.uid);
+  }
+
   Future<void> signOut() async {
     try {
       final prefs = await SharedPreferences.getInstance();

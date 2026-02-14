@@ -15,6 +15,8 @@ class UserEntity {
   final int clicks;
   final String email;
   final String phoneNumber;
+  final bool isQrGenerated;
+  final DateTime? qrGeneratedAt;
   final DateTime createdAt;
 
   UserEntity({
@@ -30,6 +32,8 @@ class UserEntity {
     this.profileCompleted = false,
     this.views = 0,
     this.clicks = 0,
+    this.isQrGenerated = false,
+    this.qrGeneratedAt,
     required this.createdAt,
     this.email = '',
     this.phoneNumber = '',
@@ -51,6 +55,8 @@ class UserEntity {
     String? phoneNumber,
     int? views,
     int? clicks,
+    bool? isQrGenerated,
+    DateTime? qrGeneratedAt,
   }) {
     return UserEntity(
       uid: uid ?? this.uid,
@@ -68,6 +74,8 @@ class UserEntity {
       phoneNumber: phoneNumber ?? this.phoneNumber,
       views: views ?? this.views,
       clicks: clicks ?? this.clicks,
+      isQrGenerated: isQrGenerated ?? this.isQrGenerated,
+      qrGeneratedAt: qrGeneratedAt ?? this.qrGeneratedAt,
     );
   }
 }

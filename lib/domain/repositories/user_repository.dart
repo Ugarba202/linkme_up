@@ -15,4 +15,5 @@ abstract class IUserRepository {
   Future<void> incrementClicks(String uid);
   Future<void> deleteSocialLink(String uid, String linkId);
   Future<UserEntity?> getUserByUsername(String username);
+  Future<void> markQrAsGenerated(String uid);
 }
