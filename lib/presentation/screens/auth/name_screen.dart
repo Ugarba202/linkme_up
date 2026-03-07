@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart' show GoRouterHelper;
+import 'package:go_router/go_router.dart';
 
 import '../../../application/providers/user_provider.dart';
+import '../../../domain/entities/user_entity.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../widgets/custom_input.dart';
 import '../../widgets/gradient_button.dart';
