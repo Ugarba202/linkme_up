@@ -36,14 +36,14 @@ At LinkMeUp, we value your privacy. This policy explains how we handle your data
 - **Identity Information**: Name, username, and bio provided during setup.
 - **Contact Information**: Email address used for authentication.
 - **Social Links**: URLs and handles you choose to add to your profile.
-- **Media**: Profile pictures and banner images stored via Cloudinary.
+- **Media**: Profile pictures and banner images stored via Supabase Storage.
 
 ## 2. How We Use Data
 We use your data strictly to provide the LinkMeUp service, allowing you to share your identity with others.
 
 ## 3. Data Storage
-- Authentication and profile data are stored securely in **Firebase**.
-- Images are stored in **Cloudinary**.
+- Authentication and profile data are stored securely in **Supabase**.
+- Images are stored in **Supabase Storage**.
 - We do not sell your personal data to third parties.
 
 ## 4. Your Rights
@@ -53,7 +53,7 @@ You have the right to:
 - Delete your account at any time from the Settings screen.
 
 ## 5. Security
-We use industry-standard security measures to protect your information, including Firebase's secure authentication layers.
+We use industry-standard security measures to protect your information, including Supabase's secure authentication layers.
 
 ## 6. Updates
 We may update this policy from time to time. Continued use of the app signifies your acceptance of the new policy.

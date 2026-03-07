@@ -32,7 +32,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   void _startTimer() {
     // Show splash for at least 2 seconds for branding
-    _timer = Timer(const Duration(seconds: 3), _checkAuthAndNavigate);
+    _timer = Timer(const Duration(seconds: 5), _checkAuthAndNavigate);
   }
 
   Future<void> _checkAuthAndNavigate() async {

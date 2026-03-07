@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart' show GoRouterHelper;
+
+import '../../../application/providers/user_provider.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../widgets/custom_input.dart';
 import '../../widgets/gradient_button.dart';
 import '../../widgets/auth_background.dart';
 
-import 'package:uuid/uuid.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 
-import '../../../application/providers/user_provider.dart';
-import '../../../domain/entities/user_entity.dart';
+
 
 class NameScreen extends ConsumerStatefulWidget {
   final String countryName;
@@ -40,48 +39,40 @@ class _NameScreenState extends ConsumerState<NameScreen> {
     debugPrint("DEBUG: Finalizing onboarding for $fullName (No-Auth Flow)");
 
     try {
-      // 1. Generate a client-side UUID
-      final uuid = const Uuid().v4();
-      debugPrint("DEBUG: Generated client UUID: $uuid");
-      
-      // 2. Persist UID locally using SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('local_uid', uuid);
+      // 1. Get current user from provider (already signed in from CountryScreen)
+      final currentUser = ref.read(userProvider);
+      if (currentUser == null) {
+        throw Exception("No active session found. Please go back.");
+      }
 
-      // 3. Auto-generate Username (Take first name)
+      // 2. Auto-generate Username (Take first name)
       final firstName = fullName.split(' ').first.toLowerCase();
       // Ensure it's alphanumeric only for the URL
       final sanitizedUsername = firstName.replaceAll(RegExp(r'[^a-z0-9]'), '');
       
-      // check if username is available (Internal logic could append numbers if taken,
-      // but following user instruction to just pick 'Usman')
       String finalUsername = sanitizedUsername;
       final isAvailable = await ref.read(userRepositoryProvider).isUsernameAvailable(finalUsername);
       if (!isAvailable) {
-        // If 'usman' is taken, append a short random string or numeric
         finalUsername = "$sanitizedUsername${DateTime.now().millisecond}";
       }
 
       final avatarUrl = "https://api.dicebear.com/9.x/avataaars/png?seed=$finalUsername&backgroundColor=b6e3f4,c0aede,d1d4f9";
       final publicUrl = "https://linkmeup.app/$finalUsername";
 
-      // 4. Create final user document in Firestore (Unauthenticated)
-      final newUser = UserEntity(
-        uid: uuid,
+      // 3. Update the existing profile in Supabase
+      final updatedUser = currentUser.copyWith(
         name: fullName,
         username: finalUsername,
-        country: widget.countryName,
         photoUrl: avatarUrl,
         publicUrl: publicUrl,
         profileCompleted: true,
-        createdAt: DateTime.now(), email: '', phoneNumber: '',
       );
 
-      debugPrint("DEBUG: Finalizing account in Firestore with Username: $finalUsername...");
-      await ref.read(userRepositoryProvider).createUser(newUser);
+      debugPrint("DEBUG: Updating profile in profiles table with Username: $finalUsername...");
+      await ref.read(userRepositoryProvider).createUser(updatedUser); // upsert handles update
 
       // 5. Set local state
-      ref.read(userProvider.notifier).setUser(newUser);
+      ref.read(userProvider.notifier).setUser(updatedUser);
 
       debugPrint("DEBUG: Account setup complete. Proceeding to welcome screen.");
       if (mounted) {

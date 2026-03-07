@@ -7,7 +7,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../application/providers/user_provider.dart';
 import '../../../core/themes/app_colors.dart';
-import '../../../infrastructure/media/cloudinary_service.dart';
 import '../../widgets/custom_input.dart';
 import '../../widgets/glass_container.dart';
 import '../../widgets/gradient_button.dart';
@@ -29,10 +28,7 @@ class SettingsScreen extends ConsumerWidget {
       );
 
       try {
-        final cloudinary = CloudinaryService();
-        final imageUrl = await cloudinary.uploadImage(File(pickedFile.path));
-        
-        await ref.read(userProvider.notifier).updatePhotoUrl(imageUrl);
+        await ref.read(userProvider.notifier).uploadProfileImage(File(pickedFile.path));
         
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -43,6 +39,36 @@ class SettingsScreen extends ConsumerWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Failed to upload image: $e")),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _pickBannerImage(BuildContext context, WidgetRef ref) async {
+    final picker = ImagePicker();
+    HapticFeedback.mediumImpact();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Uploading banner...")),
+      );
+
+      try {
+        await ref.read(userProvider.notifier).uploadBannerImage(File(pickedFile.path));
+        
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Banner updated")),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to upload banner: $e")),
           );
         }
       }
@@ -93,10 +119,29 @@ class SettingsScreen extends ConsumerWidget {
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Gradient Background
-                  Container(
-                    decoration: const BoxDecoration(
-                      gradient: AppColors.primaryGradient,
+                  // Banner / Gradient Background
+                  GestureDetector(
+                    onTap: () => _pickBannerImage(context, ref),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: user?.bannerUrl == null || user!.bannerUrl!.isEmpty 
+                          ? AppColors.primaryGradient 
+                          : null,
+                        image: user?.bannerUrl != null && user!.bannerUrl!.isNotEmpty
+                          ? DecorationImage(
+                              image: NetworkImage(user.bannerUrl!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                      ),
+                      child: user?.bannerUrl == null || user!.bannerUrl!.isEmpty
+                        ? const Center(
+                            child: Opacity(
+                              opacity: 0.3,
+                              child: Icon(Icons.add_photo_alternate_rounded, color: Colors.white, size: 40),
+                            ),
+                          )
+                        : null,
                     ),
                   ),
                   // Subtle Animated Circles

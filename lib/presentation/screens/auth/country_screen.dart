@@ -7,6 +7,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../widgets/gradient_button.dart';
 import '../../widgets/auth_background.dart';
+import '../../../application/providers/auth_providers.dart';
+import '../../../application/providers/user_provider.dart';
+import '../../../domain/entities/user_entity.dart';
 
 class CountryScreen extends ConsumerStatefulWidget {
   const CountryScreen({super.key});
@@ -29,8 +32,41 @@ class _CountryScreenState extends ConsumerState<CountryScreen> {
     e164Key: "",
   );
 
-  void _handleContinue() {
-    context.push('/auth/name', extra: _selectedCountry.name);
+  bool _isLoading = false;
+
+  Future<void> _handleContinue() async {
+    setState(() => _isLoading = true);
+    try {
+      // 1. Sign in anonymously to get a UID
+      final uid = await ref.read(authRepositoryProvider).signInAnonymously();
+      
+      if (uid != null) {
+        // 2. Create the initial profile with the selected country
+        final newUser = UserEntity(
+          uid: uid,
+          name: 'User', // Placeholder until next screen
+          country: _selectedCountry.name,
+          createdAt: DateTime.now(),
+        );
+
+        await ref.read(userRepositoryProvider).createUser(newUser);
+        
+        // 3. Set local state
+        ref.read(userProvider.notifier).setUser(newUser);
+
+        if (mounted) {
+          context.push('/auth/name', extra: _selectedCountry.name);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: ${e.toString()}")),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -147,7 +183,8 @@ class _CountryScreenState extends ConsumerState<CountryScreen> {
             // Continue Button
             GradientButton(
               text: "Continue",
-              onPressed: _handleContinue,
+              isLoading: _isLoading,
+              onPressed: _isLoading ? null : _handleContinue,
             ).animate().fadeIn(delay: 500.ms).scale(duration: 400.ms),
             const SizedBox(height: 40),
           ],
