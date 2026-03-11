@@ -1,6 +1,8 @@
+import 'package:uuid/uuid.dart';
 import '../../domain/entities/social_link_entity.dart';
 
 class SocialLinkDetector {
+  static const _uuid = Uuid();
   static SocialPlatform detect(String input) {
     final lower = input.toLowerCase();
 
@@ -85,7 +87,7 @@ class SocialLinkDetector {
       if (platform != SocialPlatform.other && !detectedPlatforms.contains(platform)) {
         detectedPlatforms.add(platform);
         results.add(SocialLinkEntity(
-          id: '${DateTime.now().millisecondsSinceEpoch}${platform.name}',
+          id: _uuid.v4(),
           platform: platform,
           username: extractUsername(part, platform),
           url: part.trim(),
@@ -94,7 +96,7 @@ class SocialLinkDetector {
         ));
       } else if (part.startsWith('http') && platform == SocialPlatform.other) {
         results.add(SocialLinkEntity(
-          id: '${DateTime.now().millisecondsSinceEpoch}other',
+          id: _uuid.v4(),
           platform: SocialPlatform.other,
           username: 'Link',
           url: part.trim(),

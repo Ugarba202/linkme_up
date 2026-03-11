@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../application/providers/user_provider.dart';
 import '../../../core/themes/app_colors.dart';
+import '../../../core/utils/social_link_detector.dart';
 import '../../widgets/custom_input.dart';
 import '../../widgets/gradient_button.dart';
 
-class AddSocialsScreen extends StatefulWidget {
+class AddSocialsScreen extends ConsumerStatefulWidget {
   const AddSocialsScreen({super.key});
 
   @override
-  State<AddSocialsScreen> createState() => _AddSocialsScreenState();
+  ConsumerState<AddSocialsScreen> createState() => _AddSocialsScreenState();
 }
 
-class _AddSocialsScreenState extends State<AddSocialsScreen> {
+class _AddSocialsScreenState extends ConsumerState<AddSocialsScreen> {
   final TextEditingController _linkController = TextEditingController();
   bool _isProcessing = false;
 
@@ -21,7 +24,7 @@ class _AddSocialsScreenState extends State<AddSocialsScreen> {
     super.dispose();
   }
 
-  void _handleAnalyze() {
+  Future<void> _handleAnalyze() async {
     final text = _linkController.text.trim();
     if (text.isEmpty) return;
 
@@ -29,16 +32,43 @@ class _AddSocialsScreenState extends State<AddSocialsScreen> {
       _isProcessing = true;
     });
 
-    // Simulate processing delay for effect
-    Future.delayed(const Duration(seconds: 1), () {
+    try {
+      // 1. Detect all links
+      final detectedLinks = SocialLinkDetector.detectAll(text);
+      
+      if (detectedLinks.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("No valid social links detected. Please try again.")),
+          );
+        }
+      } else {
+        // 2. Save each link to Supabase
+        for (final link in detectedLinks) {
+          await ref.read(userProvider.notifier).addSocialLink(link);
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Successfully added ${detectedLinks.length} links!")),
+          );
+          // Navigate to Dashboard
+          context.go('/dashboard');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error adding links: ${e.toString()}")),
+        );
+      }
+    } finally {
       if (mounted) {
         setState(() {
           _isProcessing = false;
         });
-        // Navigate to Dashboard with the raw text to be detected there
-        context.go('/dashboard', extra: text);
       }
-    });
+    }
   }
 
   @override
