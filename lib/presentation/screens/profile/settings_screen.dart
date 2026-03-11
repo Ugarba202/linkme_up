@@ -11,72 +11,71 @@ import '../../widgets/custom_input.dart';
 import '../../widgets/glass_container.dart';
 import '../../widgets/gradient_button.dart';
 
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
-  Future<void> _pickImage(BuildContext context, WidgetRef ref) async {
+  @override
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  bool _isUploadingProfile = false;
+  bool _isUploadingBanner = false;
+
+  Future<void> _pickImage() async {
     final picker = ImagePicker();
     HapticFeedback.mediumImpact();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
 
     if (pickedFile != null) {
-      if (!context.mounted) return;
-
-      // Show loading indicator or handle loading state
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Uploading image...")),
-      );
-
+      setState(() => _isUploadingProfile = true);
       try {
         await ref.read(userProvider.notifier).uploadProfileImage(File(pickedFile.path));
-        
-        if (context.mounted) {
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Profile picture updated")),
           );
         }
       } catch (e) {
-        if (context.mounted) {
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Failed to upload image: $e")),
           );
         }
+      } finally {
+        if (mounted) setState(() => _isUploadingProfile = false);
       }
     }
   }
 
-  Future<void> _pickBannerImage(BuildContext context, WidgetRef ref) async {
+  Future<void> _pickBannerImage() async {
     final picker = ImagePicker();
     HapticFeedback.mediumImpact();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
 
     if (pickedFile != null) {
-      if (!context.mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Uploading banner...")),
-      );
-
+      setState(() => _isUploadingBanner = true);
       try {
         await ref.read(userProvider.notifier).uploadBannerImage(File(pickedFile.path));
-        
-        if (context.mounted) {
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Banner updated")),
           );
         }
       } catch (e) {
-        if (context.mounted) {
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Failed to upload banner: $e")),
           );
         }
+      } finally {
+        if (mounted) setState(() => _isUploadingBanner = false);
       }
     }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final user = ref.watch(userProvider);
     final photoUrl = user?.photoUrl;
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -121,7 +120,7 @@ class SettingsScreen extends ConsumerWidget {
                 children: [
                   // Banner / Gradient Background
                   GestureDetector(
-                    onTap: () => _pickBannerImage(context, ref),
+                    onTap: _isUploadingBanner ? null : _pickBannerImage,
                     child: Container(
                       decoration: BoxDecoration(
                         gradient: user?.bannerUrl == null || user!.bannerUrl!.isEmpty 
@@ -134,39 +133,31 @@ class SettingsScreen extends ConsumerWidget {
                             )
                           : null,
                       ),
-                      child: user?.bannerUrl == null || user!.bannerUrl!.isEmpty
-                        ? const Center(
-                            child: Opacity(
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          if (user?.bannerUrl == null || user!.bannerUrl!.isEmpty)
+                            const Opacity(
                               opacity: 0.3,
                               child: Icon(Icons.add_photo_alternate_rounded, color: Colors.white, size: 40),
                             ),
-                          )
-                        : null,
+                          if (_isUploadingBanner)
+                            Container(
+                              color: Colors.black26,
+                              child: const CircularProgressIndicator(color: Colors.white),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                  // Subtle Animated Circles
-                  Positioned(
-                        top: -50,
-                        right: -50,
-                        child: Container(
-                          width: 200,
-                          height: 200,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.1),
-                          ),
-                        ),
-                      )
-                      .animate(onPlay: (c) => c.repeat(reverse: true))
-                      .moveY(begin: 0, end: 30, duration: 3.seconds),
-
+                  
                   // Content
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const SizedBox(height: 40),
                       GestureDetector(
-                        onTap: () => _pickImage(context, ref),
+                        onTap: _isUploadingProfile ? null : _pickImage,
                         child: Stack(
                           children: [
                             Container(
@@ -189,18 +180,18 @@ class SettingsScreen extends ConsumerWidget {
                                 radius: 60,
                                 backgroundColor: Colors.white24,
                                 backgroundImage: backgroundImage,
-                                child: backgroundImage == null
+                                child: _isUploadingProfile 
+                                  ? const CircularProgressIndicator(color: Colors.white)
+                                  : (backgroundImage == null
                                     ? Text(
                                         (user?.name ?? "U")
                                                     .trim()
                                                     .split(" ")
-                                                    .length >=
-                                                2
+                                                    .length >= 2
                                             ? "${(user?.name ?? "U").trim().split(" ")[0][0]}${(user?.name ?? "U").trim().split(" ")[1][0]}"
                                                 .toUpperCase()
                                             : (user?.name ?? "U").isNotEmpty
-                                                ? (user?.name ?? "U")[0]
-                                                    .toUpperCase()
+                                                ? (user?.name ?? "U")[0].toUpperCase()
                                                 : "U",
                                         style: const TextStyle(
                                           fontSize: 48,
@@ -208,7 +199,7 @@ class SettingsScreen extends ConsumerWidget {
                                           color: Colors.white,
                                         ),
                                       )
-                                    : null,
+                                    : null),
                               ),
                             ),
                             Positioned(
@@ -286,7 +277,7 @@ class SettingsScreen extends ConsumerWidget {
                       _buildSettingsTile(
                         context,
                         label: "Bio",
-                        value: user?.bio.isEmpty ?? true ? "No bio set" : user?.bio,
+                        value: user?.bio == null || user!.bio.isEmpty ? "No bio set" : user.bio,
                         icon: Icons.description_outlined,
                         onTap: () => _showEditField(
                           context,
@@ -306,8 +297,7 @@ class SettingsScreen extends ConsumerWidget {
                           ref,
                           "Country",
                           user?.country ?? "",
-                          (v) =>
-                              ref.read(userProvider.notifier).updateCountry(v),
+                          (v) => ref.read(userProvider.notifier).updateCountry(v),
                         ),
                       ),
                     ],
@@ -324,7 +314,7 @@ class SettingsScreen extends ConsumerWidget {
                         context,
                         label: "Manage Linked Accounts",
                         icon: Icons.share_rounded,
-                        onTap: () => context.push('/profile/manage-socials'),
+                        onTap: () => context.push('/profile/settings/manage-socials'),
                       ),
                       ...((user?.socialLinks ?? [])).map(
                         (link) => _buildToggleTile(
@@ -344,7 +334,7 @@ class SettingsScreen extends ConsumerWidget {
                       _buildSettingsTile(
                         context,
                         label: "My Personal Link",
-                        value: "linkmeup.ugarba/${user?.username ?? 'user'}",
+                        value: "linkmeup.app/${user?.username ?? 'user'}",
                         icon: Icons.link_rounded,
                         isReadOnly: true,
                         showCopy: true,
@@ -359,12 +349,6 @@ class SettingsScreen extends ConsumerWidget {
                     context,
                     title: "General Preferences",
                     items: [
-                      _buildSettingsTile(
-                        context,
-                        label: "Notifications",
-                        icon: Icons.notifications_none_rounded,
-                        onTap: () {}, // Implementation placeholder
-                      ),
                       _buildSettingsTile(
                         context,
                         label: "Appearance",
@@ -400,55 +384,51 @@ class SettingsScreen extends ConsumerWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children:
-          [
-                Padding(
-                  padding: const EdgeInsets.only(left: 8, bottom: 12),
-                  child: Text(
-                    title.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.gray400,
-                      letterSpacing: 1.5,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 8, bottom: 12),
+          child: Text(
+            title.toUpperCase(),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: AppColors.gray400,
+              letterSpacing: 1.5,
+            ),
+          ),
+        ),
+        GlassContainer(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          color: isDark
+              ? AppColors.darkSurface.withValues(alpha: 0.6)
+              : Colors.white,
+          borderRadius: 24,
+          borderColor: isDark
+              ? Colors.white.withValues(alpha: 0.05)
+              : AppColors.gray200.withValues(alpha: 0.5),
+          child: Column(
+            children: items.asMap().entries.map((entry) {
+              final idx = entry.key;
+              final item = entry.value;
+              return Column(
+                children: [
+                  item,
+                  if (idx < items.length - 1)
+                    Divider(
+                      height: 1,
+                      indent: 64,
+                      endIndent: 20,
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : AppColors.gray100,
                     ),
-                  ),
-                ),
-                GlassContainer(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  color: isDark
-                      ? AppColors.darkSurface.withValues(alpha: 0.6)
-                      : Colors.white,
-                  borderRadius: 24,
-                  borderColor: isDark
-                      ? Colors.white.withValues(alpha: 0.05)
-                      : AppColors.gray200.withValues(alpha: 0.5),
-                  child: Column(
-                    children: items.asMap().entries.map((entry) {
-                      final idx = entry.key;
-                      final item = entry.value;
-                      return Column(
-                        children: [
-                          item,
-                          if (idx < items.length - 1)
-                            Divider(
-                              height: 1,
-                              indent: 64,
-                              endIndent: 20,
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.05)
-                                  : AppColors.gray100,
-                            ),
-                        ],
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ]
-              .animate(interval: 50.ms)
-              .fadeIn(duration: 400.ms)
-              .slideY(begin: 0.1, end: 0),
-    );
+                ],
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    ).animate(interval: 50.ms).fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0);
   }
 
   Widget _buildToggleTile(
@@ -486,7 +466,6 @@ class SettingsScreen extends ConsumerWidget {
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
     );
   }
-
 
   Widget _buildSettingsTile(
     BuildContext context, {
@@ -547,7 +526,7 @@ class SettingsScreen extends ConsumerWidget {
       onPressed: () async {
         HapticFeedback.heavyImpact();
         await ref.read(userProvider.notifier).signOut();
-        if (context.mounted) {
+        if (mounted) {
           context.go('/onboarding');
         }
       },
