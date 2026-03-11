@@ -229,7 +229,7 @@ class ProfileLandingScreen extends StatelessWidget {
                       borderColor: Colors.white.withValues(alpha: 0.05),
                       child: Column(
                         children: [
-                          const Icon(Icons.qr_code_Scanner_rounded, color: AppColors.primaryPurple, size: 32),
+                          const Icon(Icons.qr_code_scanner_rounded, color: AppColors.primaryPurple, size: 32),
                           const SizedBox(height: 16),
                           const Text(
                             "Ready for your own digital pass?",
