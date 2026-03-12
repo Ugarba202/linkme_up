@@ -19,7 +19,7 @@ void main() async {
     const ProviderScope(
       child: LinkMeUpApp(),
     ),
-  );
+  ); 
 }  
 
 class LinkMeUpApp extends ConsumerWidget {

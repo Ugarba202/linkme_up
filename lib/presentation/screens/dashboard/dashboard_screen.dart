@@ -74,7 +74,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final finalLinks = _detectLinks
         .where((l) => _selectedPlatforms.contains(l.platform))
         .toList();
-    
+
     final user = ref.read(userProvider);
     if (user != null) {
       ref.read(userProvider.notifier).updateSocialLinks(finalLinks);
@@ -88,21 +88,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      // Provide a slight gradient background for depth
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Theme.of(context).scaffoldBackgroundColor,
-              AppColors.primaryPurple.withValues(alpha: 0.05),
-            ],
-          ),
+      body: SafeArea(
+        bottom: false,
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.only(bottom: 120),
+          child: _currentIndex == 0
+              ? _buildDashboardHome()
+              : const Center(child: Text("Coming Soon")),
         ),
-        child: _currentIndex == 0
-            ? _buildDashboardHome()
-            : const Center(child: Text("Coming Soon")),
       ),
     );
   }
@@ -133,296 +127,300 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return SafeArea(
-      child: Column(
-        children: [
-          // Header
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: () => context.push('/profile/settings'),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.primaryPurple.withValues(alpha: 0.3),
-                        width: 2,
-                      ),
-                    ),
-                    child: CircleAvatar(
-                      radius: 28,
-                      backgroundColor: AppColors.primaryPurple.withValues(
-                        alpha: 0.1,
-                      ),
-                      backgroundImage: backgroundImage,
-                      child: backgroundImage == null
-                          ? Text(
-                              initials.toUpperCase(),
-                              style: const TextStyle(
-                                color: AppColors.primaryPurple,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                              ),
-                            )
-                          : null,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Welcome, ${user?.name.split(' ').first ?? 'User'}!",
-                        style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        "Connect your world",
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Header
+        Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Row(
+            children: [
+              GestureDetector(
+                onTap: () => context.push('/profile/settings'),
+                child: Container(
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkSurface : Colors.white,
                     shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                    border: Border.all(
+                      color: AppColors.primaryPurple.withValues(alpha: 0.3),
+                      width: 2,
+                    ),
+                  ),
+                  child: CircleAvatar(
+                    radius: 28,
+                    backgroundColor: AppColors.primaryPurple.withValues(
+                      alpha: 0.1,
+                    ),
+                    backgroundImage: backgroundImage,
+                    child: backgroundImage == null
+                        ? Text(
+                            initials.toUpperCase(),
+                            style: const TextStyle(
+                              color: AppColors.primaryPurple,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                          )
+                        : null,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Welcome, ${user?.name.split(' ').first ?? 'User'}!",
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      "Connect your world",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.darkSurface : Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  onPressed: () => context.push('/notifications'),
+                  icon: Stack(
+                    children: [
+                      const Icon(Icons.notifications_none_rounded),
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: AppColors.error,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  child: IconButton(
-                    onPressed: () => context.push('/notifications'),
-                    icon: Stack(
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Stats Section
+        _buildStatSection(isDark, user),
+
+        // Main Content
+        _detectLinks.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.link_off_rounded,
+                      size: 80,
+                      color: AppColors.gray300.withValues(alpha: 0.5),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      "No links detected.",
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    GradientButton(
+                      text: "Add Socials",
+                      width: 200,
+                      onPressed: () => context.go('/profile/add-socials'),
+                      icon: Icons.add_link_rounded,
+                    ),
+                  ],
+                ),
+              )
+            : Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Row(
                       children: [
-                        const Icon(Icons.notifications_none_rounded),
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          child: Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              color: AppColors.error,
+                        Text(
+                          "Your Connections",
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const Spacer(),
+                        // Add Socials Button
+                        IconButton(
+                          onPressed: () => context.push('/profile/add-socials'),
+                          icon: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryPurple.withValues(
+                                alpha: 0.1,
+                              ),
                               shape: BoxShape.circle,
                             ),
+                            child: const Icon(
+                              Icons.add_rounded,
+                              color: AppColors.primaryPurple,
+                            ),
+                          ),
+                          tooltip: "Add Link",
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryPurple.withValues(
+                              alpha: 0.1,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            "${_selectedPlatforms.length} Active",
+                            style: const TextStyle(
+                              color: AppColors.primaryPurple,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
+                  const SizedBox(height: 16),
 
-          // Stats Section
-          _buildStatSection(isDark, user),
-
-          // Main Content
-          Expanded(
-            child: _detectLinks.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.link_off_rounded,
-                          size: 80,
-                          color: AppColors.gray300.withValues(alpha: 0.5),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          "No links detected.",
-                          style: Theme.of(context).textTheme.bodyLarge
-                              ?.copyWith(color: AppColors.textMuted),
-                        ),
-                        const SizedBox(height: 32),
-                        GradientButton(
-                          text: "Add Socials",
-                          width: 200,
-                          onPressed: () => context.go('/profile/add-socials'),
-                          icon: Icons.add_link_rounded,
-                        ),
-                      ],
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 8,
                     ),
-                  )
-                : Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: Row(
-                          children: [
-                            Text(
-                              "Your Connections",
-                              style: Theme.of(context).textTheme.titleLarge,
-                            ),
-                            const Spacer(),
-                            // Add Socials Button
-                            IconButton(
-                              onPressed: () => context.push('/profile/add-socials'),
-                              icon: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primaryPurple.withValues(alpha: 0.1),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.add_rounded, color: AppColors.primaryPurple),
-                              ),
-                              tooltip: "Add Link",
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryPurple.withValues(
-                                  alpha: 0.1,
-                                ),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                "${_selectedPlatforms.length} Active",
-                                style: const TextStyle(
-                                  color: AppColors.primaryPurple,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          ],
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4, // 4 items per row
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 1.0, // Square tiles
                         ),
-                      ),
-                      const SizedBox(height: 16),
+                    itemCount: _detectLinks.length,
+                    itemBuilder: (context, index) {
+                      final link = _detectLinks[index];
+                      final isSelected = _selectedPlatforms.contains(
+                        link.platform,
+                      );
 
-                      Expanded(
-                        child: GridView.builder(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 8,
-                          ),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 4, // 4 items per row
-                                crossAxisSpacing: 12,
-                                mainAxisSpacing: 12,
-                                childAspectRatio: 1.0, // Square tiles
-                              ),
-                          itemCount: _detectLinks.length,
-                          itemBuilder: (context, index) {
-                            final link = _detectLinks[index];
-                            final isSelected = _selectedPlatforms.contains(
-                              link.platform,
-                            );
-
-                            return GestureDetector(
-                              onTap: () => _toggleSelection(link.platform),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                curve: Curves.easeInOut,
-                                decoration: BoxDecoration(
+                      return GestureDetector(
+                            onTap: () => _toggleSelection(link.platform),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeInOut,
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? link.platform.color.withValues(alpha: 0.9)
+                                    : (isDark
+                                          ? AppColors.darkSurface
+                                          : Colors.white),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
                                   color: isSelected
-                                      ? link.platform.color.withValues(
-                                          alpha: 0.9,
-                                        )
-                                      : (isDark
-                                            ? AppColors.darkSurface
-                                            : Colors.white),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? Colors.transparent
-                                        : AppColors.gray200.withValues(
-                                            alpha: 0.5,
-                                          ),
-                                    width: 1,
-                                  ),
-                                  boxShadow: isSelected
-                                      ? [
-                                          BoxShadow(
-                                            color: link.platform.color
-                                                .withValues(alpha: 0.4),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 4),
-                                          ),
-                                        ]
-                                      : [],
+                                      ? Colors.transparent
+                                      : AppColors.gray200.withValues(
+                                          alpha: 0.5,
+                                        ),
+                                  width: 1,
                                 ),
-                                child: Stack(
-                                  children: [
-                                    Center(
-                                      child: Icon(
-                                        link.platform.icon,
-                                        color: isSelected
-                                            ? Colors.white
-                                            : link.platform.color,
-                                        size: 28, // Smaller icon
-                                      ),
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: link.platform.color.withValues(
+                                            alpha: 0.4,
+                                          ),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ]
+                                    : [],
+                              ),
+                              child: Stack(
+                                children: [
+                                  Center(
+                                    child: Icon(
+                                      link.platform.icon,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : link.platform.color,
+                                      size: 28, // Smaller icon
                                     ),
-                                    if (isSelected)
-                                      Positioned(
-                                        top: 6,
-                                        right: 6,
-                                        child: Container(
-                                          padding: const EdgeInsets.all(2),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white.withValues(
-                                              alpha: 0.2,
-                                            ),
-                                            shape: BoxShape.circle,
+                                  ),
+                                  if (isSelected)
+                                    Positioned(
+                                      top: 6,
+                                      right: 6,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(2),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.2,
                                           ),
-                                          child: const Icon(
-                                            Icons.check,
-                                            color: Colors.white,
-                                            size: 10,
-                                          ),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.check,
+                                          color: Colors.white,
+                                          size: 10,
                                         ),
                                       ),
-                                  ],
-                                ),
-                              ),
-                            )
-                            .animate(delay: (50 * index).ms)
-                            .fadeIn(duration: 300.ms, curve: Curves.easeOut)
-                            .scale(begin: const Offset(0.8, 0.8), duration: 300.ms);
-                          },
-                        ),
-                      ),
-
-                      // Action Bar (only if editing/selecting)
-                      if (_detectLinks.isNotEmpty) ...[
-                        Container(
-                          padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).scaffoldBackgroundColor,
-                            border: Border(
-                              top: BorderSide(
-                                color: AppColors.border.withValues(alpha: 0.5),
+                                    ),
+                                ],
                               ),
                             ),
-                          ),
-                          child: GradientButton(
-                            text: "Save & Continue",
-                            onPressed: _handleConnect,
-                            icon: Icons.check_circle_outline_rounded,
+                          )
+                          .animate(delay: (50 * index).ms)
+                          .fadeIn(duration: 300.ms, curve: Curves.easeOut)
+                          .scale(
+                            begin: const Offset(0.8, 0.8),
+                            duration: 300.ms,
+                          );
+                    },
+                  ),
+
+                  // Action Bar (only if editing/selecting)
+                  if (_detectLinks.isNotEmpty) ...[
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        border: Border(
+                          top: BorderSide(
+                            color: AppColors.border.withValues(alpha: 0.5),
                           ),
                         ),
-                      ],
-                    ],
-                  ),
-          ),
-        ],
-      ),
+                      ),
+                      child: GradientButton(
+                        text: "Save & Continue",
+                        onPressed: _handleConnect,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+      ],
     );
   }
 
@@ -468,10 +466,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface.withValues(alpha: 0.6) : Colors.white,
+        color: isDark
+            ? AppColors.darkSurface.withValues(alpha: 0.6)
+            : Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: isDark ? Colors.white.withValues(alpha: 0.05) : AppColors.gray100,
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.05)
+              : AppColors.gray100,
         ),
         boxShadow: [
           BoxShadow(

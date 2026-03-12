@@ -121,6 +121,76 @@ enum SocialPlatform {
         return 'Visit Link';
     }
   }
+
+  String? get baseUrl {
+    switch (this) {
+      case SocialPlatform.instagram:
+        return 'https://instagram.com/';
+      case SocialPlatform.twitter:
+        return 'https://x.com/';
+      case SocialPlatform.linkedin:
+        return 'https://linkedin.com/in/';
+      case SocialPlatform.snapchat:
+        return 'https://snapchat.com/add/';
+      case SocialPlatform.whatsapp:
+        return 'https://wa.me/';
+      case SocialPlatform.tiktok:
+        return 'https://tiktok.com/@';
+      case SocialPlatform.youtube:
+        return 'https://youtube.com/@';
+      case SocialPlatform.facebook:
+        return 'https://facebook.com/';
+      case SocialPlatform.discord:
+        return null; // Discord invites are complex
+      case SocialPlatform.pinterest:
+        return 'https://pinterest.com/';
+      case SocialPlatform.reddit:
+        return 'https://reddit.com/u/';
+      case SocialPlatform.telegram:
+        return 'https://t.me/';
+      case SocialPlatform.github:
+        return 'https://github.com/';
+      case SocialPlatform.other:
+        return null;
+    }
+  }
+
+  String get handleHint {
+    switch (this) {
+      case SocialPlatform.whatsapp:
+        return 'Phone number (e.g. 2348000000000)';
+      case SocialPlatform.discord:
+        return 'Invite link';
+      case SocialPlatform.youtube:
+        return 'Channel handle (without @)';
+      case SocialPlatform.other:
+        return 'Custom URL';
+      default:
+        return 'Username';
+    }
+  }
+
+  String constructUrl(String handle) {
+    if (baseUrl == null) return handle;
+    
+    // Clean handle: remove leading @ if present
+    String cleanHandle = handle.trim();
+    if (cleanHandle.startsWith('@')) {
+      cleanHandle = cleanHandle.substring(1);
+    }
+    
+    // For WhatsApp, ensure no + or spaces
+    if (this == SocialPlatform.whatsapp) {
+      cleanHandle = cleanHandle.replaceAll(RegExp(r'[\s\+]'), '');
+    }
+
+    // If handle already looks like a URL, return it as is (for safety)
+    if (cleanHandle.startsWith('http')) {
+      return cleanHandle;
+    }
+
+    return '$baseUrl$cleanHandle';
+  }
 }
 
 class SocialLinkEntity {

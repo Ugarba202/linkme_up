@@ -39,10 +39,15 @@ class MockUserRepository implements IUserRepository {
     await Future.delayed(const Duration(milliseconds: 300));
     if (_users.containsKey(uid)) {
       final user = _users[uid]!;
+      // Generate a mock ID if not present
+      final finalLink = link.id.isEmpty 
+          ? link.copyWith(id: DateTime.now().millisecondsSinceEpoch.toString())
+          : link;
+          
       final updatedLinks = List<SocialLinkEntity>.from(user.socialLinks)
-        ..add(link);
+        ..add(finalLink);
       _users[uid] = user.copyWith(socialLinks: updatedLinks);
-      print("MOCK: Added social link ${link.platform.name}");
+      print("MOCK: Added social link ${finalLink.platform.name} with ID ${finalLink.id}");
     }
   }
 

@@ -24,7 +24,8 @@ class MainWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     // Hide nav bar on certain screens if needed
     // Hide nav bar on dashboard (index 0)
-    final bool showNavBar = navigationShell.currentIndex != 0;
+    // Always show navigation bar for consistency
+    final bool showNavBar = true; 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(

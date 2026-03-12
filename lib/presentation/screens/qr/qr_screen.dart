@@ -468,7 +468,7 @@ class _QrScreenState extends ConsumerState<QrScreen> {
 
               // Bottom Actions
               Padding(
-                padding: const EdgeInsets.fromLTRB(32, 0, 32, 60),
+                padding: const EdgeInsets.fromLTRB(32, 0, 32, 120),
                 child: GradientButton(
                   text: "Scan a Code",
                   icon: Icons.qr_code_scanner_rounded,

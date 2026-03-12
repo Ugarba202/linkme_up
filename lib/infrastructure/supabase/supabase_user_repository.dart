@@ -55,9 +55,10 @@ class SupabaseUserRepository implements IUserRepository {
 
   @override
   Future<void> addSocialLink(String uid, SocialLinkEntity link) async {
+    final linkMap = _linkToSupabaseMap(link, isInsert: true);
     await _client.from('social_links').insert({
       'user_id': uid,
-      ..._linkToSupabaseMap(link),
+      ...linkMap,
     });
   }
 
@@ -148,15 +149,21 @@ class SupabaseUserRepository implements IUserRepository {
     );
   }
 
-  Map<String, dynamic> _linkToSupabaseMap(SocialLinkEntity link) {
-    return {
-      'id': link.id,
+  Map<String, dynamic> _linkToSupabaseMap(SocialLinkEntity link, {bool isInsert = false}) {
+    final map = {
       'platform': link.platform.name,
       'username': link.username,
       'url': link.url,
       'is_visible': link.isVisible,
       'display_order': link.order,
     };
+    
+    // Only include ID if not an insert or if ID is already set
+    if (!isInsert || link.id.isNotEmpty) {
+      map['id'] = link.id;
+    }
+    
+    return map;
   }
 
   SocialLinkEntity _linkFromSupabaseMap(Map<String, dynamic> map) {
