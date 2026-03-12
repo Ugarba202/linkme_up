@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../application/providers/user_provider.dart';
-import '../../../domain/entities/user_entity.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../widgets/custom_input.dart';
 import '../../widgets/gradient_button.dart';
@@ -46,15 +45,25 @@ class _NameScreenState extends ConsumerState<NameScreen> {
         throw Exception("No active session found. Please go back.");
       }
 
-      // 2. Auto-generate Username (Take first name)
-      final firstName = fullName.split(' ').first.toLowerCase();
-      // Ensure it's alphanumeric only for the URL
-      final sanitizedUsername = firstName.replaceAll(RegExp(r'[^a-z0-9]'), '');
+      // 2. Auto-generate Username (Take first name, fallback to more if too short)
+      final names = fullName.split(' ');
+      String candidate = names.first.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
       
-      String finalUsername = sanitizedUsername;
+      if (candidate.length < 3) {
+        // If first name is too short (e.g. "MK"), try combined name
+        final combined = fullName.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toLowerCase();
+        if (combined.length >= 3) {
+          candidate = combined;
+        } else {
+          // Absolute fallback
+          candidate = "${candidate}me${DateTime.now().millisecond % 100}";
+        }
+      }
+      
+      String finalUsername = candidate;
       final isAvailable = await ref.read(userRepositoryProvider).isUsernameAvailable(finalUsername);
       if (!isAvailable) {
-        finalUsername = "$sanitizedUsername${DateTime.now().millisecond}";
+        finalUsername = "${candidate}${DateTime.now().millisecond % 1000}";
       }
 
       final avatarUrl = "https://api.dicebear.com/9.x/avataaars/png?seed=$finalUsername&backgroundColor=b6e3f4,c0aede,d1d4f9";

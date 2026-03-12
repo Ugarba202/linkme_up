@@ -221,267 +221,265 @@ class _QrScreenState extends ConsumerState<QrScreen> {
           ),
         ),
         child: SafeArea(
-          child: Column(
-            children: [
-              // Header
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 20,
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      "My Pass",
-                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w900,
-                          ),
-                    ),
-                    const Spacer(),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.qr_code_scanner_rounded,
-                          color: Colors.white,
-                        ),
-                        onPressed: () => context.push('/qr/scan'),
-                        tooltip: "Scan Code",
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.share_rounded,
-                          color: Colors.white,
-                        ),
-                        onPressed: () {
-                          Share.share(
-                            "Check out my profile on LinkMeUp: $shareUrl",
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ).animate().fadeIn(duration: 600.ms).slideY(begin: -0.2, end: 0),
-
-              const SizedBox(height: 10),
-
-              // Subtitle
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Text(
-                  "Share your digital identity with a single scan",
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.6),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                // Header
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 20,
                   ),
-                ),
-              ).animate().fadeIn(delay: 200.ms),
-
-              const SizedBox(height: 30),
-
-              // Digital Pass Card
-              Expanded(
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32),
-                    child: user != null && !user.isQrGenerated
-                        ? _buildGenerateView(context, ref)
-                        : Container(
-                            decoration: BoxDecoration(
+                  child: Row(
+                    children: [
+                      Text(
+                        "My Pass",
+                        style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(32),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.5),
-                                  blurRadius: 40,
-                                  offset: const Offset(0, 20),
-                                ),
-                              ],
+                              fontWeight: FontWeight.w900,
                             ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // Top Section: Profile Branding
-                                Container(
-                                  padding: const EdgeInsets.all(32),
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        AppColors.primaryPurple.withValues(alpha: 0.08),
-                                        Colors.white,
-                                      ],
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                    ),
-                                    borderRadius: const BorderRadius.vertical(
-                                      top: Radius.circular(32),
-                                    ),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(3),
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: AppColors.primaryPurple.withValues(alpha: 0.2),
-                                            width: 1.5,
-                                          ),
-                                        ),
-                                        child: CircleAvatar(
-                                          radius: 40,
-                                          backgroundColor: AppColors.primaryPurple,
-                                          backgroundImage: backgroundImage,
-                                          child: backgroundImage == null
-                                              ? Text(
-                                                  (fullName.trim().split(" ").length >= 2
-                                                          ? "${fullName.trim().split(" ")[0][0]}${fullName.trim().split(" ")[1][0]}"
-                                                          : fullName.isNotEmpty
-                                                              ? fullName[0]
-                                                              : "U")
-                                                      .toUpperCase(),
-                                                  style: const TextStyle(
-                                                    fontSize: 32,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.white,
-                                                  ),
-                                                )
-                                              : null,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      Text(
-                                        fullName,
-                                        style: const TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.w900,
-                                          letterSpacing: -0.5,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        "@$displayHandle",
-                                        style: TextStyle(
-                                          color: AppColors.primaryPurple.withValues(alpha: 0.7),
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-
-                                // Middle Section: QR Code with Logo
-                                Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: QrImageView(
-                                    data: shareUrl,
-                                    version: QrVersions.auto,
-                                    size: 220.0,
-                                    gapless: true,
-                                    // Using assets/images/splash_image.png for the logo
-                                    embeddedImage: const AssetImage('assets/images/splash_image.png'),
-                                    embeddedImageStyle: const QrEmbeddedImageStyle(
-                                      size: Size(50, 50),
-                                    ),
-                                    // Use standard square shapes for better scanning reliability
-                                    eyeStyle: const QrEyeStyle(
-                                      eyeShape: QrEyeShape.square,
-                                      color: Colors.black,
-                                    ),
-                                    dataModuleStyle: const QrDataModuleStyle(
-                                      dataModuleShape: QrDataModuleShape.square,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
-
-                                const SizedBox(height: 20),
-
-                                // Clickable Link
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 32.0),
-                                  child: InkWell(
-                                    onTap: () async {
-                                      final Uri url = Uri.parse(shareUrl);
-                                      if (!await launchUrl(url)) {
-                                        if (context.mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Could not launch url')),
-                                          );
-                                        }
-                                      }
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.primaryPurple.withValues(alpha: 0.05),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Text(
-                                        shareUrl,
-                                        style: const TextStyle(
-                                          color: AppColors.primaryPurple,
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 13,
-                                          decoration: TextDecoration.underline,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                          .animate()
-                          .scale(
-                            delay: 200.ms,
-                            duration: 600.ms,
-                            curve: Curves.easeOutBack,
-                          )
-                          .fadeIn(delay: 200.ms),
+                      ),
+                      const Spacer(),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.qr_code_scanner_rounded,
+                            color: Colors.white,
+                          ),
+                          onPressed: () => context.push('/qr/scan'),
+                          tooltip: "Scan Code",
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.share_rounded,
+                            color: Colors.white,
+                          ),
+                          onPressed: () {
+                            Share.share(
+                              "Check out my profile on LinkMeUp: $shareUrl",
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
+                ).animate().fadeIn(duration: 600.ms).slideY(begin: -0.2, end: 0),
+  
+                const SizedBox(height: 10),
+  
+                // Subtitle
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Text(
+                    "Share your digital identity with a single scan",
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.6),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ).animate().fadeIn(delay: 200.ms),
+  
+                const SizedBox(height: 30),
+  
+                // Digital Pass Card
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: user != null && !user.isQrGenerated
+                      ? _buildGenerateView(context, ref)
+                      : Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(32),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.5),
+                                blurRadius: 40,
+                                offset: const Offset(0, 20),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Top Section: Profile Branding
+                              Container(
+                                padding: const EdgeInsets.all(32),
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      AppColors.primaryPurple.withValues(alpha: 0.08),
+                                      Colors.white,
+                                    ],
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                  ),
+                                  borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(32),
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(3),
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: AppColors.primaryPurple.withValues(alpha: 0.2),
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      child: CircleAvatar(
+                                        radius: 40,
+                                        backgroundColor: AppColors.primaryPurple,
+                                        backgroundImage: backgroundImage,
+                                        child: backgroundImage == null
+                                            ? Text(
+                                                (fullName.trim().split(" ").length >= 2
+                                                        ? "${fullName.trim().split(" ")[0][0]}${fullName.trim().split(" ")[1][0]}"
+                                                        : fullName.isNotEmpty
+                                                            ? fullName[0]
+                                                            : "U")
+                                                    .toUpperCase(),
+                                                style: const TextStyle(
+                                                  fontSize: 32,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                ),
+                                              )
+                                            : null,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      fullName,
+                                      style: const TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: -0.5,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      "@$displayHandle",
+                                      style: TextStyle(
+                                        color: AppColors.primaryPurple.withValues(alpha: 0.7),
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+  
+                              // Middle Section: QR Code with Logo
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: QrImageView(
+                                  data: shareUrl,
+                                  version: QrVersions.auto,
+                                  size: 220.0,
+                                  gapless: true,
+                                  // Using assets/images/splash_image.png for the logo
+                                  embeddedImage: const AssetImage('assets/images/splash_image.png'),
+                                  embeddedImageStyle: const QrEmbeddedImageStyle(
+                                    size: Size(50, 50),
+                                  ),
+                                  // Use standard square shapes for better scanning reliability
+                                  eyeStyle: const QrEyeStyle(
+                                    eyeShape: QrEyeShape.square,
+                                    color: Colors.black,
+                                  ),
+                                  dataModuleStyle: const QrDataModuleStyle(
+                                    dataModuleShape: QrDataModuleShape.square,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+  
+                              const SizedBox(height: 20),
+  
+                              // Clickable Link
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 32.0),
+                                child: InkWell(
+                                  onTap: () async {
+                                    final Uri url = Uri.parse(shareUrl);
+                                    if (!await launchUrl(url)) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(content: Text('Could not launch url')),
+                                        );
+                                      }
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primaryPurple.withValues(alpha: 0.05),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      shareUrl,
+                                      style: const TextStyle(
+                                        color: AppColors.primaryPurple,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                        .animate()
+                        .scale(
+                          delay: 200.ms,
+                          duration: 600.ms,
+                          curve: Curves.easeOutBack,
+                        )
+                        .fadeIn(delay: 200.ms),
                 ),
-              ),
-
-              const SizedBox(height: 32),
-
-              // Bottom Actions
-              Padding(
-                padding: const EdgeInsets.fromLTRB(32, 0, 32, 120),
-                child: GradientButton(
-                  text: "Scan a Code",
-                  icon: Icons.qr_code_scanner_rounded,
-                  onPressed: () => context.push('/qr/scan'),
+  
+                const SizedBox(height: 32),
+  
+                // Bottom Actions
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(32, 0, 32, 100),
+                  child: GradientButton(
+                    text: "Scan a Code",
+                    icon: Icons.qr_code_scanner_rounded,
+                    onPressed: () => context.push('/qr/scan'),
+                  ),
+                ).animate().slideY(
+                  begin: 1.0,
+                  end: 0,
+                  delay: 500.ms,
+                  duration: 500.ms,
+                  curve: Curves.easeOut,
                 ),
-              ).animate().slideY(
-                begin: 1.0,
-                end: 0,
-                delay: 500.ms,
-                duration: 500.ms,
-                curve: Curves.easeOut,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
