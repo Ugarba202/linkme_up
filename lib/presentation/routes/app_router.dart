@@ -8,8 +8,12 @@ import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/main_wrapper.dart';
 
 // Auth Flow
+import '../screens/auth/auth_screen.dart';
 import '../screens/auth/country_screen.dart';
 import '../screens/auth/name_screen.dart';
+
+// Setup Wizard
+import '../screens/setup/setup_wizard_screen.dart';
 
 // Profile Setup
 import '../screens/profile/welcome_screen.dart'; 
@@ -25,8 +29,8 @@ import '../screens/qr/qr_screen.dart';
 import '../screens/qr/full_qr_screen.dart';
 import '../screens/qr/scanner_screen.dart';
 
-// New Screens
 import '../screens/notifications/notifications_screen.dart';
+import '../screens/analytics/analytics_dashboard_screen.dart';
 import '../screens/profile/external_profile_screen.dart';
 import '../screens/profile/profile_landing_screen.dart';
 import '../screens/legal/legal_screen.dart';
@@ -73,9 +77,20 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       // Auth Flow
       GoRoute(
+        path: '/auth',
+        builder: (context, state) => const AuthScreen(),
+      ),
+      GoRoute(
         path: '/auth/country',
         builder: (context, state) => const CountryScreen(),
       ),
+      
+      // Setup Wizard
+      GoRoute(
+        path: '/setup',
+        builder: (context, state) => const SetupWizardScreen(),
+      ),
+
       GoRoute(
         path: '/auth/name',
         builder: (context, state) {
@@ -100,15 +115,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           return MainWrapper(navigationShell: navigationShell);
         },
         branches: [
-          // Branch 1: Dashboard
+          // Branch 1: Analytics
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/dashboard',
-                builder: (context, state) {
-                  final rawLinks = state.extra as String?;
-                  return DashboardScreen(rawLinks: rawLinks);
-                },
+                path: '/analytics',
+                builder: (context, state) => const AnalyticsDashboardScreen(),
               ),
             ],
           ),

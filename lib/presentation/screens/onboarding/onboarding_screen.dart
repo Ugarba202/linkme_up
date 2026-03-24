@@ -18,19 +18,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   final List<OnboardingContent> _pages = [
     OnboardingContent(
-      title: "Scan once, connect everywhere.",
+      title: "Scan to Connect",
       subtitle: "Share your entire social presence in seconds with a single QR code.",
       icon: Icons.qr_code_scanner_rounded,
     ),
     OnboardingContent(
-      title: "No more awkward spelling.",
+      title: "All your links in one place",
       subtitle: "Stop repeating usernames. Just show your code and stay in the flow.",
-      icon: Icons.forum_rounded,
+      icon: Icons.link_rounded,
     ),
     OnboardingContent(
-      title: "Your identity, simplified.",
-      subtitle: "One link for all your platforms. Instantly intuitive for everyone.",
-      icon: Icons.person_add_rounded,
+      title: "Insights that matter",
+      subtitle: "Track your scans and see how your network grows.",
+      icon: Icons.analytics_rounded,
     ),
   ];
 
@@ -159,7 +159,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _navigateToAuth() {
-    context.push('/auth/country');
+    context.push('/auth');
   }
 }
 

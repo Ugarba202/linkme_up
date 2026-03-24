@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:io';
 import '../../domain/entities/social_link_entity.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/user_repository.dart';
-import '../../infrastructure/supabase/supabase_user_repository.dart';
+import '../../infrastructure/mock_user_repository.dart';
 import 'storage_providers.dart';
 
 final userRepositoryProvider = Provider<IUserRepository>((ref) {
-  return SupabaseUserRepository();
+  return MockUserRepository();
 });
 
 class UserNotifier extends Notifier<UserEntity?> {
@@ -26,27 +25,13 @@ class UserNotifier extends Notifier<UserEntity?> {
       final prefs = await SharedPreferences.getInstance();
       final localUid = prefs.getString('local_uid');
       
-      // 1. Check for real Supabase auth session (Anonymous or Email)
-      final authUid = await _getSupabaseUid();
-      
-      if (authUid != null) {
-        debugPrint("DEBUG: Restoring session from Supabase Auth: $authUid");
-        await _loadUserProfile(authUid);
-      } else {
-        // 2. Fallback to legacy local_uid if present
-        final localUid = prefs.getString('local_uid');
-        if (localUid != null) {
-          debugPrint("DEBUG: Restoring session from legacy local UID: $localUid");
-          await _loadUserProfile(localUid);
-        }
+      if (localUid != null) {
+        debugPrint("DEBUG: Restoring session from local UID: $localUid");
+        await _loadUserProfile(localUid);
       }
     } catch (e) {
       debugPrint("DEBUG: Error session restoration: $e");
     }
-  }
-
-  Future<String?> _getSupabaseUid() async {
-    return Supabase.instance.client.auth.currentUser?.id;
   }
 
   Future<void> _loadUserProfile(String uid) async {

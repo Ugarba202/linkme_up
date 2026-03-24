@@ -97,7 +97,7 @@ class MainWrapper extends StatelessWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              _buildNavItem(context, 0, Icons.grid_view_rounded, "Home"),
+                              _buildNavItem(context, 0, Icons.insights_rounded, "Analytics"),
                               _buildNavItem(context, 1, Icons.qr_code_rounded, "QR"),
                               _buildNavItem(context, 2, Icons.person_rounded, "Profile"),
                             ],

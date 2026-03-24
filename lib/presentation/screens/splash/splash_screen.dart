@@ -44,7 +44,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     // If user is already loaded and profile is completed, go to dashboard
     if (user != null) {
       if (user.profileCompleted) {
-        context.go('/dashboard');
+        context.go('/analytics');
       } else {
         // User exists but profile not complete, take them to welcome or where they left off
         context.go('/profile/welcome');
@@ -61,7 +61,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColors.primaryGradient),
+        decoration: const BoxDecoration(color: AppColors.primaryPurple),
         child: Stack(
           children: [
             // Subtle Background Patterns/Shapes
@@ -133,11 +133,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                             ),
                           ],
                         ),
-                        child: Image.asset(
-                          'assets/images/splash_image.png',
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.contain,
+                        child: const Icon(
+                          Icons.qr_code_scanner_rounded,
+                          size: 60,
+                          color: AppColors.primaryPurple,
                         ),
                       )
                       .animate()
