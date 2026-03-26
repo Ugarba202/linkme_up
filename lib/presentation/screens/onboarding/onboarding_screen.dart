@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
-
-import '../../../core/themes/app_colors.dart';
-import '../../widgets/gradient_button.dart';
+import '../../widgets/common/custom_button.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -13,165 +10,142 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  final PageController _controller = PageController();
-  int _currentIndex = 0;
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
 
-  final List<OnboardingContent> _pages = [
+  final List<OnboardingContent> _onboardingPages = [
     OnboardingContent(
-      title: "Scan to Connect",
-      subtitle: "Share your entire social presence in seconds with a single QR code.",
-      icon: Icons.qr_code_scanner_rounded,
+      title: 'One QR.\nAll your links.',
+      description: 'Link your Instagram, TikTok, YouTube, and more in seconds.',
+      imageType: OnboardingImageType.connect,
     ),
     OnboardingContent(
-      title: "All your links in one place",
-      subtitle: "Stop repeating usernames. Just show your code and stay in the flow.",
-      icon: Icons.link_rounded,
+      title: 'Scan to\nConnect.',
+      description: 'Show your QR code to anyone and let them discover your digital world instantly.',
+      imageType: OnboardingImageType.share,
     ),
     OnboardingContent(
-      title: "Insights that matter",
-      subtitle: "Track your scans and see how your network grows.",
-      icon: Icons.analytics_rounded,
+      title: 'Insights that matter.',
+      description: 'See who’s scanning and which platforms are trending with real-time analytics.',
+      imageType: OnboardingImageType.analytics,
     ),
   ];
+
+  void _nextPage() {
+    if (_currentPage < _onboardingPages.length - 1) {
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      context.go('/auth');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // TOP BAR - Skip Button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Align(
-                alignment: Alignment.topRight,
-                child: _currentIndex < _pages.length - 1
-                    ? TextButton(
-                        onPressed: () => _navigateToAuth(),
-                        child: Text(
-                          "Skip",
-                          style: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      )
-                    : const SizedBox(height: 48), // Spacer to maintain layout
-              ),
-            ),
-
-            // CENTER CONTENT - PageView
-            Expanded(
-              child: PageView.builder(
-                controller: _controller,
-                itemCount: _pages.length,
-                onPageChanged: (index) {
-                  setState(() => _currentIndex = index);
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: _currentPage > 0
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.black),
+                onPressed: () {
+                  _pageController.previousPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
                 },
-                itemBuilder: (context, index) {
-                  return _OnboardingPageView(content: _pages[index]);
-                },
-              ),
+              )
+            : null,
+        title: const Text(
+          'LinkQR',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => context.go('/auth'),
+            child: const Text(
+              'SKIP',
+              style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
             ),
-
-            // BOTTOM BAR - Indicators & Action Button
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  // Progress Dots
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      _pages.length,
-                      (index) => _buildIndicator(index == _currentIndex),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: _onboardingPages.length,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentPage = index;
+                });
+              },
+              itemBuilder: (context, index) {
+                return _OnboardingPageView(content: _onboardingPages[index]);
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Indicators on the left
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(
+                    _onboardingPages.length,
+                    (index) => Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      height: 6,
+                      width: _currentPage == index ? 24 : 6,
+                      decoration: BoxDecoration(
+                        color: _currentPage == index ? const Color(0xFF5B62F4) : Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(3),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 32),
-
-                  // Action Button
-                  GradientButton(
-                    text: _currentIndex == _pages.length - 1
-                        ? "Get Started"
-                        : "Next",
-                    icon: Icons.arrow_forward_rounded,
-                    onPressed: () {
-                      if (_currentIndex == _pages.length - 1) {
-                        _navigateToAuth();
-                      } else {
-                        _controller.nextPage(
-                          duration: const Duration(milliseconds: 400),
-                          curve: Curves.easeOutQuart,
-                        );
-                      }
-                    },
+                ),
+                // Next button (half of the screen width)
+                SizedBox(
+                  width: 140, // Around half width of typical device or explicitly fixed
+                  child: PrimaryButton(
+                    text: '',
+                    onPressed: _nextPage,
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Icon(Icons.arrow_forward, color: Colors.white),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: () => context.push('/legal/terms'),
-                        child: Text(
-                          "Terms of Service",
-                          style: TextStyle(
-                            color: AppColors.gray500,
-                            fontSize: 12,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                      Text("  •  ", style: TextStyle(color: AppColors.gray300)),
-                      GestureDetector(
-                        onTap: () => context.push('/legal/privacy'),
-                        child: Text(
-                          "Privacy Policy",
-                          style: TextStyle(
-                            color: AppColors.gray500,
-                            fontSize: 12,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
-  }
-
-  Widget _buildIndicator(bool isActive) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      height: 8,
-      width: isActive ? 24 : 8,
-      decoration: BoxDecoration(
-        color: isActive ? AppColors.primary : AppColors.primarySoft,
-        borderRadius: BorderRadius.circular(4),
-      ),
-    );
-  }
-
-  void _navigateToAuth() {
-    context.push('/auth');
   }
 }
 
+enum OnboardingImageType { connect, share, analytics }
+
 class OnboardingContent {
   final String title;
-  final String subtitle;
-  final IconData icon;
+  final String description;
+  final OnboardingImageType imageType;
 
   OnboardingContent({
     required this.title,
-    required this.subtitle,
-    required this.icon,
+    required this.description,
+    required this.imageType,
   });
 }
 
@@ -183,51 +157,86 @@ class _OnboardingPageView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+      padding: const EdgeInsets.all(24.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Illustration / Icon Placeholder
-          Container(
-            height: 200,
-            width: 200,
-            decoration: BoxDecoration(
-              color: AppColors.primarySoft.withOpacity(0.5),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              content.icon,
-              size: 100,
-              color: AppColors.primary,
-            ),
+          Expanded(
+            flex: 3,
+            child: _buildGraphic(content.imageType),
           ),
-          const SizedBox(height: 60),
-
-          // Title
-          Text(
-            content.title,
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
-              height: 1.2,
+          const SizedBox(height: 48),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              content.title,
+              style: const TextStyle(
+                fontSize: 40,
+                fontWeight: FontWeight.bold,
+                height: 1.1,
+              ),
             ),
-            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
-
-          // Subtitle
-          Text(
-            content.subtitle,
-            style: const TextStyle(
-              fontSize: 16,
-              color: AppColors.textSecondary,
-              height: 1.5,
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              content.description,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.black,
+                height: 1.5,
+              ),
             ),
-            textAlign: TextAlign.center,
           ),
+          const Spacer(),
         ],
       ),
+    );
+  }
+
+  Widget _buildGraphic(OnboardingImageType type) {
+    switch (type) {
+      case OnboardingImageType.connect:
+        return _ConnectGraphic();
+      case OnboardingImageType.share:
+        return _ShareGraphic();
+      case OnboardingImageType.analytics:
+        return _AnalyticsGraphic();
+    }
+  }
+}
+
+class _ConnectGraphic extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: SizedBox(
+        width: 250,
+        height: 250,
+      ),
+    );
+  }
+}
+
+class _ShareGraphic extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: SizedBox(
+        width: 200,
+        height: 200,
+      ),
+    );
+  }
+}
+
+class _AnalyticsGraphic extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      height: 300,
+      width: double.infinity,
     );
   }
 }

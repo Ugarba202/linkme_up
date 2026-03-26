@@ -1,170 +1,219 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_animate/flutter_animate.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../application/providers/auth_providers.dart';
 
-import '../../../core/themes/app_colors.dart';
-import '../../widgets/gradient_button.dart';
-import '../../widgets/custom_input.dart';
-import '../../widgets/auth_background.dart';
-
-class AuthScreen extends StatefulWidget {
+class AuthScreen extends ConsumerWidget {
   const AuthScreen({super.key});
 
   @override
-  State<AuthScreen> createState() => _AuthScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    const primaryColor = Color(0xFF5B62F4);
 
-class _AuthScreenState extends State<AuthScreen> {
-  bool _isLogin = true;
-  bool _isLoading = false;
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-
-  void _toggleMode() {
-    setState(() {
-      _isLogin = !_isLogin;
-    });
-  }
-
-  Future<void> _handleAuth() async {
-    setState(() => _isLoading = true);
-    // Mock network delay
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() => _isLoading = false);
-    
-    if (mounted) {
-      // Navigate to setup wizard steps 
-      context.push('/setup');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AuthBackground(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          children: [
-            const SizedBox(height: 60),
-            // Logo
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.primaryPurple.withOpacity(0.1),
-                shape: BoxShape.circle,
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => context.go('/'),
+        ),
+        title: const Text(
+          'LinkQR',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 24),
+              const Text(
+                'Join LinkQR',
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
               ),
-              child: const Icon(Icons.qr_code_scanner_rounded, size: 48, color: AppColors.primaryPurple),
-            ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
-            const SizedBox(height: 32),
-            
-            // Welcome Text
-            Text(
-              _isLogin ? "Welcome Back" : "Create Account",
-              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                fontWeight: FontWeight.w900,
+              const SizedBox(height: 8),
+              const Text(
+                'Elevate your digital presence.',
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
-            
-            const SizedBox(height: 12),
-            Text(
-              _isLogin ? "Enter your details to proceed." : "Sign up to start sharing your links.",
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.gray500),
-              textAlign: TextAlign.center,
-            ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2, end: 0),
-            
-            const SizedBox(height: 40),
-            
-            // Inputs
-            CustomInput(
-              controller: _emailController,
-              hintText: "Email",
-              label: "Email Address",
-              prefixIcon: Icons.email_outlined,
-              keyboardType: TextInputType.emailAddress,
-            ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1, end: 0),
-            
-            const SizedBox(height: 20),
-            
-            CustomInput(
-              controller: _passwordController,
-              hintText: "Password",
-              label: "Password",
-              prefixIcon: Icons.lock_outline_rounded,
-              isPassword: true,
-            ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.1, end: 0),
-            
-            const SizedBox(height: 40),
-            
-            GradientButton(
-              text: _isLogin ? "Sign In" : "Sign Up",
-              isLoading: _isLoading,
-              onPressed: _isLoading ? null : _handleAuth,
-            ).animate().fadeIn(delay: 600.ms).scale(duration: 400.ms),
-            
-            const SizedBox(height: 24),
-            
-            // Social Auth Mock Buttons
-            Row(
-              children: [
-                Expanded(child: Divider(color: AppColors.gray200)),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text("Or continue with", style: TextStyle(color: AppColors.gray400, fontSize: 12)),
+              const SizedBox(height: 48),
+              // Central World Map Asset Graphic
+              const Center(child: _WorldMapGraphic()),
+              const Spacer(),
+              // Social Login Buttons
+              _SocialButton(
+                icon: FontAwesomeIcons.apple,
+                text: 'Continue with Apple',
+                backgroundColor: Colors.black,
+                textColor: Colors.white,
+                onPressed: () => _handleAuth(context, ref),
+              ),
+              const SizedBox(height: 12),
+              _SocialButton(
+                icon: FontAwesomeIcons.google,
+                text: 'Continue with Google',
+                backgroundColor: Colors.white,
+                textColor: Colors.black,
+                borderColor: Colors.grey.shade300,
+                onPressed: () => _handleAuth(context, ref),
+              ),
+              const SizedBox(height: 12),
+              _SocialButton(
+                icon: Icons.phone_android,
+                text: 'Continue with Phone',
+                backgroundColor: primaryColor,
+                textColor: Colors.white,
+                onPressed: () => _handleAuth(context, ref),
+              ),
+              const SizedBox(height: 24),
+              const Center(child: Text('OR', style: TextStyle(color: Colors.grey, fontSize: 12))),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: () => _handleAuth(context, ref),
+                child: const Text(
+                  'Continue as Guest',
+                  style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
                 ),
-                Expanded(child: Divider(color: AppColors.gray200)),
-              ],
-            ).animate().fadeIn(delay: 700.ms),
-            
-            const SizedBox(height: 24),
-            
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildSocialButton(Icons.g_mobiledata_rounded, AppColors.facebook),
-                const SizedBox(width: 16),
-                _buildSocialButton(Icons.apple_rounded, Colors.black),
-              ],
-            ).animate().fadeIn(delay: 800.ms),
-
-            const SizedBox(height: 40),
-            
-            // Toggle Login/Signup
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  _isLogin ? "Don't have an account? " : "Already have an account? ",
-                  style: const TextStyle(color: AppColors.gray500, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 24),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24.0),
+                child: Text(
+                  'By continuing, you agree to our Terms of Service\nand Privacy Policy',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey, fontSize: 10, height: 1.5),
                 ),
-                GestureDetector(
-                  onTap: _toggleMode,
-                  child: Text(
-                    _isLogin ? "Sign Up" : "Sign In",
-                    style: const TextStyle(color: AppColors.primaryPurple, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ).animate().fadeIn(delay: 900.ms),
-            
-            const SizedBox(height: 40),
-          ],
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildSocialButton(IconData icon, Color color) {
+  void _handleAuth(BuildContext context, WidgetRef ref) async {
+    try {
+      await ref.read(authRepositoryProvider).signInAnonymously();
+      if (context.mounted) {
+        context.go('/setup');
+      }
+    } catch (_) {
+      // Handle error
+    }
+  }
+}
+
+class _WorldMapGraphic extends StatelessWidget {
+  const _WorldMapGraphic();
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      width: 60,
-      height: 60,
+      width: 280,
+      height: 220,
       decoration: BoxDecoration(
-        color: AppColors.gray50,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.gray200),
+        color: const Color(0xFF1A1A1A),
+        borderRadius: BorderRadius.circular(24),
       ),
-      child: Center(
-        child: Icon(icon, size: 32, color: color),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Simulated World Map lines
+          CustomPaint(
+            size: const Size(200, 120),
+            painter: _MapPainter(),
+          ),
+          // Floating QR Card
+          Positioned(
+            bottom: 20,
+            right: 20,
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10)
+                ],
+              ),
+              child: const Center(
+                child: Icon(Icons.qr_code_2, color: Colors.black, size: 30),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MapPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.1)
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+
+    // Draw some random map-like dots or grid
+    for (var i = 1; i < 10; i++) {
+      canvas.drawLine(Offset(0, size.height * (i / 10)), Offset(size.width, size.height * (i / 10)), paint);
+      canvas.drawLine(Offset(size.width * (i / 10), 0), Offset(size.width * (i / 10), size.height), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+class _SocialButton extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final Color backgroundColor;
+  final Color textColor;
+  final Color? borderColor;
+  final VoidCallback onPressed;
+
+  const _SocialButton({
+    required this.icon,
+    required this.text,
+    required this.backgroundColor,
+    required this.textColor,
+    this.borderColor,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: backgroundColor,
+        foregroundColor: textColor,
+        elevation: 0,
+        minimumSize: const Size(double.infinity, 56),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: borderColor != null ? BorderSide(color: borderColor!) : BorderSide.none,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 20),
+          const SizedBox(width: 12),
+          Text(text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        ],
       ),
     );
   }

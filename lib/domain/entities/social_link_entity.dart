@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../../core/themes/app_colors.dart';
 
 enum SocialPlatform {
   instagram,
@@ -63,33 +62,33 @@ enum SocialPlatform {
   Color get color {
     switch (this) {
       case SocialPlatform.instagram:
-        return const Color(0xFFE1306C); // Official Insta Pink/Orange
+        return const Color(0xFFE1306C);
       case SocialPlatform.twitter:
-        return AppColors.twitter;
+        return const Color(0xFF000000);
       case SocialPlatform.linkedin:
-        return AppColors.linkedin;
+        return const Color(0xFF0A66C2);
       case SocialPlatform.snapchat:
-        return AppColors.snapchat;
+        return const Color(0xFFFFFC00);
       case SocialPlatform.whatsapp:
-        return AppColors.whatsapp;
+        return const Color(0xFF25D366);
       case SocialPlatform.tiktok:
-        return AppColors.tiktok;
+        return const Color(0xFF000000);
       case SocialPlatform.youtube:
-        return AppColors.youtube;
+        return const Color(0xFFFF0000);
       case SocialPlatform.facebook:
-        return AppColors.facebook;
+        return const Color(0xFF1877F2);
       case SocialPlatform.discord:
-        return AppColors.discord;
+        return const Color(0xFF5865F2);
       case SocialPlatform.pinterest:
-        return AppColors.pinterest;
+        return const Color(0xFFE60023);
       case SocialPlatform.reddit:
-        return AppColors.reddit;
+        return const Color(0xFFFF4500);
       case SocialPlatform.telegram:
-        return AppColors.telegram;
+        return const Color(0xFF0088CC);
       case SocialPlatform.github:
         return const Color(0xFF333333);
       case SocialPlatform.other:
-        return AppColors.primaryPurple;
+        return const Color(0xFF3F51B5);
     }
   }
 

@@ -1,212 +1,117 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 
-import '../../../core/themes/app_colors.dart';
-
-import 'dart:async';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../application/providers/user_provider.dart';
-
-class SplashScreen extends ConsumerStatefulWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  ConsumerState<SplashScreen> createState() => _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends ConsumerState<SplashScreen> {
-  Timer? _timer;
-
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _startTimer();
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  void _startTimer() {
-    // Show splash for 2.5 seconds for branding and auth restoration
-    _timer = Timer(const Duration(milliseconds: 2500), _checkAuthAndNavigate);
-  }
-
-  Future<void> _checkAuthAndNavigate() async {
-    if (!mounted) return;
-
-    // We wait a bit more if state is null to allow restoration to complete
-    final user = ref.read(userProvider);
-    
-    // If user is already loaded and profile is completed, go to dashboard
-    if (user != null) {
-      if (user.profileCompleted) {
-        context.go('/analytics');
-      } else {
-        // User exists but profile not complete, take them to welcome or where they left off
-        context.go('/profile/welcome');
+    Timer(const Duration(seconds: 5), () {
+      if (mounted) {
+        context.go('/onboarding');
       }
-    } else {
-      // No user found after restoration period, go to onboarding
-      context.go('/onboarding');
-    }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    const primaryColor = Color(0xFF5B62F4);
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(color: AppColors.primaryPurple),
-        child: Stack(
-          children: [
-            // Subtle Background Patterns/Shapes
-            Positioned(
-                  top: -100,
-                  right: -100,
-                  child: Container(
-                    width: 300,
-                    height: 300,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.05),
-                    ),
-                  ),
-                )
-                .animate(
-                  onPlay: (controller) => controller.repeat(reverse: true),
-                )
-                .moveY(
-                  begin: 0,
-                  end: 50,
-                  duration: 4.seconds,
-                  curve: Curves.easeInOut,
-                ),
-
-            Positioned(
-                  bottom: -50,
-                  left: -50,
-                  child: Container(
-                    width: 200,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.05),
-                    ),
-                  ),
-                )
-                .animate(
-                  onPlay: (controller) => controller.repeat(reverse: true),
-                )
-                .moveX(
-                  begin: 0,
-                  end: 50,
-                  duration: 3.seconds,
-                  curve: Curves.easeInOut,
-                ),
-
-            // Main Content
-            Center(
+      backgroundColor: primaryColor,
+      body: Stack(
+        children: [
+          // Background Shape
+          Positioned(
+            top: -100,
+            right: -100,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Logo Container with Premium Styling
-                  Container(
-                        padding: const EdgeInsets.all(28),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.95),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.2),
-                              blurRadius: 30,
-                              offset: const Offset(0, 15),
+                  const Spacer(),
+                  // Central Graphic Mockup (Blank & Minimal)
+                  Center(
+                    child: SizedBox(
+                      width: 240,
+                      height: 240,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Outer translucent layer
+                          Container(
+                            width: 200,
+                            height: 200,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(48),
                             ),
-                            BoxShadow(
-                              color: Colors.white.withValues(alpha: 0.3),
-                              blurRadius: 60,
-                              spreadRadius: -10,
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.qr_code_scanner_rounded,
-                          size: 60,
-                          color: AppColors.primaryPurple,
-                        ),
-                      )
-                      .animate()
-                      .scale(duration: 800.ms, curve: Curves.easeOutBack)
-                      .fadeIn(duration: 600.ms)
-                      .shimmer(delay: 2.seconds, duration: 1500.ms),
-
-                  const SizedBox(height: 32),
-
-                  // App Name
-                  Text(
-                        'LinkMeUp',
-                        style: const TextStyle(
-                          fontSize: 42,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          letterSpacing: -1,
-                        ),
-                      )
-                      .animate()
-                      .fadeIn(delay: 400.ms, duration: 800.ms)
-                      .slideY(begin: 0.2, end: 0, curve: Curves.easeOut),
-
-                  const SizedBox(height: 12),
-
-                  // Tagline
-                  Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Text(
-                          'Scan • Connect • Share',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                            letterSpacing: 1.5,
                           ),
-                        ),
-                      )
-                      .animate()
-                      .fadeIn(delay: 800.ms, duration: 800.ms)
-                      .slideY(begin: 0.5, end: 0, curve: Curves.easeOut),
+                          // Inner white-ish layer
+                          Container(
+                            width: 130,
+                            height: 130,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(32),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    'One QR.\nAll your links.',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 40,
+                      height: 1.2,
+                      letterSpacing: -0.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Share your entire online presence\nwith a single scan.',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16,
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 64),
+                  const Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 3,
+                    ),
+                  ),
+                  const SizedBox(height: 48),
                 ],
               ),
             ),
-
-            // Loading Indicator at Bottom
-            Positioned(
-              bottom: 60,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: const SizedBox(
-                  width: 30,
-                  height: 30,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white70),
-                  ),
-                ),
-              ).animate().fadeIn(delay: 1.seconds),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
