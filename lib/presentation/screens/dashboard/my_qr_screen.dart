@@ -1,139 +1,144 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../../application/providers/user_provider.dart';
+import '../../widgets/common/custom_button.dart';
 
 class MyQRScreen extends ConsumerWidget {
   const MyQRScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    const primaryColor = Color(0xFF5B62F4);
+    final user = ref.watch(userProvider);
+    final displayName = user?.name.toUpperCase() ?? 'YOUR NAME';
+    final username = user?.username ?? 'username';
+    final profileUrl = 'linkqr.app/$username';
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          // Two-tone background
-          Column(
-            children: [
-              Container(
-                height: MediaQuery.of(context).size.height * 0.5,
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: primaryColor,
-                  borderRadius: BorderRadius.only(bottomLeft: Radius.circular(40), bottomRight: Radius.circular(40)),
-                ),
-              ),
-              const Spacer(),
-            ],
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text('My Pass', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF5B62F4), Color(0xFF8187F7)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          SafeArea(
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              padding: const EdgeInsets.all(24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context)),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                        decoration: BoxDecoration(color: Colors.orange, borderRadius: BorderRadius.circular(12)),
-                        child: const Row(
-                          children: [
-                            Text('PRO', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
-                            SizedBox(width: 4),
-                            Icon(Icons.bolt, color: Colors.white, size: 14),
-                          ],
-                        ),
-                      ),
-                      const Icon(Icons.settings_outlined, color: Colors.white),
-                    ],
-                  ),
-                  const SizedBox(height: 48),
-                  const Text(
-                    'Your Brand,\nis Live.',
-                    style: TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.bold, height: 1.1),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 48),
-                  // Massive Floating QR Card
+                  const SizedBox(height: 20),
                   Container(
                     padding: const EdgeInsets.all(32),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(32),
+                      borderRadius: BorderRadius.circular(40),
                       boxShadow: [
-                        BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 40, offset: const Offset(0, 20))
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 40,
+                          offset: const Offset(0, 20),
+                        ),
                       ],
                     ),
                     child: Column(
-                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        QrImageView(
-                          data: 'https://linkqr.app/alexc',
-                          version: QrVersions.auto,
-                          size: 200.0,
-                          eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: primaryColor),
-                          dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: primaryColor),
+                        Text(
+                          displayName,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 2,
+                            color: Colors.grey,
+                          ),
                         ),
-                        const SizedBox(height: 24),
-                        const Text(
-                          '@alexc',
-                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        const SizedBox(height: 32),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.05),
+                                blurRadius: 10,
+                              ),
+                            ],
+                          ),
+                          child: QrImageView(
+                            data: 'https://$profileUrl',
+                            version: QrVersions.auto,
+                            size: 200.0,
+                            eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.circle, color: Color(0xFF5B62F4)),
+                            dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.circle, color: Color(0xFF5B62F4)),
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        Text(
+                          '@$username',
+                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF5B62F4)),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          profileUrl,
+                          style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
                         ),
                       ],
                     ),
                   ),
-                  const Spacer(),
-                  ElevatedButton.icon(
+                  const SizedBox(height: 48),
+                  PrimaryButton(
+                    text: 'Share My Profile Link',
                     onPressed: () {},
-                    icon: const Icon(Icons.download),
-                    label: const Text('Save to Photos'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 56),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      elevation: 0,
-                    ),
                   ),
                   const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.share_outlined),
-                    label: const Text('Share QR Code'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: primaryColor,
-                      side: const BorderSide(color: Color(0xFFEEEEEE)),
-                      minimumSize: const Size(double.infinity, 56),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  SizedBox(
+                    height: 56,
+                    child: OutlinedButton(
+                      onPressed: () => context.go('/qr/scan'),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.white, width: 1.5),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      child: const Text('Scan Others', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: Column(
-                      children: [
-                        const Text('COPY LINK', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1.2)),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text('View My Profile', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black)),
-                            const SizedBox(width: 4),
-                            Icon(Icons.open_in_new, size: 12, color: Colors.grey.shade400),
-                          ],
-                        )
-                      ],
-                    ),
+                  const SizedBox(height: 40),
+                  Column(
+                    children: [
+                      const Text(
+                        'LinkMeUp Premium',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white70),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.bolt, size: 14, color: Colors.orange.shade300),
+                          const Text(' Active Member', style: TextStyle(fontSize: 10, color: Colors.white60)),
+                        ],
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 24),
                 ],
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

@@ -46,8 +46,13 @@ class UserNotifier extends Notifier<UserEntity?> {
     }
   }
 
-  void setUser(UserEntity user) {
+  Future<void> setUser(UserEntity user) async {
     state = user;
+    await ref.read(userRepositoryProvider).createUser(user);
+    
+    // Save locally for persistence across restarts
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('local_uid', user.uid);
   }
 
   Future<void> updateName(String newName) async {

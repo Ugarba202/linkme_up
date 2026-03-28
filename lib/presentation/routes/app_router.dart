@@ -7,6 +7,9 @@ import '../screens/auth/auth_screen.dart';
 import '../screens/setup/setup_wizard.dart';
 import '../screens/main_wrapper.dart';
 import '../screens/profile/edit_profile_screen.dart';
+import '../screens/profile/public_profile_screen.dart';
+import '../screens/scanner/qr_scanner_screen.dart';
+import '../screens/settings/settings_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -26,15 +29,30 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/setup',
-        builder: (context, state) => const SetupWizardScreen(),
+        builder: (context, state) {
+          final step = int.tryParse(state.uri.queryParameters['step'] ?? '0') ?? 0;
+          return SetupWizardScreen(initialStep: step);
+        },
       ),
       GoRoute(
         path: '/home',
         builder: (context, state) => const MainWrapperScreen(),
       ),
       GoRoute(
-        path: '/edit_profile',
+        path: '/profile/edit',
         builder: (context, state) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/qr/scan',
+        builder: (context, state) => const QRScannerScreen(),
+      ),
+      GoRoute(
+        path: '/public-profile',
+        builder: (context, state) => const PublicProfileScreen(),
       ),
     ],
   );

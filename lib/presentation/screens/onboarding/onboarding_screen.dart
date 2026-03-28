@@ -119,8 +119,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     text: '',
                     onPressed: _nextPage,
                     child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        Text(
+                          'Next',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(width: 8),
                         Icon(Icons.arrow_forward, color: Colors.white),
                       ],
                     ),
