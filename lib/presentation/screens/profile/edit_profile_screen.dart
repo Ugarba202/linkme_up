@@ -6,7 +6,9 @@ import '../../../application/providers/user_provider.dart';
 import '../../../domain/entities/social_link_entity.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
-  const EditProfileScreen({super.key});
+  final bool isFromSetup;
+  final bool isTab;
+  const EditProfileScreen({super.key, this.isFromSetup = false, this.isTab = false});
 
   @override
   ConsumerState<EditProfileScreen> createState() => _EditProfileScreenState();
@@ -96,20 +98,27 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     await notifier.updateSocialLinks(updatedLinks);
     
     if (mounted) {
-      context.pop();
+      if (widget.isTab) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile updated successfully!')),
+        );
+      } else {
+        context.pop();
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(userProvider);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => context.pop(),
+        leading: (widget.isFromSetup || widget.isTab) ? null : IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black, size: 20),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
           'Edit Profile',
@@ -153,12 +162,18 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           blurRadius: 20,
                         ),
                       ],
-                      image: const DecorationImage(
-                        image: NetworkImage('https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400'),
-                        fit: BoxFit.cover,
-                      ),
+                      image: user?.photoBytes != null 
+                        ? DecorationImage(image: MemoryImage(user!.photoBytes!), fit: BoxFit.cover)
+                        : user?.photoUrl != null
+                          ? DecorationImage(image: NetworkImage(user!.photoUrl!), fit: BoxFit.cover)
+                          : const DecorationImage(
+                              image: NetworkImage('https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400'),
+                              fit: BoxFit.cover,
+                            ),
                     ),
                   ),
+                  if (user?.photoBytes == null && user?.photoUrl == null)
+                    const Icon(Icons.person_rounded, size: 40, color: Colors.grey),
                   Positioned(
                     bottom: 0,
                     right: 0,

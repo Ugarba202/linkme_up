@@ -25,13 +25,14 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
     super.initState();
     _currentStep = widget.initialStep;
   }
+
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
   Uint8List? _profileImageBytes;
   String? _usernameError;
   String? _profileError;
-  
+
   // Track connected socials: { 'platform': 'Instagram', 'username': '...', 'icon': ..., 'color': ... }
   final List<Map<String, dynamic>> _connectedSocials = [];
 
@@ -55,14 +56,15 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
         return false;
       }
     } else if (_currentStep == 1) {
-      if (_nameController.text.trim().isEmpty || _bioController.text.trim().isEmpty) {
+      if (_nameController.text.trim().isEmpty ||
+          _bioController.text.trim().isEmpty) {
         setState(() => _profileError = 'display name and bio is required');
         return false;
       }
     } else if (_currentStep == 2) {
       if (_connectedSocials.isEmpty) {
         // Optional: show a snackbar or similar if at least one social is required
-        return true; 
+        return true;
       }
     }
     return true;
@@ -70,7 +72,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
 
   Future<void> _saveStepData() async {
     final notifier = ref.read(userProvider.notifier);
-    
+
     if (_currentStep == 0) {
       if (_usernameController.text.isNotEmpty) {
         await notifier.updateUsername(_usernameController.text);
@@ -80,15 +82,20 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
         await notifier.updateName(_nameController.text);
       }
       await notifier.updateBio(_bioController.text);
+      if (_profileImageBytes != null) {
+        await notifier.updatePhotoBytes(_profileImageBytes!);
+      }
     } else if (_currentStep == 2) {
       // Clear existing to avoid duplicates in mock
       // (Simplified: in a real app we'd update specifically)
       for (final social in _connectedSocials) {
         final platform = SocialPlatform.values.firstWhere(
-          (p) => p.name.toLowerCase() == (social['name'] as String).toLowerCase().replaceAll(' ', ''),
+          (p) =>
+              p.name.toLowerCase() ==
+              (social['name'] as String).toLowerCase().replaceAll(' ', ''),
           orElse: () => SocialPlatform.other,
         );
-        
+
         final link = SocialLinkEntity(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           platform: platform,
@@ -103,10 +110,10 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
 
   void _nextStep() async {
     if (!_validateCurrentStep()) return;
-    
+
     await _saveStepData();
     if (!mounted) return;
-    
+
     if (_currentStep < 2) {
       setState(() {
         _currentStep++;
@@ -148,16 +155,24 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: _prevStep,
         ),
-        title: const Text('LinkQR', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'LinkQR',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
         actions: [
-          IconButton(icon: const Icon(Icons.settings_outlined, color: Colors.black), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined, color: Colors.black),
+            onPressed: () {},
+          ),
         ],
       ),
       body: SafeArea(
         child: Column(
           children: [
-            _ProgressHeader(currentStep: _currentStep + 2), // Mockup says Step 2 of 4 for Username
+            _ProgressHeader(
+              currentStep: _currentStep + 2,
+            ), // Mockup says Step 2 of 4 for Username
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24.0),
@@ -174,10 +189,10 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
             Padding(
               padding: const EdgeInsets.all(24.0),
               child: PrimaryButton(
-                text: _currentStep == 0 
-                  ? 'Next' 
-                  : _currentStep == 1 
-                    ? 'Continue to Final Step' 
+                text: _currentStep == 0
+                    ? 'Next'
+                    : _currentStep == 1
+                    ? 'Continue to Final Step'
                     : 'Generate My QR',
                 onPressed: _nextStep,
               ),
@@ -192,18 +207,47 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Choose your\nusername', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, height: 1.1)),
+        const Text(
+          'Choose your\nusername',
+          style: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+            height: 1.1,
+          ),
+        ),
         const SizedBox(height: 12),
-        Text('This will be your permanent link:', style: TextStyle(color: Colors.grey.shade600)),
-        const Text('linkqr.app/[username]', style: TextStyle(color: Color(0xFF5B62F4), fontWeight: FontWeight.bold)),
+        Text(
+          'This will be your permanent link:',
+          style: TextStyle(color: Colors.grey.shade600),
+        ),
+        const Text(
+          'linkqr.app/[username]',
+          style: TextStyle(
+            color: Color(0xFF5B62F4),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const SizedBox(height: 32),
-        const Text('USERNAME', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+        const Text(
+          'USERNAME',
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey,
+          ),
+        ),
         const SizedBox(height: 8),
         CustomInputField(
           controller: _usernameController,
-          hintText: 'username',
-          prefixIcon: const Icon(Icons.alternate_email, size: 18, color: Color(0xFF5B62F4)),
-          suffixIcon: _usernameController.text.isNotEmpty ? const Icon(Icons.check_circle, color: Colors.green, size: 18) : null,
+          hintText: 'enter username',
+          prefixIcon: const Icon(
+            Icons.alternate_email,
+            size: 18,
+            color: Color(0xFF5B62F4),
+          ),
+          suffixIcon: _usernameController.text.isNotEmpty
+              ? const Icon(Icons.check_circle, color: Colors.green, size: 18)
+              : null,
           onChanged: (val) {
             setState(() {
               _usernameError = null;
@@ -212,9 +256,23 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
         ),
         const SizedBox(height: 8),
         if (_usernameError != null)
-          Text(_usernameError!, style: const TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold))
+          Text(
+            _usernameError!,
+            style: const TextStyle(
+              color: Colors.red,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          )
         else if (_usernameController.text.isNotEmpty)
-          Text('${_usernameController.text} is available!', style: const TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold)),
+          Text(
+            '${_usernameController.text} is available!',
+            style: const TextStyle(
+              color: Colors.green,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
 
         const SizedBox(height: 48),
         _PersonalBrandBanner(),
@@ -226,24 +284,45 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Create your profile', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+        const Text(
+          'Create your profile',
+          style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
-        Text('Personalize how others see your digital identity when they scan your code.', style: TextStyle(color: Colors.grey.shade600)),
+        Text(
+          'Personalize how others see your digital identity when they scan your code.',
+          style: TextStyle(color: Colors.grey.shade600),
+        ),
         const SizedBox(height: 40),
         Center(
           child: Column(
             children: [
               if (_profileError != null) ...[
-                Text(_profileError!, style: const TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold)),
+                Text(
+                  _profileError!,
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 16),
               ],
               Stack(
                 children: [
-                   CircleAvatar(
+                  CircleAvatar(
                     radius: 50,
                     backgroundColor: Colors.grey.shade100,
-                    backgroundImage: _profileImageBytes != null ? MemoryImage(_profileImageBytes!) : null,
-                    child: _profileImageBytes == null ? Icon(Icons.person_outline, size: 40, color: Colors.grey.shade400) : null,
+                    backgroundImage: _profileImageBytes != null
+                        ? MemoryImage(_profileImageBytes!)
+                        : null,
+                    child: _profileImageBytes == null
+                        ? Icon(
+                            Icons.person_outline,
+                            size: 40,
+                            color: Colors.grey.shade400,
+                          )
+                        : null,
                   ),
                   Positioned(
                     bottom: 0,
@@ -252,24 +331,45 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
                       onTap: _pickImage,
                       child: Container(
                         padding: const EdgeInsets.all(6),
-                        decoration: const BoxDecoration(color: Color(0xFF5B62F4), shape: BoxShape.circle),
-                        child: const Icon(Icons.add, color: Colors.white, size: 18),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF5B62F4),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.add,
+                          color: Colors.white,
+                          size: 18,
+                        ),
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
-              const Text('ADD PROFILE PICTURE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF5B62F4))),
+              const Text(
+                'ADD PROFILE PICTURE',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF5B62F4),
+                ),
+              ),
             ],
           ),
         ),
         const SizedBox(height: 40),
-        const Text('DISPLAY NAME', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+        const Text(
+          'DISPLAY NAME',
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey,
+          ),
+        ),
         const SizedBox(height: 8),
         CustomInputField(
-          controller: _nameController, 
-          hintText: 'Your Name',
+          controller: _nameController,
+          hintText: 'enter your fullname',
           onChanged: (val) {
             setState(() {
               _profileError = null;
@@ -280,14 +380,24 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('BIO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
-            Text('${_bioController.text.length}/100', style: const TextStyle(fontSize: 10, color: Colors.grey)),
+            const Text(
+              'BIO',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
+            ),
+            Text(
+              '${_bioController.text.length}/100',
+              style: const TextStyle(fontSize: 10, color: Colors.grey),
+            ),
           ],
         ),
         const SizedBox(height: 8),
         CustomInputField(
-          controller: _bioController, 
-          hintText: 'Bio', 
+          controller: _bioController,
+          hintText: 'Bio',
           maxLines: 3,
           onChanged: (val) {
             setState(() {
@@ -297,8 +407,12 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
         ),
         const SizedBox(height: 40),
         _LivePreviewCard(
-          name: _nameController.text.isEmpty ? 'Your Name' : _nameController.text, 
-          bio: _bioController.text.isEmpty ? 'Your bio will appear here' : _bioController.text, 
+          name: _nameController.text.isEmpty
+              ? 'Your Name'
+              : _nameController.text,
+          bio: _bioController.text.isEmpty
+              ? 'Your bio will appear here'
+              : _bioController.text,
           imageBytes: _profileImageBytes,
           connectedSocials: _connectedSocials,
         ),
@@ -306,14 +420,19 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
     );
   }
 
-  void _showAddSocialBottomSheet(Map<String, dynamic> platform, {bool isCustom = false}) {
+  void _showAddSocialBottomSheet(
+    Map<String, dynamic> platform, {
+    bool isCustom = false,
+  }) {
     final TextEditingController linkController = TextEditingController(
       text: _connectedSocials.firstWhere(
-        (element) => element['name'] == platform['name'], 
-        orElse: () => {'username': ''}
-      )['username']
+        (element) => element['name'] == platform['name'],
+        orElse: () => {'username': ''},
+      )['username'],
     );
-    final TextEditingController customNameController = TextEditingController(text: isCustom ? platform['name'] : '');
+    final TextEditingController customNameController = TextEditingController(
+      text: isCustom ? platform['name'] : '',
+    );
 
     showModalBottomSheet(
       context: context,
@@ -362,13 +481,23 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
                 const SizedBox(width: 16),
                 Text(
                   isCustom ? 'Add Custom Link' : 'Connect ${platform['name']}',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 32),
             if (isCustom) ...[
-              const Text('PLATFORM NAME', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+              const Text(
+                'PLATFORM NAME',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
+              ),
               const SizedBox(height: 8),
               CustomInputField(
                 controller: customNameController,
@@ -376,12 +505,23 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
               ),
               const SizedBox(height: 24),
             ],
-            const Text('USERNAME OR LINK', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+            const Text(
+              'USERNAME OR LINK',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
+            ),
             const SizedBox(height: 8),
             CustomInputField(
               controller: linkController,
               hintText: isCustom ? 'https://...' : 'your_username',
-              prefixIcon: Icon(isCustom ? Icons.link : Icons.alternate_email, size: 18, color: const Color(0xFF5B62F4)),
+              prefixIcon: Icon(
+                isCustom ? Icons.link : Icons.alternate_email,
+                size: 18,
+                color: const Color(0xFF5B62F4),
+              ),
             ),
             const SizedBox(height: 32),
             PrimaryButton(
@@ -390,10 +530,14 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
                 if (linkController.text.isNotEmpty) {
                   setState(() {
                     // Remove if already exists
-                    _connectedSocials.removeWhere((element) => element['name'] == platform['name']);
-                    
+                    _connectedSocials.removeWhere(
+                      (element) => element['name'] == platform['name'],
+                    );
+
                     _connectedSocials.add({
-                      'name': isCustom ? customNameController.text : platform['name'],
+                      'name': isCustom
+                          ? customNameController.text
+                          : platform['name'],
                       'username': linkController.text,
                       'icon': platform['icon'],
                       'color': platform['color'],
@@ -415,41 +559,81 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Connect your\naccounts', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, height: 1.1)),
+        const Text(
+          'Connect your\naccounts',
+          style: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+            height: 1.1,
+          ),
+        ),
         const SizedBox(height: 8),
-        Text('Add at least one to generate your QR.', style: TextStyle(color: Colors.grey.shade600)),
+        Text(
+          'Add at least one to generate your QR.',
+          style: TextStyle(color: Colors.grey.shade600),
+        ),
         const SizedBox(height: 32),
         ..._buildMockSocialList(),
         const SizedBox(height: 16),
         Center(
           child: TextButton.icon(
-            onPressed: () => _showAddSocialBottomSheet(
-              {'name': 'Custom', 'icon': Icons.link, 'color': const Color(0xFF5B62F4)}, 
-              isCustom: true
-            ),
+            onPressed: () => _showAddSocialBottomSheet({
+              'name': 'Custom',
+              'icon': Icons.link,
+              'color': const Color(0xFF5B62F4),
+            }, isCustom: true),
             icon: const Icon(Icons.add, size: 18),
-            label: const Text('Add Custom Link', style: TextStyle(fontWeight: FontWeight.bold)),
-            style: TextButton.styleFrom(foregroundColor: const Color(0xFF5B62F4)),
+            label: const Text(
+              'Add Custom Link',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFF5B62F4),
+            ),
           ),
-        )
+        ),
       ],
     );
   }
 
   List<Widget> _buildMockSocialList() {
     final platforms = [
-      {'name': 'Instagram', 'icon': FontAwesomeIcons.instagram, 'color': Colors.pink},
-      {'name': 'TikTok', 'icon': FontAwesomeIcons.tiktok, 'color': Colors.black},
-      {'name': 'Twitter / X', 'icon': FontAwesomeIcons.xTwitter, 'color': Colors.black},
-      {'name': 'YouTube', 'icon': FontAwesomeIcons.youtube, 'color': Colors.red},
-      {'name': 'LinkedIn', 'icon': FontAwesomeIcons.linkedin, 'color': Colors.blue},
-      {'name': 'Snapchat', 'icon': FontAwesomeIcons.snapchat, 'color': Colors.yellow.shade700},
+      {
+        'name': 'Instagram',
+        'icon': FontAwesomeIcons.instagram,
+        'color': Colors.pink,
+      },
+      {
+        'name': 'TikTok',
+        'icon': FontAwesomeIcons.tiktok,
+        'color': Colors.black,
+      },
+      {
+        'name': 'Twitter / X',
+        'icon': FontAwesomeIcons.xTwitter,
+        'color': Colors.black,
+      },
+      {
+        'name': 'YouTube',
+        'icon': FontAwesomeIcons.youtube,
+        'color': Colors.red,
+      },
+      {
+        'name': 'LinkedIn',
+        'icon': FontAwesomeIcons.linkedin,
+        'color': Colors.blue,
+      },
+      {
+        'name': 'Snapchat',
+        'icon': FontAwesomeIcons.snapchat,
+        'color': Colors.yellow.shade700,
+      },
     ];
 
     return platforms.map((p) {
       final connected = _connectedSocials.firstWhere(
-        (element) => element['name'] == p['name'], 
-        orElse: () => {}
+        (element) => element['name'] == p['name'],
+        orElse: () => {},
       );
       final isConnected = connected.isNotEmpty;
 
@@ -458,8 +642,18 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: isConnected ? const Color(0xFF5B62F4).withValues(alpha: 0.2) : Colors.grey.shade100),
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4))],
+          border: Border.all(
+            color: isConnected
+                ? const Color(0xFF5B62F4).withValues(alpha: 0.2)
+                : Colors.grey.shade100,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: ListTile(
           leading: Container(
@@ -468,19 +662,26 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
               color: (p['color'] as Color).withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(p['icon'] as IconData, color: p['color'] as Color, size: 20),
+            child: Icon(
+              p['icon'] as IconData,
+              color: p['color'] as Color,
+              size: 20,
+            ),
           ),
-          title: Text(p['name'] as String, style: const TextStyle(fontWeight: FontWeight.bold)),
+          title: Text(
+            p['name'] as String,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           subtitle: Text(
-            isConnected ? '@${connected['username']}' : 'NOT CONNECTED', 
+            isConnected ? '@${connected['username']}' : 'NOT CONNECTED',
             style: TextStyle(
-              fontSize: 10, 
+              fontSize: 10,
               color: isConnected ? const Color(0xFF5B62F4) : Colors.grey,
               fontWeight: isConnected ? FontWeight.bold : FontWeight.normal,
-            )
+            ),
           ),
           trailing: Icon(
-            isConnected ? Icons.check_circle : Icons.add_circle_outline, 
+            isConnected ? Icons.check_circle : Icons.add_circle_outline,
             color: isConnected ? Colors.green : Colors.grey.shade400,
           ),
           onTap: () => _showAddSocialBottomSheet(p),
@@ -497,7 +698,9 @@ class _ProgressHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double progress = currentStep / 4;
-    String status = currentStep == 4 ? 'ALMOST THERE' : '${(progress * 100).toInt()}% COMPLETE';
+    String status = currentStep == 4
+        ? 'ALMOST THERE'
+        : '${(progress * 100).toInt()}% COMPLETE';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -506,8 +709,22 @@ class _ProgressHeader extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('STEP $currentStep OF 4', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF5B62F4))),
-              Text(status, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+              Text(
+                'STEP $currentStep OF 4',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF5B62F4),
+                ),
+              ),
+              Text(
+                status,
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -516,7 +733,9 @@ class _ProgressHeader extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               backgroundColor: Colors.grey.shade100,
-              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF5B62F4)),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                Color(0xFF5B62F4),
+              ),
               minHeight: 6,
             ),
           ),
@@ -541,9 +760,15 @@ class _PersonalBrandBanner extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Your Personal Brand', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                const Text(
+                  'Your Personal Brand',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
                 const SizedBox(height: 4),
-                Text('A unique username makes your QR codes more memorable and professional for your audience.', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                Text(
+                  'A unique username makes your QR codes more memorable and professional for your audience.',
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                ),
               ],
             ),
           ),
@@ -562,8 +787,8 @@ class _LivePreviewCard extends StatelessWidget {
   final List<Map<String, dynamic>> connectedSocials;
 
   const _LivePreviewCard({
-    required this.name, 
-    required this.bio, 
+    required this.name,
+    required this.bio,
     this.imageBytes,
     required this.connectedSocials,
   });
@@ -573,7 +798,18 @@ class _LivePreviewCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Center(child: Text('LIVE PREVIEW', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white, backgroundColor: Colors.black, letterSpacing: 1))),
+        const Center(
+          child: Text(
+            'LIVE PREVIEW',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              backgroundColor: Colors.black,
+              letterSpacing: 1,
+            ),
+          ),
+        ),
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.all(16),
@@ -581,40 +817,71 @@ class _LivePreviewCard extends StatelessWidget {
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
             border: Border.all(color: Colors.grey.shade100),
-            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 20, offset: const Offset(0, 10))],
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
           ),
           child: Row(
             children: [
               CircleAvatar(
                 radius: 30,
                 backgroundColor: Colors.grey.shade100,
-                backgroundImage: imageBytes != null ? MemoryImage(imageBytes!) : null,
+                backgroundImage: imageBytes != null
+                    ? MemoryImage(imageBytes!)
+                    : null,
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text(bio, style: TextStyle(color: Colors.grey.shade600, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text(
+                      bio,
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 12,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     const SizedBox(height: 8),
                     Row(
-                      children: connectedSocials.isEmpty 
-                        ? [
-                            _SmallCircle(color: Colors.pink, size: 8),
-                            const SizedBox(width: 4),
-                            _SmallCircle(color: Colors.black, size: 8),
-                            const SizedBox(width: 4),
-                            _SmallCircle(color: Colors.blue, size: 8),
-                            const SizedBox(width: 4),
-                            _SmallCircle(color: Colors.purple, size: 8),
-                          ]
-                        : connectedSocials.take(4).map((s) => Padding(
-                            padding: const EdgeInsets.only(right: 4.0),
-                            child: Icon(s['icon'] as IconData, color: s['color'] as Color, size: 10),
-                          )).toList(),
-                    )
+                      children: connectedSocials.isEmpty
+                          ? [
+                              _SmallCircle(color: Colors.pink, size: 8),
+                              const SizedBox(width: 4),
+                              _SmallCircle(color: Colors.black, size: 8),
+                              const SizedBox(width: 4),
+                              _SmallCircle(color: Colors.blue, size: 8),
+                              const SizedBox(width: 4),
+                              _SmallCircle(color: Colors.purple, size: 8),
+                            ]
+                          : connectedSocials
+                                .take(4)
+                                .map(
+                                  (s) => Padding(
+                                    padding: const EdgeInsets.only(right: 4.0),
+                                    child: Icon(
+                                      s['icon'] as IconData,
+                                      color: s['color'] as Color,
+                                      size: 10,
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                    ),
                   ],
                 ),
               ),
@@ -633,6 +900,10 @@ class _SmallCircle extends StatelessWidget {
   const _SmallCircle({required this.color, required this.size});
   @override
   Widget build(BuildContext context) {
-    return Container(width: size, height: size, decoration: BoxDecoration(color: color, shape: BoxShape.circle));
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+    );
   }
 }

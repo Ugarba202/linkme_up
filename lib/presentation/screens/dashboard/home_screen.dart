@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../widgets/common/custom_button.dart';
 import '../../../application/providers/user_provider.dart';
+import '../../../application/providers/navigation_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -25,12 +26,16 @@ class HomeScreen extends ConsumerWidget {
                 Row(
                   children: [
                     GestureDetector(
-                      onTap: () => context.go('/edit_profile'),
+                      onTap: () => ref.read(navigationProvider.notifier).setIndex(3),
                       child: CircleAvatar(
                         radius: 20,
                         backgroundColor: const Color(0xFF5B62F4).withValues(alpha: 0.1),
-                        backgroundImage: user?.photoUrl != null ? NetworkImage(user!.photoUrl!) : null,
-                        child: user?.photoUrl == null 
+                        backgroundImage: user?.photoBytes != null 
+                          ? MemoryImage(user!.photoBytes!) 
+                          : user?.photoUrl != null 
+                            ? NetworkImage(user!.photoUrl!) as ImageProvider
+                            : null,
+                        child: user?.photoBytes == null && user?.photoUrl == null 
                           ? const Icon(Icons.person_rounded, color: Color(0xFF5B62F4))
                           : null,
                       ),
@@ -131,8 +136,6 @@ class HomeScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             Row(
               children: [
-                Expanded(child: _buildStatCard('Total Scans', '124', Icons.visibility, context)),
-                const SizedBox(width: 16),
                 Expanded(child: _buildStatCard('Connections', '48', Icons.people, context)),
               ],
             ),

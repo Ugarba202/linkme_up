@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'social_link_entity.dart';
 
 class UserEntity {
@@ -6,6 +7,7 @@ class UserEntity {
   final String username;
   final String country;
   final String? photoUrl;
+  final Uint8List? photoBytes;
   final String? bannerUrl;
   final String bio;
   final String? publicUrl;
@@ -25,6 +27,7 @@ class UserEntity {
     this.username = '',
     this.country = 'Nigeria',
     this.photoUrl,
+    this.photoBytes,
     this.bannerUrl,
     this.bio = '',
     this.socialLinks = const [],
@@ -45,6 +48,7 @@ class UserEntity {
     String? username,
     String? country, 
     String? photoUrl,
+    Uint8List? photoBytes,
     String? bannerUrl,
     String? bio,
     List<SocialLinkEntity>? socialLinks,
@@ -64,6 +68,7 @@ class UserEntity {
       username: username ?? this.username,
       country: country ?? this.country,
       photoUrl: photoUrl ?? this.photoUrl,
+      photoBytes: photoBytes ?? this.photoBytes,
       bannerUrl: bannerUrl ?? this.bannerUrl,
       bio: bio ?? this.bio,
       socialLinks: socialLinks ?? this.socialLinks,

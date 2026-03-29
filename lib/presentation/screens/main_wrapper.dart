@@ -1,174 +1,142 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../application/providers/navigation_provider.dart';
 import 'dashboard/home_screen.dart';
 import 'dashboard/my_qr_screen.dart';
 import 'analytics/analytics_screen.dart';
 import 'profile/edit_profile_screen.dart';
 
-class MainWrapperScreen extends StatefulWidget {
+class MainWrapperScreen extends ConsumerStatefulWidget {
   const MainWrapperScreen({super.key});
 
   @override
-  State<MainWrapperScreen> createState() => _MainWrapperScreenState();
+  ConsumerState<MainWrapperScreen> createState() => _MainWrapperScreenState();
 }
 
-class _MainWrapperScreenState extends State<MainWrapperScreen> {
-  int _currentIndex = 0; // Start at Home
-
+class _MainWrapperScreenState extends ConsumerState<MainWrapperScreen> {
   final List<Widget> _pages = [
     const HomeScreen(),
     const MyQRScreen(),
-    const SizedBox(), // Placeholder for SCAN button center
     const AnalyticsScreen(),
-    const EditProfileScreen(),
+    const EditProfileScreen(isTab: true),
   ];
 
   void _onTabTapped(int index) {
-    if (index == 2) {
-      // Center Scan Button Action
-      _openScanner();
-      return;
-    }
-    setState(() {
-      _currentIndex = index;
-    });
-  }
-
-  void _openScanner() {
-    // Navigate to scan screen or trigger overlay
-    // For now, push to the existing scanner screen
-    Navigator.of(context).pushNamed('/qr/scan');
+    ref.read(navigationProvider.notifier).setIndex(index);
   }
 
   @override
   Widget build(BuildContext context) {
+    final currentIndex = ref.watch(navigationProvider);
     return Scaffold(
       extendBody: true, // Allow body behind the navbar if needed for transparency effects
       body: IndexedStack(
-        index: _currentIndex,
+        index: currentIndex,
         children: _pages,
       ),
-      bottomNavigationBar: _buildCustomNavBar(),
+      bottomNavigationBar: _buildCustomNavBar(currentIndex),
     );
   }
 
-  Widget _buildCustomNavBar() {
+  Widget _buildCustomNavBar(int currentIndex) {
     return Container(
-      height: 110, // Extra height to accommodate the floating center button
-      color: Colors.transparent,
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          // Main Nav Bar Background
-          Container(
-            height: 80,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(30),
-                topRight: Radius.circular(30),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 20,
-                  offset: const Offset(0, -5),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+      height: 100,
+      margin: const EdgeInsets.fromLTRB(20, 0, 20, 20), // Floats the navbar
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth;
+          final itemWidth = width / 4;
+          final pillWidth = itemWidth * 0.8; // Pill takes 80% of item width
+          
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(30),
+            child: Stack(
               children: [
-                _buildNavItem(0, Icons.home_rounded, 'HOME'),
-                _buildNavItem(1, Icons.qr_code_2_rounded, 'MY QR'),
-                const SizedBox(width: 60), // Space for center button
-                _buildNavItem(3, Icons.analytics_rounded, 'ANALYTICS'),
-                _buildNavItem(4, Icons.person_rounded, 'PROFILE'),
-              ],
-            ),
-          ),
-          // Center Floating Scan Button
-          Positioned(
-            top: 0,
-            child: _buildCenterScanButton(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem(int index, IconData icon, String label) {
-    final isSelected = _currentIndex == index;
-    return GestureDetector(
-      onTap: () => _onTabTapped(index),
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFF1F4FF) : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? const Color(0xFF5B62F4) : Colors.grey.shade400,
-              size: 24,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? const Color(0xFF5B62F4) : Colors.grey.shade400,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCenterScanButton() {
-    return GestureDetector(
-      onTap: () => _onTabTapped(2),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: const Color(0xFF5B62F4),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF5B62F4).withValues(alpha: 0.4),
-                  blurRadius: 15,
-                  offset: const Offset(0, 8),
+                // Glass Backdrop
+                Positioned.fill(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          width: 1.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                // Liquid Moving Indicator (Pill) - Calculated for perfect centering
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.elasticOut,
+                  left: (currentIndex * itemWidth) + (itemWidth - pillWidth) / 2,
+                  top: (80 - 44) / 2, // Centered vertically in the 80px row
+                  child: Container(
+                    width: pillWidth,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF5B62F4).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                ),
+                // Nav Items
+                Container(
+                  height: 80,
+                  alignment: Alignment.center,
+                  child: Row(
+                    children: [
+                      _buildNavItem(0, Icons.home_rounded, 'HOME', currentIndex),
+                      _buildNavItem(1, Icons.qr_code_2_rounded, 'MY QR', currentIndex),
+                      _buildNavItem(2, Icons.analytics_rounded, 'ANALYTICS', currentIndex),
+                      _buildNavItem(3, Icons.person_rounded, 'PROFILE', currentIndex),
+                    ],
+                  ),
                 ),
               ],
             ),
-            child: const Icon(
-              Icons.qr_code_scanner_rounded,
-              color: Colors.white,
-              size: 32,
-            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index, IconData icon, String label, int currentIndex) {
+    final isSelected = currentIndex == index;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _onTabTapped(index),
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedScale(
+          scale: isSelected ? 1.05 : 1.0,
+          duration: const Duration(milliseconds: 200),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                color: isSelected ? const Color(0xFF5B62F4) : Colors.grey.shade400,
+                size: 26,
+              ),
+              const SizedBox(height: 4),
+              AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 200),
+                style: TextStyle(
+                  color: isSelected ? const Color(0xFF5B62F4) : Colors.grey.shade400,
+                  fontSize: 10,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  letterSpacing: 0.5,
+                ),
+                child: Text(label),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
-          const Text(
-            'SCAN',
-            style: TextStyle(
-              color: Colors.black87,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

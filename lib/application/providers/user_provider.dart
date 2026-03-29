@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
+import 'dart:typed_data';
 import '../../domain/entities/social_link_entity.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/user_repository.dart';
@@ -100,6 +101,12 @@ class UserNotifier extends Notifier<UserEntity?> {
     if (state == null) return;
     final updated = state!.copyWith(bannerUrl: newBannerUrl);
     await ref.read(userRepositoryProvider).updateUser(updated);
+    state = updated;
+  }
+
+  Future<void> updatePhotoBytes(Uint8List bytes) async {
+    if (state == null) return;
+    final updated = state!.copyWith(photoBytes: bytes);
     state = updated;
   }
 
