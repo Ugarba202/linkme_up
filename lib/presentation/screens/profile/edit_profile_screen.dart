@@ -375,7 +375,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     return Column(
       children: [
         TextButton(
-          onPressed: () {},
+          onPressed: () => _showDeleteConfirmation(context),
           child: const Text(
             'DELETE ACCOUNT',
             style: TextStyle(color: Color(0xFFD32D41), fontWeight: FontWeight.bold, fontSize: 13),
@@ -435,6 +435,30 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.3), width: 1),
         ),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Account?'),
+        content: const Text('This action is permanent and will remove all your data, social links, and analytics. Are you sure?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CANCEL', style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await ref.read(userProvider.notifier).deleteAccount();
+              if (mounted) context.go('/auth');
+            },
+            child: const Text('DELETE', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          ),
+        ],
       ),
     );
   }

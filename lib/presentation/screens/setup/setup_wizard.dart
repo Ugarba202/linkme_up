@@ -1,9 +1,11 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../widgets/common/custom_button.dart';
 import '../../widgets/common/custom_input.dart';
 import '../../../application/providers/user_provider.dart';
@@ -30,8 +32,10 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
   Uint8List? _profileImageBytes;
+  File? _profileImageFile;
   String? _usernameError;
   String? _profileError;
+  bool _isGenerating = false;
 
   // Track connected socials: { 'platform': 'Instagram', 'username': '...', 'icon': ..., 'color': ... }
   final List<Map<String, dynamic>> _connectedSocials = [];
@@ -105,6 +109,11 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
         );
         await notifier.addSocialLink(link);
       }
+      
+      // Upload image to Supabase if exists
+      if (_profileImageFile != null) {
+        await notifier.uploadProfileImage(_profileImageFile!);
+      }
     }
   }
 
@@ -119,7 +128,19 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
         _currentStep++;
       });
     } else {
-      context.go('/home');
+      // Final Step: Generation Ceremony
+      setState(() => _isGenerating = true);
+      
+      final notifier = ref.read(userProvider.notifier);
+      // Perform final save and completion
+      await notifier.completeSetup();
+      
+      // Artificial delay for the premium "generation" effect
+      await Future.delayed(const Duration(seconds: 4));
+      
+      if (mounted) {
+        context.go('/home');
+      }
     }
   }
 
@@ -140,6 +161,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
       final bytes = await pickedFile.readAsBytes();
       setState(() {
         _profileImageBytes = bytes;
+        _profileImageFile = File(pickedFile.path);
       });
     }
   }
@@ -168,38 +190,134 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
         ],
       ),
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            _ProgressHeader(
-              currentStep: _currentStep + 2,
-            ), // Mockup says Step 2 of 4 for Username
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24.0),
-                child: IndexedStack(
-                  index: _currentStep,
-                  children: [
-                    _buildUsernameStep(),
-                    _buildProfileSetupStep(),
-                    _buildConnectSocialsStep(),
-                  ],
+            Column(
+              children: [
+                _ProgressHeader(
+                  currentStep: _currentStep + 2,
+                ), // Mockup says Step 2 of 4 for Username
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24.0),
+                    child: IndexedStack(
+                      index: _currentStep,
+                      children: [
+                        _buildUsernameStep(),
+                        _buildProfileSetupStep(),
+                        _buildConnectSocialsStep(),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: PrimaryButton(
+                    text: _currentStep == 0
+                        ? 'Next'
+                        : _currentStep == 1
+                        ? 'Continue to Final Step'
+                        : 'Generate My QR',
+                    onPressed: _nextStep,
+                  ),
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: PrimaryButton(
-                text: _currentStep == 0
-                    ? 'Next'
-                    : _currentStep == 1
-                    ? 'Continue to Final Step'
-                    : 'Generate My QR',
-                onPressed: _nextStep,
-              ),
-            ),
+            if (_isGenerating) _buildGenerationOverlay(),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildGenerationOverlay() {
+    return Container(
+      color: Colors.white,
+      width: double.infinity,
+      height: double.infinity,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Animated QR Symbol
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(seconds: 3),
+            builder: (context, value, child) {
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: CircularProgressIndicator(
+                      value: value,
+                      strokeWidth: 6,
+                      color: const Color(0xFF5B62F4),
+                      backgroundColor: const Color(0xFF5B62F4).withValues(alpha: 0.1),
+                    ),
+                  ),
+                  Icon(
+                    Icons.qr_code_scanner_rounded,
+                    size: 60,
+                    color: const Color(0xFF5B62F4).withValues(alpha: value),
+                  ),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 48),
+          const Text(
+            'GENERATING YOUR PASS',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2,
+              color: Color(0xFF5B62F4),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Compiling your digital identity...',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(height: 48),
+          // Progress Status bits
+          _buildStatusBit('Analyzing social connections...', 0.3),
+          _buildStatusBit('Securing your unique handle...', 0.6),
+          _buildStatusBit('Finalizing premium QR pass...', 0.9),
+        ],
+      ).animate().fadeIn(duration: 400.ms).scale(begin: const Offset(0.9, 0.9)),
+    );
+  }
+
+  Widget _buildStatusBit(String text, double visibleAt) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(seconds: 4),
+      builder: (context, value, child) {
+        final isVisible = value >= visibleAt;
+        return AnimatedOpacity(
+          opacity: isVisible ? 1.0 : 0.0,
+          duration: 300.ms,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green, size: 14),
+                const SizedBox(width: 8),
+                Text(
+                  text,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

@@ -51,8 +51,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const QRScannerScreen(),
       ),
       GoRoute(
-        path: '/public-profile',
-        builder: (context, state) => const PublicProfileScreen(),
+        path: '/profile/:username',
+        builder: (context, state) {
+          final username = state.pathParameters['username'];
+          return PublicProfileScreen(username: username);
+        },
+      ),
+      GoRoute(
+        path: '/profile/id/:uid',
+        builder: (context, state) {
+          final uid = state.pathParameters['uid'];
+          return PublicProfileScreen(uid: uid);
+        },
       ),
     ],
   );

@@ -230,4 +230,28 @@ class SocialLinkEntity {
       createdAt: createdAt ?? this.createdAt,
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'platform': platform.name,
+      'username': username,
+      'url': url,
+      'is_visible': isVisible,
+      'sort_order': order,
+      'created_at': createdAt.toIso8601String(),
+    };
+  }
+
+  factory SocialLinkEntity.fromMap(Map<String, dynamic> map) {
+    return SocialLinkEntity(
+      id: map['id'],
+      platform: SocialPlatform.values.byName(map['platform']),
+      username: map['username'],
+      url: map['url'],
+      isVisible: map['is_visible'] ?? true,
+      order: map['sort_order'] ?? 0,
+      createdAt: DateTime.parse(map['created_at']),
+    );
+  }
 }

@@ -101,15 +101,13 @@ class MockUserRepository implements IUserRepository {
   }
 
   @override
-  Future<void> incrementClicks(String uid) {
-    // TODO: implement incrementClicks
-    throw UnimplementedError();
+  Future<void> incrementClicks(String uid) async {
+    print("MOCK: Incremented clicks for $uid");
   }
 
   @override
-  Future<void> incrementViews(String uid) {
-    // TODO: implement incrementViews
-    throw UnimplementedError();
+  Future<void> incrementViews(String uid) async {
+    print("MOCK: Incremented views for $uid");
   }
 
   @override
@@ -123,5 +121,19 @@ class MockUserRepository implements IUserRepository {
       );
       print("MOCK: Marked QR as generated for $uid");
     }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getAnalytics(String uid) async {
+    return {
+      'total_views': 1245,
+      'total_clicks': 890,
+    };
+  }
+
+  @override
+  Future<void> deleteAccount(String uid) async {
+    _users.remove(uid);
+    print("MOCK: Deleted user account $uid");
   }
 }

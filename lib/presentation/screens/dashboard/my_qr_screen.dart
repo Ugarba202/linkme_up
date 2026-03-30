@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../../application/providers/user_provider.dart';
 import '../../widgets/common/custom_button.dart';
 
@@ -104,18 +103,6 @@ class MyQRScreen extends ConsumerWidget {
                   PrimaryButton(
                     text: 'Share My Profile Link',
                     onPressed: () {},
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    height: 56,
-                    child: OutlinedButton(
-                      onPressed: () => context.go('/qr/scan'),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.white, width: 1.5),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      ),
-                      child: const Text('Scan Others', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                    ),
                   ),
                   const SizedBox(height: 40),
                   Column(

@@ -16,13 +16,25 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
       width: double.infinity,
       height: 56,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF5B62F4).withValues(alpha: 0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF5B62F4),
+          foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(28), // Pill shape for modern look
+            borderRadius: BorderRadius.circular(28),
           ),
           elevation: 0,
         ),

@@ -6,11 +6,11 @@ import 'dart:typed_data';
 import '../../domain/entities/social_link_entity.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/user_repository.dart';
-import '../../infrastructure/mock_user_repository.dart';
+import '../../infrastructure/repositories/supabase_user_repository.dart';
 import 'storage_providers.dart';
 
 final userRepositoryProvider = Provider<IUserRepository>((ref) {
-  return MockUserRepository();
+  return SupabaseUserRepository();
 });
 
 class UserNotifier extends Notifier<UserEntity?> {
@@ -45,6 +45,11 @@ class UserNotifier extends Notifier<UserEntity?> {
     } catch (e) {
       debugPrint("DEBUG: Error loading profile for $uid: $e");
     }
+  }
+
+  Future<void> setUserLocal(UserEntity user) async {
+    state = user;
+    // Don't call DB, just update state for app-wide access
   }
 
   Future<void> setUser(UserEntity user) async {
@@ -181,6 +186,13 @@ class UserNotifier extends Notifier<UserEntity?> {
     await ref.read(userRepositoryProvider).updateSocialLinks(state!.uid, links);
   }
 
+  Future<void> completeSetup() async {
+    if (state == null) return;
+    final updated = state!.copyWith(profileCompleted: true);
+    await ref.read(userRepositoryProvider).updateUser(updated);
+    state = updated;
+  }
+
   Future<void> markQrAsGenerated() async {
     if (state == null) return;
     state = state!.copyWith(isQrGenerated: true, qrGeneratedAt: DateTime.now());
@@ -197,8 +209,34 @@ class UserNotifier extends Notifier<UserEntity?> {
       debugPrint("DEBUG: Error during sign out: $e");
     }
   }
+
+  Future<void> deleteAccount() async {
+    if (state == null) return;
+    try {
+      final uid = state!.uid;
+      await ref.read(userRepositoryProvider).deleteAccount(uid);
+      await signOut(); // Clear local state and session
+    } catch (e) {
+      debugPrint("DEBUG: Error during account deletion: $e");
+    }
+  }
 }
 
 final userProvider = NotifierProvider<UserNotifier, UserEntity?>(() {
   return UserNotifier();
+});
+
+final publicProfileByUsernameProvider = FutureProvider.family<UserEntity?, String>((ref, username) async {
+  final repository = ref.watch(userRepositoryProvider);
+  return repository.getUserByUsername(username);
+});
+
+final publicProfileByUidProvider = FutureProvider.family<UserEntity?, String>((ref, uid) async {
+  final repository = ref.watch(userRepositoryProvider);
+  return repository.getUser(uid);
+});
+
+final userAnalyticsProvider = FutureProvider.family<Map<String, dynamic>, String>((ref, uid) async {
+  final repository = ref.watch(userRepositoryProvider);
+  return repository.getAnalytics(uid);
 });

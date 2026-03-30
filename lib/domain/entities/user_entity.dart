@@ -83,4 +83,47 @@ class UserEntity {
       qrGeneratedAt: qrGeneratedAt ?? this.qrGeneratedAt,
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': uid,
+      'full_name': name,
+      'username': username,
+      'country': country,
+      'avatar_url': photoUrl,
+      'banner_url': bannerUrl,
+      'bio': bio,
+      'public_url': publicUrl,
+      'profile_completed': profileCompleted,
+      'email': email,
+      'phone_number': phoneNumber,
+      'views': views,
+      'clicks': clicks,
+      'is_qr_generated': isQrGenerated,
+      'qr_generated_at': qrGeneratedAt?.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
+    };
+  }
+
+  factory UserEntity.fromMap(Map<String, dynamic> map, {List<SocialLinkEntity> links = const []}) {
+    return UserEntity(
+      uid: map['id'],
+      name: map['full_name'] ?? '',
+      username: map['username'] ?? '',
+      country: map['country'] ?? 'Nigeria',
+      photoUrl: map['avatar_url'],
+      bannerUrl: map['banner_url'],
+      bio: map['bio'] ?? '',
+      publicUrl: map['public_url'],
+      profileCompleted: map['profile_completed'] ?? false,
+      socialLinks: links,
+      email: map['email'] ?? '',
+      phoneNumber: map['phone_number'] ?? '',
+      views: map['views'] ?? 0,
+      clicks: map['clicks'] ?? 0,
+      isQrGenerated: map['is_qr_generated'] ?? false,
+      qrGeneratedAt: map['qr_generated_at'] != null ? DateTime.parse(map['qr_generated_at']) : null,
+      createdAt: DateTime.parse(map['created_at']),
+    );
+  }
 }

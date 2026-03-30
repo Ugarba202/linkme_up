@@ -79,8 +79,15 @@ class _MainWrapperScreenState extends ConsumerState<MainWrapperScreen> {
                     width: pillWidth,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF5B62F4).withValues(alpha: 0.1),
+                      color: const Color(0xFF5B62F4).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF5B62F4).withValues(alpha: 0.1),
+                          blurRadius: 10,
+                          spreadRadius: 2,
+                        ),
+                      ],
                     ),
                   ),
                 ),

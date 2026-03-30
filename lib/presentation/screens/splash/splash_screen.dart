@@ -1,23 +1,48 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../application/providers/auth_providers.dart';
+import '../../../application/providers/user_provider.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 5), () {
+    _handleNavigation();
+  }
+
+  Future<void> _handleNavigation() async {
+    // Artificial delay for splash effect
+    await Future.delayed(const Duration(seconds: 3));
+    
+    if (!mounted) return;
+
+    final authState = ref.read(authStateProvider);
+    final userId = authState.value;
+
+    if (userId != null) {
+      // Check if profile exists
+      final user = await ref.read(userRepositoryProvider).getUser(userId);
+      
       if (mounted) {
-        context.go('/onboarding');
+        if (user != null && user.profileCompleted) {
+          ref.read(userProvider.notifier).setUserLocal(user); // Use local setter to avoid DB loop
+          context.go('/home');
+        } else {
+          context.go('/setup');
+        }
       }
-    });
+    } else {
+      context.go('/onboarding');
+    }
   }
 
   @override

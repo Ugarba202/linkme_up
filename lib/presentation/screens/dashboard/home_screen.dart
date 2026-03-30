@@ -5,6 +5,7 @@ import '../../../core/themes/app_colors.dart';
 import '../../widgets/common/custom_button.dart';
 import '../../../application/providers/user_provider.dart';
 import '../../../application/providers/navigation_provider.dart';
+import '../../widgets/common/shimmer_loading.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -13,6 +14,11 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider);
     final firstName = user?.name.split(' ').first ?? 'User';
+    
+    // Fetch real analytics
+    final asyncAnalytics = user != null 
+        ? ref.watch(userAnalyticsProvider(user.uid))
+        : const AsyncValue.loading();
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -35,7 +41,7 @@ class HomeScreen extends ConsumerWidget {
                           : user?.photoUrl != null 
                             ? NetworkImage(user!.photoUrl!) as ImageProvider
                             : null,
-                        child: user?.photoBytes == null && user?.photoUrl == null 
+                        child: (user?.photoBytes == null && user?.photoUrl == null) 
                           ? const Icon(Icons.person_rounded, color: Color(0xFF5B62F4))
                           : null,
                       ),
@@ -52,7 +58,7 @@ class HomeScreen extends ConsumerWidget {
                           ),
                         ),
                         Text(
-                          'Good morning',
+                          'Welcome back',
                           style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                         ),
                       ],
@@ -122,22 +128,28 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 24),
                   PrimaryButton(
-                    text: 'Connect All Socials',
-                    onPressed: () => context.go('/setup?step=2'),
+                    text: 'Manage Your Pass',
+                    onPressed: () => ref.read(navigationProvider.notifier).setIndex(1),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 32),
             Text(
-              'Quick Stats',
+              'Your Impact',
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(child: _buildStatCard('Connections', '48', Icons.people, context)),
-              ],
+            asyncAnalytics.when(
+              data: (stats) => Row(
+                children: [
+                  Expanded(child: _buildStatCard('Profile Views', '${stats['total_views']}', Icons.visibility_rounded, context)),
+                  const SizedBox(width: 16),
+                  Expanded(child: _buildStatCard('Link Taps', '${stats['total_clicks']}', Icons.touch_app_rounded, context)),
+                ],
+              ),
+              loading: () => const ShimmerStatsSkeleton(),
+              error: (err, _) => const Text('Error loading stats'),
             ),
           ],
         ),
@@ -155,9 +167,9 @@ class HomeScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: AppColors.primary),
-          const SizedBox(height: 8),
-          Text(title, style: const TextStyle(color: AppColors.textSecondary)),
+          Icon(icon, color: AppColors.primary, size: 20),
+          const SizedBox(height: 12),
+          Text(title, style: TextStyle(color: Colors.grey.shade600, fontSize: 12, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
           Text(
             value,

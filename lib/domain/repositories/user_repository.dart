@@ -16,4 +16,6 @@ abstract class IUserRepository {
   Future<void> deleteSocialLink(String uid, String linkId);
   Future<UserEntity?> getUserByUsername(String username);
   Future<void> markQrAsGenerated(String uid);
+  Future<Map<String, dynamic>> getAnalytics(String uid);
+  Future<void> deleteAccount(String uid);
 }
