@@ -32,7 +32,7 @@ class HomeScreen extends ConsumerWidget {
                 Row(
                   children: [
                     GestureDetector(
-                      onTap: () => ref.read(navigationProvider.notifier).setIndex(3),
+                      onTap: () => ref.read(navigationProvider.notifier).setIndex(4),
                       child: CircleAvatar(
                         radius: 20,
                         backgroundColor: const Color(0xFF5B62F4).withValues(alpha: 0.1),
@@ -69,7 +69,7 @@ class HomeScreen extends ConsumerWidget {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.notifications_none_rounded, size: 28),
-                      onPressed: () => context.go('/notifications'),
+                      onPressed: () => context.push('/notifications'),
                     ),
                     Positioned(
                       right: 12,
@@ -141,12 +141,15 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             asyncAnalytics.when(
-              data: (stats) => Row(
-                children: [
-                  Expanded(child: _buildStatCard('Profile Views', '${stats['total_views']}', Icons.visibility_rounded, context)),
-                  const SizedBox(width: 16),
-                  Expanded(child: _buildStatCard('Link Taps', '${stats['total_clicks']}', Icons.touch_app_rounded, context)),
-                ],
+              data: (stats) => GestureDetector(
+                onTap: () => ref.read(navigationProvider.notifier).setIndex(3),
+                child: Row(
+                  children: [
+                    Expanded(child: _buildStatCard('Profile Views', '${stats['total_views']}', Icons.visibility_rounded, context)),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildStatCard('Link Taps', '${stats['total_clicks']}', Icons.touch_app_rounded, context)),
+                  ],
+                ),
               ),
               loading: () => const ShimmerStatsSkeleton(),
               error: (err, _) => const Text('Error loading stats'),

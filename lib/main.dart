@@ -10,21 +10,17 @@ import 'presentation/routes/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   await Supabase.initialize(
     url: SupabaseConfig.url,
     anonKey: SupabaseConfig.anonKey,
   );
-  
-  runApp(
-    const ProviderScope(
-      child: LinkMeUpApp(),
-    ),
-  ); 
-}  
+
+  runApp(const ProviderScope(child: LinkMeUpApp()));
+}
 
 class LinkMeUpApp extends ConsumerWidget {
-  const LinkMeUpApp({super.key} );
+  const LinkMeUpApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

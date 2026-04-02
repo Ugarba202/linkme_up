@@ -28,4 +28,7 @@ class MockAuthRepository implements IAuthRepository {
 
   @override
   Stream<String?> get onAuthStateChanged => Stream.value(null);
+
+  @override
+  String? get currentUserId => null;
 }

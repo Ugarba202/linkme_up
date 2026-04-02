@@ -244,12 +244,12 @@ class PublicProfileScreen extends ConsumerWidget {
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
+                color: color.withOpacity(1.0), // full color
+                borderRadius: BorderRadius.circular(12), // squircle
               ),
-              child: Icon(icon, color: color, size: 20),
+              child: Icon(icon, color: Colors.white, size: 20),
             ),
             const SizedBox(width: 16),
             Expanded(

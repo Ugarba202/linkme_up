@@ -15,8 +15,6 @@ class AuthScreen extends ConsumerStatefulWidget {
 }
 
 class _AuthScreenState extends ConsumerState<AuthScreen> {
-  bool _isLoading = false;
-
   @override
   Widget build(BuildContext context) {
     const primaryColor = Color(0xFF5B62F4);
@@ -75,13 +73,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          )
-                        ],
                       ),
                       child: const Icon(
                         Icons.person_add_outlined,
@@ -96,7 +87,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
               // Primary Action: Continue as Guest
               PrimaryButton(
                 text: 'Continue as Guest',
-                isLoading: _isLoading,
                 onPressed: () => _handleAuth(context),
                 child: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8.0),
@@ -138,7 +128,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   }
 
   void _handleAuth(BuildContext context) async {
-    setState(() => _isLoading = true);
     try {
       final uid = await ref.read(authRepositoryProvider).signInAnonymously();
       
@@ -146,13 +135,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         final existingUser = await ref.read(userRepositoryProvider).getUser(uid);
         
         if (existingUser != null) {
-          // User already has a profile
           ref.read(userProvider.notifier).setUserLocal(existingUser);
           if (mounted) {
             context.go(existingUser.profileCompleted ? '/home' : '/setup');
           }
         } else {
-          // Initialize fresh user profile
           final newUser = UserEntity(
             uid: uid,
             name: 'Anonymous User',
@@ -169,10 +156,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     } catch (e) {
       if (mounted) {
         GlobalErrorHandler.handleError(context, e);
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
       }
     }
   }

@@ -21,6 +21,9 @@ class SupabaseAuthRepository implements IAuthRepository {
   }
 
   @override
+  String? get currentUserId => _supabase.auth.currentUser?.id;
+
+  @override
   Future<bool> isEmailVerified() async {
     return _supabase.auth.currentUser?.emailConfirmedAt != null;
   }

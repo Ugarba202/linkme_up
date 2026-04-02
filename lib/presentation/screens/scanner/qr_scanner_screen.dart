@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/themes/app_colors.dart';
+import '../../../application/providers/user_provider.dart';
 
-class QRScannerScreen extends StatefulWidget {
+class QRScannerScreen extends ConsumerStatefulWidget {
   const QRScannerScreen({super.key});
 
   @override
-  State<QRScannerScreen> createState() => _QRScannerScreenState();
+  ConsumerState<QRScannerScreen> createState() => _QRScannerScreenState();
 }
 
-class _QRScannerScreenState extends State<QRScannerScreen> {
+class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
   final MobileScannerController cameraController = MobileScannerController();
   bool _isScanComplete = false;
+  String? _scannedUsername;
 
   @override
   void dispose() {
@@ -30,11 +33,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         if (code.contains('linkmeup.app/')) {
           final username = code.split('linkmeup.app/').last.split('?').first.replaceAll('/', '');
           setState(() {
+            _scannedUsername = username;
             _isScanComplete = true;
-          });
-          context.push('/profile/$username').then((_) {
-            // Reset scan state if they come back
-            if (mounted) setState(() => _isScanComplete = false);
           });
         }
       }
@@ -56,7 +56,14 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           // Camera Overlay Fill
           Container(
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.3),
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFF5B62F4).withValues(alpha: 0.2), // Subtle purple/green gradient at top? Actually let's use dark teal/green
+                  Color(0xFF0F2027).withValues(alpha: 0.8), // Dark bottom
+                ],
+              ),
             ),
           ),
 
@@ -72,7 +79,16 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                     children: [
                       _buildTopButton(
                         icon: Icons.close_rounded,
-                        onPressed: () => context.pop(),
+                        onPressed: () {
+                          if (_isScanComplete) {
+                            setState(() {
+                               _isScanComplete = false;
+                               _scannedUsername = null;
+                            });
+                          } else {
+                            context.pop();
+                          }
+                        },
                       ),
                       Row(
                         children: [
@@ -83,9 +99,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                           const SizedBox(width: 12),
                           _buildTopButton(
                             icon: Icons.image_rounded,
-                            onPressed: () {
-                              // Gallery picker logic
-                            },
+                            onPressed: () {},
                           ),
                         ],
                       ),
@@ -107,7 +121,6 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                         ),
                         child: Stack(
                           children: [
-                            // Corner Accents (Simplified approach)
                             _buildFrameCorner(top: 0, left: 0, rotation: 0),
                             _buildFrameCorner(top: 0, right: 0, rotation: 1),
                             _buildFrameCorner(bottom: 0, left: 0, rotation: 3),
@@ -134,9 +147,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           ),
 
           // Floating Result Card
-          if (_isScanComplete)
+          if (_isScanComplete && _scannedUsername != null)
             Positioned(
-              bottom: 100,
+              bottom: 80,
               left: 20,
               right: 20,
               child: _buildResultCard(),
@@ -171,10 +184,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            border: Border(
-              top: BorderSide(color: const Color(0xFF4ADE80), width: 4),
-              left: BorderSide(color: const Color(0xFF4ADE80), width: 4),
+            border: const Border(
+              top: BorderSide(color: Color(0xFF4ADE80), width: 4),
+              left: BorderSide(color: Color(0xFF4ADE80), width: 4),
             ),
+            borderRadius: const BorderRadius.only(topLeft: Radius.circular(12)),
           ),
         ),
       ),
@@ -182,6 +196,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   }
 
   Widget _buildResultCard() {
+    final asyncProfile = ref.watch(publicProfileByUsernameProvider(_scannedUsername!));
+
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
       duration: const Duration(milliseconds: 300),
@@ -208,61 +224,100 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             ),
           ],
         ),
-        child: Row(
-          children: [
-            Stack(
+        child: asyncProfile.when(
+          data: (user) {
+            if (user == null) {
+               return const Center(child: Text('User not found'));
+            }
+            return Row(
               children: [
-                const CircleAvatar(
-                  radius: 30,
-                  backgroundImage: NetworkImage('https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400'),
-                ),
-                Positioned(
-                  bottom: -2,
-                  right: -2,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF4ADE80),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
+                Stack(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.grey.shade200, width: 1),
+                      ),
+                      child: CircleAvatar(
+                        radius: 26,
+                        backgroundColor: Colors.grey[200],
+                        backgroundImage: user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
+                        child: user.photoUrl == null ? const Icon(Icons.person, color: Colors.grey) : null,
+                      ),
                     ),
-                    child: const Icon(Icons.check, size: 10, color: Colors.white),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF4ADE80),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: const Icon(Icons.check, size: 8, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user.name,
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (user.bio != null && user.bio.isNotEmpty)
+                        Text(
+                          user.bio!,
+                          style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        )
+                      else
+                        Text(
+                          '@${user.username}',
+                          style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                          maxLines: 1,
+                        ),
+                    ],
                   ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () {
+                    context.push('/profile/${user.username}').then((_) {
+                       if (mounted) {
+                          setState(() {
+                             _isScanComplete = false;
+                             _scannedUsername = null;
+                          });
+                       }
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  ),
+                  child: const Text('View Profile', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                 ),
               ],
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Alex Harrison',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black),
-                  ),
-                  Text(
-                    'Product Designer • SF',
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            ElevatedButton(
-              onPressed: () {
-                context.push('/public-profile'); // Placeholder for navigation
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              ),
-              child: const Text('View Profile', style: TextStyle(fontWeight: FontWeight.bold)),
-            ),
-          ],
+            );
+          },
+          loading: () => const Padding(
+             padding: EdgeInsets.all(12),
+             child: Center(child: SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2))),
+          ),
+          error: (err, stack) => const Center(child: Text('Error loading profile')),
         ),
       ),
     );

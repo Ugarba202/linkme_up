@@ -37,6 +37,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
   String? _usernameError;
   String? _profileError;
   bool _isGenerating = false;
+  bool _isSyncingProfile = false;
   bool _isCheckingUsername = false;
   bool? _isUsernameValid;
   Timer? _debounce;
@@ -199,6 +200,22 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
     await _saveStepData();
     if (!mounted) return;
 
+    if (_currentStep == 1) {
+      // Intermediary Step: Profile Syncing Progress
+      setState(() => _isSyncingProfile = true);
+      
+      // Short delay for the "Creating Identity" effect
+      await Future.delayed(const Duration(seconds: 2));
+      
+      if (mounted) {
+        setState(() {
+          _isSyncingProfile = false;
+          _currentStep++;
+        });
+      }
+      return;
+    }
+
     if (_currentStep < 2) {
       setState(() {
         _currentStep++;
@@ -299,10 +316,59 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
                 ),
               ],
             ),
+            if (_isSyncingProfile) _buildProfileSyncOverlay(),
             if (_isGenerating) _buildGenerationOverlay(),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildProfileSyncOverlay() {
+    return Container(
+      color: Colors.white,
+      width: double.infinity,
+      height: double.infinity,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(
+            width: 80,
+            height: 80,
+            child: CircularProgressIndicator(
+              strokeWidth: 6,
+              color: Color(0xFF5B62F4),
+              strokeCap: StrokeCap.round,
+            ),
+          ),
+          const SizedBox(height: 48),
+          const Text(
+            'ESTABLISHING IDENTITY',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2,
+              color: Color(0xFF5B62F4),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Creating your digital profile...',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'This only takes a moment.',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade400,
+            ),
+          ),
+        ],
+      ).animate().fadeIn(duration: 400.ms).scale(begin: const Offset(0.9, 0.9)),
     );
   }
 
@@ -982,7 +1048,7 @@ class _PersonalBrandBanner extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          Icon(Icons.qr_code_2, size: 60, color: Colors.grey.shade200),
+          const Icon(Icons.qr_code_2, size: 60, color: Color(0xFF5B62F4)),
         ],
       ),
     );

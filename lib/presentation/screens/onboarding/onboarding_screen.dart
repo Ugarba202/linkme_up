@@ -170,11 +170,7 @@ class _OnboardingPageView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Expanded(
-            flex: 3,
-            child: _buildGraphic(content.imageType),
-          ),
-          const SizedBox(height: 48),
+          const Spacer(flex: 2),
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
@@ -201,51 +197,6 @@ class _OnboardingPageView extends StatelessWidget {
           const Spacer(),
         ],
       ),
-    );
-  }
-
-  Widget _buildGraphic(OnboardingImageType type) {
-    switch (type) {
-      case OnboardingImageType.connect:
-        return _ConnectGraphic();
-      case OnboardingImageType.share:
-        return _ShareGraphic();
-      case OnboardingImageType.analytics:
-        return _AnalyticsGraphic();
-    }
-  }
-}
-
-class _ConnectGraphic extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: SizedBox(
-        width: 250,
-        height: 250,
-      ),
-    );
-  }
-}
-
-class _ShareGraphic extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: SizedBox(
-        width: 200,
-        height: 200,
-      ),
-    );
-  }
-}
-
-class _AnalyticsGraphic extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox(
-      height: 300,
-      width: double.infinity,
     );
   }
 }

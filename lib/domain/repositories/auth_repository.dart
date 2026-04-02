@@ -4,4 +4,5 @@ abstract class IAuthRepository {
   Future<String?> signInAnonymously();
   Future<void> signOut();
   Stream<String?> get onAuthStateChanged;
+  String? get currentUserId;
 }

@@ -22,129 +22,114 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   Future<void> _handleNavigation() async {
     // Artificial delay for splash effect
     await Future.delayed(const Duration(seconds: 3));
-    
+
     if (!mounted) return;
 
-    final authState = ref.read(authStateProvider);
-    final userId = authState.value;
+    final authRepository = ref.read(authRepositoryProvider);
+    final userId = authRepository.currentUserId;
 
     if (userId != null) {
       try {
-        // Check if profile exists
+        // Ensure user profile is loaded into state before we leave the splash
+        // This helps the GoRouter redirect make the right decision
         final user = await ref.read(userRepositoryProvider).getUser(userId);
-        
-        if (mounted) {
-          if (user != null && user.profileCompleted) {
-            ref.read(userProvider.notifier).setUserLocal(user);
-            context.go('/home');
-          } else {
-            // Profile incomplete or doesn't exist, go to setup
-            context.go('/setup');
-          }
+        if (user != null && mounted) {
+          ref.read(userProvider.notifier).setUserLocal(user);
         }
       } catch (e) {
-        debugPrint("DEBUG: Error loading profile: $e");
-        if (mounted) {
-          context.go('/setup'); // Better to try setup if auth exists
-        }
+        debugPrint("DEBUG: Error loading profile on splash: $e");
       }
-    } else {
-      context.go('/onboarding');
+    }
+
+    if (mounted) {
+      // Navigate to home; the GoRouter redirect will intercept and send to 
+      // /setup or /onboarding if necessary.
+      context.go('/home');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF5B62F4);
     return Scaffold(
-      backgroundColor: primaryColor,
-      body: Stack(
-        children: [
-          // Background Shape
-          Positioned(
-            top: -100,
-            right: -100,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Spacer(),
-                  // Central Graphic Mockup (Blank & Minimal)
-                  Center(
-                    child: SizedBox(
-                      width: 240,
-                      height: 240,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          // Outer translucent layer
-                          Container(
-                            width: 200,
-                            height: 200,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(48),
-                            ),
-                          ),
-                          // Inner white-ish layer
-                          Container(
-                            width: 130,
-                            height: 130,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(32),
-                            ),
+      backgroundColor: const Color(0xFF5B62F4), // Main application color
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // App Generated Icon
+                    Container(
+                      width: 140,
+                      height: 140,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(32),
+                        image: const DecorationImage(
+                          image: AssetImage('assets/images/splash_icon_new.png'),
+                          fit: BoxFit.cover,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    'One QR.\nAll your links.',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 40,
-                      height: 1.2,
-                      letterSpacing: -0.5,
+                    
+                    const SizedBox(height: 24),
+                    
+                    // App Name
+                    const Text(
+                      'LinkMeUp',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.5,
+                      ),
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
+                  ],
+                ),
+              ),
+            ),
+            
+            // Bottom section
+            Padding(
+              padding: const EdgeInsets.only(bottom: 48.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Minimalist Tagline
                   const Text(
-                    'Share your entire online presence\nwith a single scan.',
+                    'ONE QR CODE. ALL YOUR LINKS. FOREVER.',
                     style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 16,
-                      height: 1.5,
+                      color: Colors.white,
+                      fontSize: 10,
+                      letterSpacing: 2.5,
+                      fontWeight: FontWeight.bold,
                     ),
-                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 64),
-                  const Center(
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Elegant subtle indicator
+                  const SizedBox(
+                    width: 18,
+                    height: 18,
                     child: CircularProgressIndicator(
                       color: Colors.white,
-                      strokeWidth: 3,
+                      strokeWidth: 2,
                     ),
                   ),
-                  const SizedBox(height: 48),
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
