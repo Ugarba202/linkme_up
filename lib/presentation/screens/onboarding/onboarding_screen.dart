@@ -61,7 +61,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               )
             : null,
         title: const Text(
-          'LinkQR',
+          'LinkMeUp',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         actions: [

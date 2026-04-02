@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
@@ -36,6 +37,9 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
   String? _usernameError;
   String? _profileError;
   bool _isGenerating = false;
+  bool _isCheckingUsername = false;
+  bool? _isUsernameValid;
+  Timer? _debounce;
 
   // Track connected socials: { 'platform': 'Instagram', 'username': '...', 'icon': ..., 'color': ... }
   final List<Map<String, dynamic>> _connectedSocials = [];
@@ -45,7 +49,76 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
     _usernameController.dispose();
     _nameController.dispose();
     _bioController.dispose();
+    _debounce?.cancel();
     super.dispose();
+  }
+
+  void _onUsernameChanged(String val) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    
+    if (val.trim().isEmpty) {
+      setState(() {
+        _isUsernameValid = null;
+        _isCheckingUsername = false;
+        _usernameError = null;
+      });
+      return;
+    }
+
+    setState(() {
+      _isCheckingUsername = true;
+      _usernameError = null;
+      _isUsernameValid = null;
+    });
+
+    _debounce = Timer(const Duration(milliseconds: 600), () async {
+      try {
+        final isAvailable = await ref.read(userRepositoryProvider).isUsernameAvailable(val.trim());
+        if (mounted) {
+          setState(() {
+            _isCheckingUsername = false;
+            _isUsernameValid = isAvailable;
+            if (!isAvailable) {
+              _usernameError = 'username is already taken';
+            }
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isCheckingUsername = false;
+          });
+        }
+      }
+    });
+  }
+
+  Map<String, String>? _detectPlatformFromUrl(String input) {
+    final url = input.toLowerCase().trim();
+    if (url.isEmpty) return null;
+
+    // List of common patterns
+    if (url.contains('instagram.com/')) {
+      final handle = url.split('instagram.com/').last.split('?').first.replaceAll('/', '');
+      return {'platform': 'Instagram', 'handle': handle};
+    }
+    if (url.contains('tiktok.com/@')) {
+      final handle = url.split('tiktok.com/@').last.split('?').first.replaceAll('/', '');
+      return {'platform': 'TikTok', 'handle': handle};
+    }
+    if (url.contains('twitter.com/') || url.contains('x.com/')) {
+      final handle = url.split('/').last.split('?').first;
+      return {'platform': 'Twitter / X', 'handle': handle};
+    }
+    if (url.contains('youtube.com/@') || url.contains('youtube.com/c/')) {
+      final handle = url.split('/').last.split('?').first;
+      return {'platform': 'YouTube', 'handle': handle};
+    }
+    if (url.contains('linkedin.com/in/')) {
+      final handle = url.split('linkedin.com/in/').last.split('?').first.replaceAll('/', '');
+      return {'platform': 'LinkedIn', 'handle': handle};
+    }
+    return null;
   }
 
   bool _validateCurrentStep() {
@@ -57,6 +130,9 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
     if (_currentStep == 0) {
       if (_usernameController.text.trim().isEmpty) {
         setState(() => _usernameError = 'username is required');
+        return false;
+      }
+      if (_isUsernameValid == false) {
         return false;
       }
     } else if (_currentStep == 1) {
@@ -135,8 +211,8 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
       // Perform final save and completion
       await notifier.completeSetup();
       
-      // Artificial delay for the premium "generation" effect
-      await Future.delayed(const Duration(seconds: 4));
+      // Short delay for the premium "generation" effect
+      await Future.delayed(const Duration(seconds: 2));
       
       if (mounted) {
         context.go('/home');
@@ -178,7 +254,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
           onPressed: _prevStep,
         ),
         title: const Text(
-          'LinkQR',
+          'LinkMeUp',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -339,7 +415,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
           style: TextStyle(color: Colors.grey.shade600),
         ),
         const Text(
-          'linkqr.app/[username]',
+          'linkmeup.app/[username]',
           style: TextStyle(
             color: Color(0xFF5B62F4),
             fontWeight: FontWeight.bold,
@@ -363,14 +439,21 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
             size: 18,
             color: Color(0xFF5B62F4),
           ),
-          suffixIcon: _usernameController.text.isNotEmpty
-              ? const Icon(Icons.check_circle, color: Colors.green, size: 18)
-              : null,
-          onChanged: (val) {
-            setState(() {
-              _usernameError = null;
-            });
-          },
+          suffixIcon: _isCheckingUsername
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: Padding(
+                    padding: EdgeInsets.all(12.0),
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF5B62F4)),
+                  ),
+                )
+              : _isUsernameValid == true
+                  ? const Icon(Icons.check_circle, color: Colors.green, size: 20)
+                  : _isUsernameValid == false
+                      ? const Icon(Icons.error_outline, color: Colors.red, size: 20)
+                      : null,
+          onChanged: _onUsernameChanged,
         ),
         const SizedBox(height: 8),
         if (_usernameError != null)
@@ -382,7 +465,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
               fontWeight: FontWeight.bold,
             ),
           )
-        else if (_usernameController.text.isNotEmpty)
+        else if (_isUsernameValid == true)
           Text(
             '${_usernameController.text} is available!',
             style: const TextStyle(
@@ -640,6 +723,14 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
                 size: 18,
                 color: const Color(0xFF5B62F4),
               ),
+              onChanged: (val) {
+                if (!isCustom) {
+                  final detected = _detectPlatformFromUrl(val);
+                  if (detected != null && detected['platform'] == platform['name']) {
+                    linkController.text = detected['handle']!;
+                  }
+                }
+              },
             ),
             const SizedBox(height: 32),
             PrimaryButton(

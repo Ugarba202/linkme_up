@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../application/providers/user_provider.dart';
+import 'package:flutter/services.dart';
 import '../../widgets/common/custom_button.dart';
 
 class MyQRScreen extends ConsumerWidget {
@@ -12,7 +13,7 @@ class MyQRScreen extends ConsumerWidget {
     final user = ref.watch(userProvider);
     final displayName = user?.name.toUpperCase() ?? 'YOUR NAME';
     final username = user?.username ?? 'username';
-    final profileUrl = 'linkqr.app/$username';
+    final profileUrl = 'linkmeup.app/$username';
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -92,9 +93,32 @@ class MyQRScreen extends ConsumerWidget {
                           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF5B62F4)),
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          profileUrl,
-                          style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                        InkWell(
+                          onTap: () {
+                            final textUrl = 'https://$profileUrl';
+                            Clipboard.setData(ClipboardData(text: textUrl)).then((_) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Link copied to clipboard!'),
+                                    duration: Duration(seconds: 2),
+                                    backgroundColor: Color(0xFF5B62F4),
+                                  ),
+                                );
+                              }
+                            });
+                          },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                profileUrl,
+                                style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(Icons.copy, size: 14, color: Colors.grey.shade500),
+                            ],
+                          ),
                         ),
                       ],
                     ),

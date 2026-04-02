@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../application/providers/user_provider.dart';
 import '../../../domain/entities/user_entity.dart';
 import '../../widgets/common/shimmer_loading.dart';
@@ -33,7 +34,7 @@ class PublicProfileScreen extends ConsumerWidget {
           onPressed: () => context.pop(),
         ),
         title: const Text(
-          'LinkQR',
+          'LinkMeUp',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -54,7 +55,7 @@ class PublicProfileScreen extends ConsumerWidget {
              ref.read(userRepositoryProvider).incrementViews(user.uid);
           });
           
-          return _buildProfileContent(context, user);
+          return _buildProfileContent(context, ref, user);
         },
         loading: () => const Padding(
           padding: EdgeInsets.all(40.0),
@@ -65,24 +66,27 @@ class PublicProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildProfileContent(BuildContext context, UserEntity user) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
+  Widget _buildProfileContent(BuildContext context, WidgetRef ref, UserEntity user) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 450),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
           children: [
             const SizedBox(height: 20),
             // Profile Card
             _buildProfileCard(user),
             const SizedBox(height: 24),
             // Social Links
-            _buildSocialLinksList(user),
+            _buildSocialLinksList(context, ref, user),
             const SizedBox(height: 32),
             // Footer Button
             _buildFooterAction(context),
             const SizedBox(height: 16),
             Text(
-              'POWERED BY LINKQR',
+              'POWERED BY LINKMEUP',
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.6),
                 fontSize: 10,
@@ -94,7 +98,9 @@ class PublicProfileScreen extends ConsumerWidget {
           ],
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 
   Widget _buildProfileCard(UserEntity user) {
@@ -152,9 +158,9 @@ class PublicProfileScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 4),
-          if (user.username.isNotEmpty)
+          if (user.username != null && user.username!.isNotEmpty)
             Text(
-              '@${user.username.toUpperCase()}',
+              '@${user.username!.toUpperCase()}',
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -176,12 +182,15 @@ class PublicProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSocialLinksList(UserEntity user) {
+  Widget _buildSocialLinksList(BuildContext context, WidgetRef ref, UserEntity user) {
     return Column(
       children: user.socialLinks.where((l) => l.isVisible).map((link) {
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: _buildSocialTile(
+            context,
+            ref,
+            uid: user.uid,
             icon: link.platform.icon,
             name: link.platform.displayName,
             handle: link.username,
@@ -193,7 +202,10 @@ class PublicProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSocialTile({
+  Widget _buildSocialTile(
+    BuildContext context,
+    WidgetRef ref, {
+    required String uid,
     required IconData icon,
     required String name,
     required String handle,
@@ -214,8 +226,20 @@ class PublicProfileScreen extends ConsumerWidget {
         ],
       ),
       child: InkWell(
-        onTap: () {
-          // Future: log click analytics
+        onTap: () async {
+          // Log click analytics
+          ref.read(userRepositoryProvider).incrementClicks(uid);
+          
+          final uri = Uri.parse(url);
+          if (await canLaunchUrl(uri)) {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          } else {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Could not open $url')),
+              );
+            }
+          }
         },
         child: Row(
           children: [

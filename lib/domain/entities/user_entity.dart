@@ -4,7 +4,7 @@ import 'social_link_entity.dart';
 class UserEntity {
   final String uid;
   final String name;
-  final String username;
+  final String? username;
   final String country;
   final String? photoUrl;
   final Uint8List? photoBytes;
@@ -24,7 +24,7 @@ class UserEntity {
   UserEntity({
     required this.uid,
     required this.name,
-    this.username = '',
+    this.username,
     this.country = 'Nigeria',
     this.photoUrl,
     this.photoBytes,
@@ -109,7 +109,7 @@ class UserEntity {
     return UserEntity(
       uid: map['id'],
       name: map['full_name'] ?? '',
-      username: map['username'] ?? '',
+      username: map['username'], // Allow null
       country: map['country'] ?? 'Nigeria',
       photoUrl: map['avatar_url'],
       bannerUrl: map['banner_url'],

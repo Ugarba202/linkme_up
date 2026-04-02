@@ -220,7 +220,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             const SizedBox(height: 8),
             _buildInputField(
               controller: _usernameController,
-              hintText: 'linkqr.me/arivera',
+              hintText: 'linkmeup.app/arivera',
               readOnly: true,
               suffixIcon: Icon(Icons.lock_rounded, size: 18, color: Colors.grey.shade400),
             ),

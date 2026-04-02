@@ -29,15 +29,23 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     final userId = authState.value;
 
     if (userId != null) {
-      // Check if profile exists
-      final user = await ref.read(userRepositoryProvider).getUser(userId);
-      
-      if (mounted) {
-        if (user != null && user.profileCompleted) {
-          ref.read(userProvider.notifier).setUserLocal(user); // Use local setter to avoid DB loop
-          context.go('/home');
-        } else {
-          context.go('/setup');
+      try {
+        // Check if profile exists
+        final user = await ref.read(userRepositoryProvider).getUser(userId);
+        
+        if (mounted) {
+          if (user != null && user.profileCompleted) {
+            ref.read(userProvider.notifier).setUserLocal(user);
+            context.go('/home');
+          } else {
+            // Profile incomplete or doesn't exist, go to setup
+            context.go('/setup');
+          }
+        }
+      } catch (e) {
+        debugPrint("DEBUG: Error loading profile: $e");
+        if (mounted) {
+          context.go('/setup'); // Better to try setup if auth exists
         }
       }
     } else {

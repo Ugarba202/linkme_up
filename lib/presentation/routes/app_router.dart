@@ -64,6 +64,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           return PublicProfileScreen(uid: uid);
         },
       ),
+      GoRoute(
+        path: '/:username',
+        builder: (context, state) {
+          final username = state.pathParameters['username'];
+          return PublicProfileScreen(username: username);
+        },
+      ),
     ],
   );
 });

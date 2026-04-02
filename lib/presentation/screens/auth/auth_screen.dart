@@ -5,12 +5,20 @@ import '../../widgets/common/custom_button.dart';
 import '../../../application/providers/auth_providers.dart';
 import '../../../application/providers/user_provider.dart';
 import '../../../domain/entities/user_entity.dart';
+import '../../../core/error/error_handling.dart';
 
-class AuthScreen extends ConsumerWidget {
+class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AuthScreen> createState() => _AuthScreenState();
+}
+
+class _AuthScreenState extends ConsumerState<AuthScreen> {
+  bool _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
     const primaryColor = Color(0xFF5B62F4);
 
     return Scaffold(
@@ -88,7 +96,8 @@ class AuthScreen extends ConsumerWidget {
               // Primary Action: Continue as Guest
               PrimaryButton(
                 text: 'Continue as Guest',
-                onPressed: () => _handleAuth(context, ref),
+                isLoading: _isLoading,
+                onPressed: () => _handleAuth(context),
                 child: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8.0),
                   child: Row(
@@ -128,26 +137,43 @@ class AuthScreen extends ConsumerWidget {
     );
   }
 
-  void _handleAuth(BuildContext context, WidgetRef ref) async {
+  void _handleAuth(BuildContext context) async {
+    setState(() => _isLoading = true);
     try {
       final uid = await ref.read(authRepositoryProvider).signInAnonymously();
       
       if (uid != null) {
-        // Initialize fresh user profile
-        final newUser = UserEntity(
-          uid: uid,
-          name: 'Anonymous User',
-          createdAt: DateTime.now(),
-        );
+        final existingUser = await ref.read(userRepositoryProvider).getUser(uid);
         
-        await ref.read(userProvider.notifier).setUser(newUser);
-        
-        if (context.mounted) {
-          context.go('/setup');
+        if (existingUser != null) {
+          // User already has a profile
+          ref.read(userProvider.notifier).setUserLocal(existingUser);
+          if (mounted) {
+            context.go(existingUser.profileCompleted ? '/home' : '/setup');
+          }
+        } else {
+          // Initialize fresh user profile
+          final newUser = UserEntity(
+            uid: uid,
+            name: 'Anonymous User',
+            createdAt: DateTime.now(),
+          );
+          
+          await ref.read(userProvider.notifier).setUser(newUser);
+          
+          if (mounted) {
+            context.go('/setup');
+          }
         }
       }
-    } catch (_) {
-      // Handle error
+    } catch (e) {
+      if (mounted) {
+        GlobalErrorHandler.handleError(context, e);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 }

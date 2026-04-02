@@ -25,9 +25,19 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
     final List<Barcode> barcodes = capture.barcodes;
     if (barcodes.isNotEmpty) {
-      setState(() {
-        _isScanComplete = true;
-      });
+      final code = barcodes.first.rawValue;
+      if (code != null) {
+        if (code.contains('linkmeup.app/')) {
+          final username = code.split('linkmeup.app/').last.split('?').first.replaceAll('/', '');
+          setState(() {
+            _isScanComplete = true;
+          });
+          context.push('/profile/$username').then((_) {
+            // Reset scan state if they come back
+            if (mounted) setState(() => _isScanComplete = false);
+          });
+        }
+      }
     }
   }
 
@@ -107,7 +117,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                       ),
                       const SizedBox(height: 40),
                       Text(
-                        'Point camera at a LinkQR code',
+                        'Point camera at a LinkMeUp code',
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.9),
                           fontSize: 16,

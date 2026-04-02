@@ -7,6 +7,8 @@ import 'dashboard/my_qr_screen.dart';
 import 'analytics/analytics_screen.dart';
 import 'profile/edit_profile_screen.dart';
 
+import 'scanner/qr_scanner_screen.dart';
+
 class MainWrapperScreen extends ConsumerStatefulWidget {
   const MainWrapperScreen({super.key});
 
@@ -15,9 +17,11 @@ class MainWrapperScreen extends ConsumerStatefulWidget {
 }
 
 class _MainWrapperScreenState extends ConsumerState<MainWrapperScreen> {
-  final List<Widget> _pages = [
+  // Using a getter so we can conditionally mount the scanner
+  List<Widget> _getPages(int currentIndex) => [
     const HomeScreen(),
     const MyQRScreen(),
+    currentIndex == 2 ? const QRScannerScreen() : const SizedBox(),
     const AnalyticsScreen(),
     const EditProfileScreen(isTab: true),
   ];
@@ -33,7 +37,7 @@ class _MainWrapperScreenState extends ConsumerState<MainWrapperScreen> {
       extendBody: true, // Allow body behind the navbar if needed for transparency effects
       body: IndexedStack(
         index: currentIndex,
-        children: _pages,
+        children: _getPages(currentIndex),
       ),
       bottomNavigationBar: _buildCustomNavBar(currentIndex),
     );
@@ -46,7 +50,7 @@ class _MainWrapperScreenState extends ConsumerState<MainWrapperScreen> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final width = constraints.maxWidth;
-          final itemWidth = width / 4;
+          final itemWidth = width / 5;
           final pillWidth = itemWidth * 0.8; // Pill takes 80% of item width
           
           return ClipRRect(
@@ -99,8 +103,9 @@ class _MainWrapperScreenState extends ConsumerState<MainWrapperScreen> {
                     children: [
                       _buildNavItem(0, Icons.home_rounded, 'HOME', currentIndex),
                       _buildNavItem(1, Icons.qr_code_2_rounded, 'MY QR', currentIndex),
-                      _buildNavItem(2, Icons.analytics_rounded, 'ANALYTICS', currentIndex),
-                      _buildNavItem(3, Icons.person_rounded, 'PROFILE', currentIndex),
+                      _buildNavItem(2, Icons.qr_code_scanner_rounded, 'SCAN', currentIndex),
+                      _buildNavItem(3, Icons.analytics_rounded, 'ANALYTICS', currentIndex),
+                      _buildNavItem(4, Icons.person_rounded, 'PROFILE', currentIndex),
                     ],
                   ),
                 ),

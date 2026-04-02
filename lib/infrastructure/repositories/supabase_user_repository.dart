@@ -59,9 +59,11 @@ class SupabaseUserRepository implements IUserRepository {
 
   @override
   Future<void> addSocialLink(String uid, SocialLinkEntity link) async {
+    final data = link.toMap();
+    data.remove('id'); // Let Supabase auto-generate UUID
     await _supabase.from('social_links').insert({
       'user_id': uid,
-      ...link.toMap(),
+      ...data,
     });
   }
 
