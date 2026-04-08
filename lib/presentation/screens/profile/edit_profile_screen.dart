@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../application/providers/user_provider.dart';
 import '../../../domain/entities/social_link_entity.dart';
+import '../../widgets/setup/add_link_bottom_sheet.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   final bool isFromSetup;
@@ -18,7 +20,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   late TextEditingController _displayNameController;
   late TextEditingController _bioController;
   late TextEditingController _usernameController;
-  late List<Map<String, dynamic>> _socialPlatforms;
+  late List<SocialLinkEntity> _socialLinks;
 
   @override
   void initState() {
@@ -29,45 +31,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     _usernameController = TextEditingController(text: user?.username ?? '');
     
     // Initialize social platforms from global state
-    _socialPlatforms = (user?.socialLinks ?? []).map((link) {
-      return {
-        'id': link.id,
-        'platform': link.platform,
-        'icon': _getIconForPlatform(link.platform),
-        'name': _getNameForPlatform(link.platform),
-        'handle': link.username,
-        'color': _getColorForPlatform(link.platform),
-        'isEnabled': true, // Mock logic for enabled/disabled
-      };
-    }).toList();
+    _socialLinks = List<SocialLinkEntity>.from(user?.socialLinks ?? []);
   }
-
-  IconData _getIconForPlatform(SocialPlatform platform) {
-    switch (platform) {
-      case SocialPlatform.instagram: return Icons.camera_alt_rounded;
-      case SocialPlatform.linkedin: return Icons.work_rounded;
-      case SocialPlatform.twitter: return Icons.alternate_email_rounded;
-      case SocialPlatform.tiktok: return Icons.music_note_rounded;
-      case SocialPlatform.youtube: return Icons.play_arrow_rounded;
-      default: return Icons.link_rounded;
-    }
-  }
-
-  String _getNameForPlatform(SocialPlatform platform) {
-    return platform.name[0].toUpperCase() + platform.name.substring(1);
-  }
-
-  Color _getColorForPlatform(SocialPlatform platform) {
-    switch (platform) {
-      case SocialPlatform.instagram: return Colors.pink;
-      case SocialPlatform.linkedin: return Colors.blue;
-      case SocialPlatform.twitter: return Colors.black87;
-      case SocialPlatform.tiktok: return Colors.black;
-      case SocialPlatform.youtube: return Colors.red;
-      default: return AppColors.primary;
-    }
-  }
-
 
   @override
   void dispose() {
@@ -84,18 +49,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     await notifier.updateUsername(_usernameController.text);
 
     // Sync socials
-    final updatedLinks = _socialPlatforms.map((item) {
-      final platform = item['platform'] as SocialPlatform;
-      return SocialLinkEntity(
-        id: item['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
-        platform: platform,
-        username: item['handle'],
-        url: platform.constructUrl(item['handle']),
-        createdAt: DateTime.now(),
-      );
-    }).toList();
-    
-    await notifier.updateSocialLinks(updatedLinks);
+    await notifier.updateSocialLinks(_socialLinks);
     
     if (mounted) {
       if (widget.isTab) {
@@ -228,22 +182,40 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             const SizedBox(height: 24),
             _buildSectionLabel('CONNECTED PLATFORMS'),
             const SizedBox(height: 16),
-            ...List.generate(_socialPlatforms.length, (index) {
-              final item = _socialPlatforms[index];
+            ...List.generate(_socialLinks.length, (index) {
+              final item = _socialLinks[index];
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _buildSocialItem(
                   index: index,
-                  icon: item['icon'],
-                  name: item['name'],
-                  handle: item['handle'],
-                  color: item['color'],
-                  isEnabled: item['isEnabled'],
+                  icon: item.platform.icon,
+                  name: item.platform.displayName,
+                  handle: item.username,
+                  color: item.platform.color,
+                  isVisible: item.isVisible,
                 ),
               );
             }),
             const SizedBox(height: 24),
             _buildAddAccountButton(),
+            const SizedBox(height: 48),
+            _buildSectionLabel('JOIN OUR COMMUNITY'),
+            const SizedBox(height: 16),
+            _buildCommunityTile(
+              icon: Icons.alternate_email_rounded,
+              title: 'Follow us on X (Twitter)',
+              subtitle: 'Stay updated with the latest features',
+              color: Colors.black87,
+              onTap: () => _launchUrl('https://x.com/linkmeupapp'),
+            ),
+            const SizedBox(height: 12),
+            _buildCommunityTile(
+              icon: Icons.chat_bubble_rounded,
+              title: 'Join our WhatsApp Channel',
+              subtitle: 'Be part of the LinkMeUp community',
+              color: const Color(0xFF25D366),
+              onTap: () => _launchUrl('https://whatsapp.com/channel/linkmeup'),
+            ),
             const SizedBox(height: 48),
             _buildLogoutButton(),
             const SizedBox(height: 24),
@@ -287,7 +259,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     required String name,
     required String handle,
     required Color color,
-    required bool isEnabled,
+    required bool isVisible,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -326,10 +298,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             ),
           ),
           Switch.adaptive(
-            value: isEnabled,
+            value: isVisible,
             onChanged: (val) {
               setState(() {
-                _socialPlatforms[index]['isEnabled'] = val;
+                _socialLinks[index] = _socialLinks[index].copyWith(isVisible: val);
               });
             },
             activeThumbColor: AppColors.primary,
@@ -339,7 +311,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             icon: Icon(Icons.delete_outline_rounded, color: Colors.red.shade300, size: 22),
             onPressed: () {
               setState(() {
-                _socialPlatforms.removeAt(index);
+                _socialLinks.removeAt(index);
               });
             },
           ),
@@ -361,12 +333,27 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         ),
       ),
       child: TextButton.icon(
-        onPressed: () {},
+        onPressed: () => _showAddSocialBottomSheet(),
         icon: const Icon(Icons.add_circle_outline_rounded, size: 20, color: AppColors.primary),
         label: const Text(
           'Add Account',
           style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
         ),
+      ),
+    );
+  }
+
+  void _showAddSocialBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => AddLinkBottomSheet(
+        onAdd: (newLink) {
+          setState(() {
+            _socialLinks.add(newLink);
+          });
+        },
       ),
     );
   }
@@ -389,6 +376,58 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         const SizedBox(height: 20),
       ],
     );
+  }
+
+  Widget _buildCommunityTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withValues(alpha: 0.12)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 22),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: color)),
+                  const SizedBox(height: 2),
+                  Text(subtitle, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                ],
+              ),
+            ),
+            Icon(Icons.open_in_new_rounded, color: color.withValues(alpha: 0.5), size: 18),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   Widget _buildSectionLabel(String label) {

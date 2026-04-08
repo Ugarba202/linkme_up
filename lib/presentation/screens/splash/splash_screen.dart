@@ -51,7 +51,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF5B62F4), // Main application color
+      backgroundColor: Colors.white, // Clean white to tally with logo background
       body: SafeArea(
         child: Column(
           children: [
@@ -60,23 +60,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // App Generated Icon
-                    Container(
-                      width: 140,
-                      height: 140,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(32),
-                        image: const DecorationImage(
-                          image: AssetImage('assets/images/splash_icon_new.png'),
-                          fit: BoxFit.cover,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
+                    // New Brand Logo
+                    Hero(
+                      tag: 'logo',
+                      child: Image.asset(
+                        'assets/images/brand_logo_new.png',
+                        width: 180,
+                        height: 180,
                       ),
                     ),
                     
@@ -86,7 +76,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                     const Text(
                       'LinkMeUp',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Color(0xFF5B62F4), // Brand Blue
                         fontSize: 32,
                         fontWeight: FontWeight.w900,
                         letterSpacing: -0.5,
@@ -107,7 +97,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                   const Text(
                     'ONE QR CODE. ALL YOUR LINKS. FOREVER.',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Color(0xFF5B62F4),
                       fontSize: 10,
                       letterSpacing: 2.5,
                       fontWeight: FontWeight.bold,
@@ -121,7 +111,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                     width: 18,
                     height: 18,
                     child: CircularProgressIndicator(
-                      color: Colors.white,
+                      color: Color(0xFF5B62F4),
                       strokeWidth: 2,
                     ),
                   ),

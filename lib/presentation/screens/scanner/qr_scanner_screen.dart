@@ -273,9 +273,10 @@ class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
+                      // ignore: unnecessary_null_comparison
                       if (user.bio != null && user.bio.isNotEmpty)
                         Text(
-                          user.bio!,
+                          user.bio,
                           style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

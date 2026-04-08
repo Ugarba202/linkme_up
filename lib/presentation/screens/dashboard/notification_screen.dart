@@ -17,7 +17,7 @@ class NotificationScreen extends StatelessWidget {
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: Center(
+      body: Center( 
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -25,16 +25,16 @@ class NotificationScreen extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: const Color(0xFF5B62F4).withValues(alpha: 0.1),
-                shape: BoxShape.circle,
+                shape: BoxShape.circle, 
               ),
-              child: const Icon(
+            child: const Icon(
                 Icons.notifications_active_rounded,
                 size: 64,
                 color: Color(0xFF5B62F4),
               ),
             ),
             const SizedBox(height: 32),
-            const Text(
+            const Text( 
               'No New Notifications',
               style: TextStyle(
                 fontSize: 20,

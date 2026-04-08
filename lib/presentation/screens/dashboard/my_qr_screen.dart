@@ -2,14 +2,100 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:gal/gal.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'dart:io';
 import '../../../application/providers/user_provider.dart';
 import 'package:flutter/services.dart';
 
-class MyQRScreen extends ConsumerWidget {
+class MyQRScreen extends ConsumerStatefulWidget {
   const MyQRScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MyQRScreen> createState() => _MyQRScreenState();
+}
+
+class _MyQRScreenState extends ConsumerState<MyQRScreen> {
+  final ScreenshotController _screenshotController = ScreenshotController();
+
+  Future<void> _shareQR(String profileUrl) async {
+    try {
+      final image = await _screenshotController.capture(
+        delay: const Duration(milliseconds: 10),
+        pixelRatio: 3.0,
+      );
+      if (image != null) {
+        final directory = await getTemporaryDirectory();
+        final imagePath = await File('${directory.path}/linkmeup_qr.png').create();
+        await imagePath.writeAsBytes(image);
+        
+        await Share.shareXFiles(
+          [XFile(imagePath.path)], 
+          text: 'Scan this code to connect with me on LinkMeUp!\nhttps://$profileUrl',
+          subject: 'My LinkMeUp QR Code',
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error sharing QR: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _saveQR() async {
+    try {
+      // Permission Handling
+      if (Platform.isAndroid) {
+        // Android 13+ doesn't need manual permission for Gal usually, 
+        // but for safety we check photos
+        final status = await Permission.photos.request();
+        if (!status.isGranted && !status.isLimited) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Permission denied to save photos.')),
+            );
+          }
+          return;
+        }
+      }
+
+      final image = await _screenshotController.capture(
+        delay: const Duration(milliseconds: 10),
+        pixelRatio: 3.0,
+      );
+      
+      if (image != null) {
+        final directory = await getTemporaryDirectory();
+        final imagePath = await File('${directory.path}/qr_to_save.png').create();
+        await imagePath.writeAsBytes(image);
+        
+        await Gal.putImage(imagePath.path);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('QR Code saved to gallery!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving QR: $e')),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(userProvider);
     final username = user?.username ?? 'username';
     final profileUrl = 'linkmeup.app/$username';
@@ -37,14 +123,16 @@ class MyQRScreen extends ConsumerWidget {
         child: Column(
           children: [
             const Spacer(),
-            // Main QR Section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40.0),
-              child: Center(
+            // Main QR Section (Captured for sharing)
+            Screenshot(
+              controller: _screenshotController,
+              child: Container(
+                color: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 20),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // QR Code itself - Larger as in the design
+                    // QR Code itself
                     QrImageView(
                       data: 'https://$profileUrl',
                       version: QrVersions.auto,
@@ -52,21 +140,21 @@ class MyQRScreen extends ConsumerWidget {
                       eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.circle, color: Color(0xFF5B62F4)),
                       dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.circle, color: Color(0xFF5B62F4)),
                     ),
-                    const SizedBox(height: 60),
+                    const SizedBox(height: 40),
                     // Title
                     const Text(
                       'Here is your code !!',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w900,
-                        color: Color(0xFF2D3172), // Darker Navy-Blue for headers
+                        color: Color(0xFF2D3172), 
                         letterSpacing: -0.5,
                       ),
                     ),
                     const SizedBox(height: 12),
                     // Subtitle
                     Text(
-                      'This is your unique QR Code for another\nperson to scan.',
+                      'Scan this unique QR Code to view\nmy full digital identity.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
@@ -75,48 +163,48 @@ class MyQRScreen extends ConsumerWidget {
                         height: 1.4,
                       ),
                     ),
-                    const SizedBox(height: 32),
-                    // Copy Link - preserved but styled subtely
-                    InkWell(
-                      onTap: () {
-                        final textUrl = 'https://$profileUrl';
-                        Clipboard.setData(ClipboardData(text: textUrl)).then((_) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Link copied to clipboard!'),
-                                duration: Duration(seconds: 2),
-                                backgroundColor: Color(0xFF5B62F4),
-                              ),
-                            );
-                          }
-                        });
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              profileUrl,
-                              style: TextStyle(color: Colors.grey.shade400, fontSize: 13),
-                            ),
-                            const SizedBox(width: 8),
-                            Icon(Icons.copy_rounded, size: 14, color: Colors.grey.shade300),
-                          ],
-                        ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Copy Link - styled subtely
+            InkWell(
+              onTap: () {
+                final textUrl = 'https://$profileUrl';
+                Clipboard.setData(ClipboardData(text: textUrl)).then((_) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Link copied to clipboard!'),
+                        duration: Duration(seconds: 2),
+                        backgroundColor: Color(0xFF5B62F4),
                       ),
+                    );
+                  }
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      profileUrl,
+                      style: TextStyle(color: Colors.grey.shade400, fontSize: 13),
                     ),
+                    const SizedBox(width: 8),
+                    Icon(Icons.copy_rounded, size: 14, color: Colors.grey.shade300),
                   ],
                 ),
               ),
             ),
             const Spacer(flex: 2),
-            // Bottom Actions (Dribbble Style)
+            // Bottom Actions
             Padding(
               padding: const EdgeInsets.only(bottom: 60),
               child: Row(
@@ -125,12 +213,12 @@ class MyQRScreen extends ConsumerWidget {
                   _buildBottomAction(
                     icon: Icons.share_rounded,
                     label: 'Share',
-                    onPressed: () {},
+                    onPressed: () => _shareQR(profileUrl),
                   ),
                   _buildBottomAction(
                     icon: Icons.save_alt_rounded,
                     label: 'Save',
-                    onPressed: () {},
+                    onPressed: _saveQR,
                   ),
                 ],
               ),

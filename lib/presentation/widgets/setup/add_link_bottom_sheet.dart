@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../../../../domain/models/social_link_model.dart';
+import '../../../../domain/entities/social_link_entity.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../common/custom_input.dart';
 import '../common/custom_button.dart';
 
 class AddLinkBottomSheet extends StatefulWidget {
-  final Function(SocialLinkModel) onAdd;
-  final SocialLinkModel? editLink;
+  final Function(SocialLinkEntity) onAdd;
+  final SocialLinkEntity? editLink;
 
   const AddLinkBottomSheet({super.key, required this.onAdd, this.editLink});
 
@@ -17,45 +16,37 @@ class AddLinkBottomSheet extends StatefulWidget {
 }
 
 class _AddLinkBottomSheetState extends State<AddLinkBottomSheet> {
-  final TextEditingController _urlController = TextEditingController();
-  String _selectedPlatform = 'Facebook';
-  IconData _selectedIcon = Icons.facebook;
-
-  final Map<String, IconData> _platforms = {
-    'Facebook': Icons.facebook,
-    'LinkedIn': FontAwesomeIcons.linkedin,
-    'Twitter / X': FontAwesomeIcons.xTwitter,
-    'Instagram': FontAwesomeIcons.instagram,
-    'TikTok': FontAwesomeIcons.tiktok,
-    'YouTube': FontAwesomeIcons.youtube,
-    'Custom Website': Icons.link,
-  };
+  final TextEditingController _usernameController = TextEditingController();
+  SocialPlatform _selectedPlatform = SocialPlatform.instagram;
 
   @override
   void initState() {
     super.initState();
     if (widget.editLink != null) {
-      _urlController.text = widget.editLink!.urlOrUsername;
-      _selectedPlatform = widget.editLink!.platformName;
-      _selectedIcon = widget.editLink!.icon;
+      _usernameController.text = widget.editLink!.username;
+      _selectedPlatform = widget.editLink!.platform;
     }
   }
 
   @override
   void dispose() {
-    _urlController.dispose();
+    _usernameController.dispose();
     super.dispose();
   }
 
   void _save() {
-    if (_urlController.text.isEmpty) return;
+    if (_usernameController.text.isEmpty) return;
     
-    final link = SocialLinkModel(
+    final username = _usernameController.text.trim();
+    final url = _selectedPlatform.constructUrl(username);
+    
+    final link = SocialLinkEntity(
       id: widget.editLink?.id ?? const Uuid().v4(),
-      platformName: _selectedPlatform,
-      urlOrUsername: _urlController.text,
-      icon: _selectedIcon,
+      platform: _selectedPlatform,
+      username: username,
+      url: url,
       isVisible: widget.editLink?.isVisible ?? true,
+      createdAt: widget.editLink?.createdAt ?? DateTime.now(),
     );
     
     widget.onAdd(link);
@@ -80,8 +71,8 @@ class _AddLinkBottomSheetState extends State<AddLinkBottomSheet> {
             style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
-          DropdownButtonFormField<String>(
-            initialValue: _selectedPlatform,
+          DropdownButtonFormField<SocialPlatform>(
+            value: _selectedPlatform,
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.grey.shade100,
@@ -90,14 +81,14 @@ class _AddLinkBottomSheetState extends State<AddLinkBottomSheet> {
                 borderSide: BorderSide.none,
               ),
             ),
-            items: _platforms.entries.map((entry) {
-              return DropdownMenuItem<String>(
-                value: entry.key,
+            items: SocialPlatform.values.map((platform) {
+              return DropdownMenuItem<SocialPlatform>(
+                value: platform,
                 child: Row(
                   children: [
-                    Icon(entry.value, color: AppColors.primary, size: 20),
+                    Icon(platform.icon, color: platform.color, size: 20),
                     const SizedBox(width: 12),
-                    Text(entry.key),
+                    Text(platform.displayName),
                   ],
                 ),
               );
@@ -106,16 +97,27 @@ class _AddLinkBottomSheetState extends State<AddLinkBottomSheet> {
               if (val != null) {
                 setState(() {
                   _selectedPlatform = val;
-                  _selectedIcon = _platforms[val]!;
                 });
               }
             },
           ),
           const SizedBox(height: 16),
           CustomInputField(
-            controller: _urlController,
-            hintText: 'Username or URL',
+            controller: _usernameController,
+            hintText: _selectedPlatform.handleHint,
+            prefixIcon: const Icon(Icons.alternate_email_rounded, size: 18, color: AppColors.primary),
           ),
+          const SizedBox(height: 12),
+          if (_usernameController.text.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: Text(
+                'Preview: ${_selectedPlatform.constructUrl(_usernameController.text)}',
+                style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           const SizedBox(height: 24),
           PrimaryButton(
             text: widget.editLink != null ? 'Update' : 'Save Link',
