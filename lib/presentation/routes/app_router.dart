@@ -25,15 +25,27 @@ final routerProvider = Provider<GoRouter>((ref) {
       final user = ref.read(userProvider);
       final userId = authRepository.currentUserId;
       
-      final isSplashing = state.uri.path == '/';
-      final isOnboarding = state.uri.path == '/onboarding';
-      final isAuth = state.uri.path == '/auth';
-      final isPublicProfile = state.uri.path.startsWith('/profile/') || state.uri.path.length > 1 && !state.uri.path.contains('/', 1);
+      final path = state.uri.path;
+      final isSplashing = path == '/';
+      final isOnboarding = path == '/onboarding';
+      final isAuth = path == '/auth';
+      
+      // Define app-specific routes that are NOT public profiles
+      final reservedRoutes = {
+        'home', 'setup', 'auth', 'onboarding', 'settings', 
+        'qr', 'notifications', 'analytics', 'profile'
+      };
 
-      // If we are on public profile, don't redirect
+      // A public profile is a top-level slug that isn't a reserved route
+      final segments = state.uri.pathSegments;
+      final isPotentialPublicProfile = segments.length == 1 && !reservedRoutes.contains(segments[0]);
+      final isExplictPublicProfile = path.startsWith('/profile/');
+      final isPublicProfile = isExplictPublicProfile || isPotentialPublicProfile;
+
+      // If we are on public profile, don't redirect to onboarding
       if (isPublicProfile) return null;
 
-      // If not authenticated, only allow Splash or Onboarding or Auth
+      // MISSION CRITICAL: If not authenticated, only allow Splash or Onboarding or Auth
       if (userId == null) {
         if (isSplashing || isOnboarding || isAuth) return null;
         return '/onboarding';
@@ -41,13 +53,13 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       // If authenticated but profile not complete
       if (user != null && !user.profileCompleted) {
-        if (state.uri.path == '/setup') return null;
+        if (path == '/setup') return null;
         return '/setup';
       }
 
       // If authenticated and profile complete, but trying to go to auth/onboarding
       if (user != null && user.profileCompleted) {
-        if (isSplashing || isOnboarding || isAuth || state.uri.path == '/setup') {
+        if (isSplashing || isOnboarding || isAuth || path == '/setup') {
           return '/home';
         }
       }

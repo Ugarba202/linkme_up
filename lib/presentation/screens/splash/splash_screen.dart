@@ -42,8 +42,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     }
 
     if (mounted) {
+      debugPrint("DEBUG: Splash complete. userId: $userId. Redirecting to router logic...");
       // Navigate to home; the GoRouter redirect will intercept and send to 
-      // /setup or /onboarding if necessary.
+      // /setup or /onboarding if necessary based on the refined logic.
       context.go('/home');
     }
   }
