@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../application/providers/user_provider.dart';
 import '../../../domain/entities/user_entity.dart';
+import '../../../core/themes/app_colors.dart';
 import '../../widgets/common/shimmer_loading.dart';
 
 class PublicProfileScreen extends ConsumerWidget {
@@ -18,14 +19,14 @@ class PublicProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    const brandPurple = Color(0xFF6366F1);
+    final brandColor = AppColors.primary;
     
     final asyncProfile = username != null 
       ? ref.watch(publicProfileByUsernameProvider(username!.replaceAll('@', '')))
       : ref.watch(publicProfileByUidProvider(uid!));
 
     return Scaffold(
-      backgroundColor: brandPurple,
+      backgroundColor: brandColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -75,6 +76,14 @@ class PublicProfileScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
           children: [
+            const SizedBox(height: 10),
+            // Brand Logo
+            Image.asset(
+              'assets/images/brand_logo_new.png',
+              width: 60,
+              height: 60,
+              color: Colors.white.withOpacity(0.9),
+            ),
             const SizedBox(height: 20),
             // Profile Card
             _buildProfileCard(user),
@@ -164,7 +173,7 @@ class PublicProfileScreen extends ConsumerWidget {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF6366F1),
+                color: AppColors.primary,
               ),
             ),
           const SizedBox(height: 16),
@@ -289,11 +298,11 @@ class PublicProfileScreen extends ConsumerWidget {
       height: 60,
       child: ElevatedButton.icon(
         onPressed: () => context.go('/auth'),
-        icon: const Icon(Icons.add_circle_rounded, color: Color(0xFF6366F1)),
+        icon: const Icon(Icons.add_circle_rounded, color: AppColors.primary),
         label: const Text(
           'Create your own free QR',
           style: TextStyle(
-            color: Color(0xFF6366F1),
+            color: AppColors.primary,
             fontWeight: FontWeight.bold,
             fontSize: 16,
           ),
