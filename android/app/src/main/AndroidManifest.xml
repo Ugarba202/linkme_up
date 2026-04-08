@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.CAMERA" />
     <application
-        android:label="linkmeup_app"
+        android:label="LinkMeUp"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher" android:enableOnBackInvokedCallback="true">
         
