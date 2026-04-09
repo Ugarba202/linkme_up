@@ -22,7 +22,7 @@ class PublicProfileScreen extends ConsumerWidget {
     final brandColor = AppColors.primary;
     
     final asyncProfile = username != null 
-      ? ref.watch(publicProfileByUsernameProvider(username!.replaceAll('@', '')))
+      ? ref.watch(publicProfileByUsernameProvider(username!.replaceAll('@', '').toLowerCase().trim()))
       : ref.watch(publicProfileByUidProvider(uid!));
 
     return Scaffold(

@@ -107,7 +107,8 @@ class SupabaseUserRepository implements IUserRepository {
 
   @override
   Future<UserEntity?> getUserByUsername(String username) async {
-    final data = await _supabase.from('profiles').select().eq('username', username).maybeSingle();
+    final cleanUsername = username.replaceAll('@', '').toLowerCase().trim();
+    final data = await _supabase.from('profiles').select().eq('username', cleanUsername).maybeSingle();
     if (data == null) return null;
     return getUser(data['id']);
   }
