@@ -3,7 +3,7 @@
     "short_name": "LinkMeUp",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#5B62F4",
+    "background_color": "#FFFFFF",
     "theme_color": "#5B62F4",
     "description": "Your permanent digital identity linked to one scan.",
     "orientation": "portrait-primary",
