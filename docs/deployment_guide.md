@@ -9,11 +9,12 @@ In your Vercel Dashboard, go to **Settings > Build & Development** and set these
 | Setting | Value |
 | :--- | :--- |
 | **Framework Preset** | `Other` |
-| **Build Command** | `flutter build web --release` |
+| **Build Command** | `./vercel-build.sh` |
 | **Output Directory** | `build/web` |
-| **Install Command** | `flutter pub get` (Optional, usually handled automatically) |
+| **Install Command** | (Leave empty) |
 
-## 🛠️ Root Directory Note
+## 🛠️ Build Script Note
+Since Vercel doesn't have Flutter installed, I've created a `vercel-build.sh` script in your repo. This script will automatically download the Flutter SDK and build your app every time you deploy.
 Ensure Vercel is set to build from the **root** of the repository (`/`), as the `vercel.json` and `pubspec.yaml` are located there.
 
 ## 🚀 Why this is important
