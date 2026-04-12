@@ -25,6 +25,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
     if (!mounted) return;
 
+    // 1. Check if we arrived here via a deep link (e.g. /username)
+    // If so, we should NOT hijack the navigation after the delay.
+    final currentPath = GoRouterState.of(context).uri.path;
+    final isRoot = currentPath == '/';
+
+    // If we are NOT at the root, it means GoRouter is already trying to 
+    // load a specific page. We should exit and let it happen.
+    if (!isRoot) {
+      debugPrint("DEBUG: Deep link detected ($currentPath). Skipping splash redirect.");
+      return;
+    }
+
     final authRepository = ref.read(authRepositoryProvider);
     final userId = authRepository.currentUserId;
 

@@ -481,7 +481,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
           style: TextStyle(color: Colors.grey.shade600),
         ),
         const Text(
-          'linkmeup.app/[username]',
+          'linkmeup-95263.web.app/[username]',
           style: TextStyle(
             color: Color(0xFF5B62F4),
             fontWeight: FontWeight.bold,

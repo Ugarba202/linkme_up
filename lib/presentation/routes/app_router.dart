@@ -19,7 +19,6 @@ final routerProvider = Provider<GoRouter>((ref) {
   // (In more complex apps, we'd use a Listenable, but for now we'll rely on the manual navigation from nodes)
   
   return GoRouter(
-    initialLocation: '/',
     redirect: (context, state) async {
       final authRepository = ref.read(authRepositoryProvider);
       final user = ref.read(userProvider);

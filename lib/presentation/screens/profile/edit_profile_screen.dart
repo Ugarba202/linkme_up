@@ -174,7 +174,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             const SizedBox(height: 8),
             _buildInputField(
               controller: _usernameController,
-              hintText: 'linkmeup.app/arivera',
+              hintText: 'linkmeup-95263.web.app/arivera',
               readOnly: true,
               suffixIcon: Icon(Icons.lock_rounded, size: 18, color: Colors.grey.shade400),
             ),
@@ -214,7 +214,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               title: 'Join our WhatsApp Channel',
               subtitle: 'Be part of the LinkMeUp community',
               color: const Color(0xFF25D366),
-              onTap: () => _launchUrl('https://whatsapp.com/channel/linkmeup'),
+              onTap: () => _launchUrl('https://whatsapp.com/channel/0029Vb7vDTVGU3BCU3VVXi1j'),
             ),
             const SizedBox(height: 48),
             _buildLogoutButton(),

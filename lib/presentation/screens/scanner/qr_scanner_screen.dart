@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/themes/app_colors.dart';
+import '../../../core/config/app_config.dart';
 import '../../../application/providers/user_provider.dart';
 
 class QRScannerScreen extends ConsumerStatefulWidget {
@@ -30,8 +31,14 @@ class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
     if (barcodes.isNotEmpty) {
       final code = barcodes.first.rawValue;
       if (code != null) {
-        if (code.contains('linkmeup.app/')) {
-          final username = code.split('linkmeup.app/').last.split('?').first.replaceAll('/', '');
+        final isLinkMeUp = code.contains(AppConfig.baseUrl) || code.contains(AppConfig.legacyUrl);
+        if (isLinkMeUp) {
+          // Extract username after whichever domain found
+          final separator = code.contains(AppConfig.baseUrl) 
+              ? '${AppConfig.baseUrl}/' 
+              : '${AppConfig.legacyUrl}/';
+              
+          final username = code.split(separator).last.split('?').first.replaceAll('/', '');
           setState(() {
             _scannedUsername = username;
             _isScanComplete = true;

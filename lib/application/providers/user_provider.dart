@@ -7,6 +7,7 @@ import '../../domain/entities/social_link_entity.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/user_repository.dart';
 import '../../infrastructure/repositories/supabase_user_repository.dart';
+import '../../core/config/app_config.dart';
 import 'storage_providers.dart';
 
 final userRepositoryProvider = Provider<IUserRepository>((ref) {
@@ -72,7 +73,7 @@ class UserNotifier extends Notifier<UserEntity?> {
   Future<void> updateUsername(String newUsername) async {
     if (state == null) return;
     // Generate public URL when username is set
-    final publicUrl = 'https://linkmeup.app/${newUsername.toLowerCase()}';
+    final publicUrl = 'https://${AppConfig.baseUrl}/${newUsername.toLowerCase()}';
     final updated = state!.copyWith(
       username: newUsername.toLowerCase(),
       publicUrl: publicUrl,

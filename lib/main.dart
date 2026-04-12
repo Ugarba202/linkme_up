@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'core/util/url_strategy_native.dart'
+    if (dart.library.html) 'core/util/url_strategy_web.dart';
 import 'l10n/arb/app_localizations.dart';
 import 'core/themes/app_theme.dart';
 import 'core/config/supabase_config.dart';
@@ -10,6 +12,7 @@ import 'presentation/routes/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  configureUrlStrategy();
 
   await Supabase.initialize(
     url: SupabaseConfig.url,

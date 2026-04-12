@@ -9,6 +9,7 @@ import 'package:gal/gal.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 import '../../../application/providers/user_provider.dart';
+import '../../../core/config/app_config.dart';
 import 'package:flutter/services.dart';
 
 class MyQRScreen extends ConsumerStatefulWidget {
@@ -98,7 +99,7 @@ class _MyQRScreenState extends ConsumerState<MyQRScreen> {
   Widget build(BuildContext context) {
     final user = ref.watch(userProvider);
     final username = user?.username ?? 'username';
-    final profileUrl = 'linkmeup.app/$username';
+    final profileUrl = '${AppConfig.baseUrl}/$username';
 
     return Scaffold(
       backgroundColor: Colors.white,
